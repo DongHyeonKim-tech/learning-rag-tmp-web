@@ -141,11 +141,11 @@ export default function Home() {
         {/* 헤더 */}
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <Title level={1} style={{ color: "white", margin: 0 }}>
-            AI 질문 답변 시스템
+            러닝웹 RAG 시스템
           </Title>
-          <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: "16px" }}>
-            궁금한 것을 질문해보세요
-          </Text>
+          <Text
+            style={{ color: "rgba(255,255,255,0.8)", fontSize: "16px" }}
+          ></Text>
         </div>
 
         {/* 카테고리 버튼 */}
