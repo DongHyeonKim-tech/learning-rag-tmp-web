@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "PORT=3007 next dev --turbopack",
+    "dev": "next dev --turbopack -p 3007",
     "build": "next build --turbopack",
-    "start": "PORT=3007 next start",
+    "start": "next start -p 3007",
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "next": "15.5.3",
     "openai": "^5.20.2",
     "react": "19.1.0",

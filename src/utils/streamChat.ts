@@ -18,6 +18,11 @@ export async function streamChat(
     body: JSON.stringify(body),
     signal,
   });
+
+  if (res.status === 204) {
+    throw new Error("NO_MATCH");
+  }
+
   if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
   const reader = res.body.getReader();

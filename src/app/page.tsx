@@ -1,15 +1,37 @@
 "use client";
 
-import Image from "next/image";
-import styles from "./page.module.css";
 import { useState, useRef, useEffect } from "react";
-import { streamChat, ChatSource } from "@/utils/streanChat";
+import { streamChat, ChatSource } from "@/utils/streamChat";
+import { searchDocuments, SearchResult, SearchParams } from "@/utils/searchApi";
+import "@ant-design/v5-patch-for-react-19";
+import {
+  Button,
+  Input,
+  notification,
+  Card,
+  Typography,
+  Space,
+  Spin,
+  Divider,
+  Tabs,
+} from "antd";
+import {
+  SendOutlined,
+  StopOutlined,
+  FileTextOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState<ChatSource[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("chat");
   const abortRef = useRef<AbortController | null>(null);
   const viewRef = useRef<HTMLDivElement>(null);
 
@@ -31,7 +53,6 @@ export default function Home() {
     setAnswer("");
     setSources([]);
     setLoading(true);
-
     try {
       await streamChat(
         {
@@ -49,7 +70,14 @@ export default function Home() {
         ac.signal
       );
     } catch (err) {
-      setAnswer((prev) => prev + `\n\n[에러] ${(err as Error).message}`);
+      const errorMessage = (err as Error).message;
+      console.error("errorMessage: ", errorMessage);
+      if (errorMessage === "NO_MATCH") {
+        console.log("NO_MATCH");
+        notification.warning({ message: "일치하는 답변이 없습니다." });
+      } else {
+        setAnswer((prev) => prev + `\n\n[에러] ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -59,99 +87,370 @@ export default function Home() {
     abortRef.current?.abort();
     setLoading(false);
   };
+
+  const onSearch = async () => {
+    if (!input.trim()) return;
+
+    setSearchLoading(true);
+    setSearchResults([]);
+
+    try {
+      const searchParams: SearchParams = {
+        messages: [{ role: "user", content: input }],
+        top_k: 10,
+        use_context: 5,
+        filters: {
+          categories: {
+            top: "건축",
+          },
+        },
+      };
+
+      const response = await searchDocuments(searchParams);
+      setSearchResults(response.results);
+    } catch (err) {
+      const errorMessage = (err as Error).message;
+      console.error("Search error:", errorMessage);
+      notification.error({ message: "검색 중 오류가 발생했습니다." });
+    } finally {
+      setSearchLoading(false);
+    }
+  };
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         minHeight: "100vh",
-        gap: "64px",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        padding: "20px",
       }}
     >
       <div
         style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          gap: "64px",
+          gap: "24px",
         }}
       >
-        <form onSubmit={onSubmit} className="flex gap-2">
-          <input
-            className="flex-1 border rounded-lg px-3 py-2"
-            placeholder="질문 입력"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-lg bg-black text-white disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? "생성 중…" : "질문"}
-          </button>
-          {loading && (
-            <button
-              type="button"
-              onClick={onStop}
-              className="px-4 py-2 rounded-lg border"
-            >
-              중지
-            </button>
-          )}
-        </form>
-
-        {/* 답변 뷰 */}
-        <div
-          ref={viewRef}
-          className="border rounded-lg p-4 h-72 overflow-auto whitespace-pre-wrap"
-        >
-          {answer || (loading ? "스트리밍 시작…" : "답변")}
+        {/* 헤더 */}
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <Title level={1} style={{ color: "white", margin: 0 }}>
+            AI 질문 답변 시스템
+          </Title>
+          <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: "16px" }}>
+            궁금한 것을 질문해보세요
+          </Text>
         </div>
 
-        {/* 출처 */}
+        {/* 입력 폼 */}
+        <Card
+          style={{
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+            border: "none",
+          }}
+        >
+          <form
+            onSubmit={
+              activeTab === "chat"
+                ? onSubmit
+                : (e) => {
+                    e.preventDefault();
+                    onSearch();
+                  }
+            }
+          >
+            <Space.Compact style={{ width: "100%" }}>
+              <Input
+                size="large"
+                placeholder={
+                  activeTab === "chat"
+                    ? "질문을 입력해주세요..."
+                    : "검색어를 입력해주세요..."
+                }
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                style={{
+                  borderRadius: "12px 0 0 12px",
+                  border: "2px solid #e0e0e0",
+                  fontSize: "16px",
+                }}
+                onPressEnter={activeTab === "chat" ? onSubmit : onSearch}
+              />
+              <Button
+                type="primary"
+                size="large"
+                htmlType="submit"
+                disabled={
+                  (activeTab === "chat" ? loading : searchLoading) ||
+                  !input.trim()
+                }
+                icon={
+                  activeTab === "chat" ? <SendOutlined /> : <SearchOutlined />
+                }
+                style={{
+                  borderRadius: "0 12px 12px 0",
+                  background: "linear-gradient(45deg, #667eea, #764ba2)",
+                  border: "none",
+                  height: "48px",
+                }}
+              >
+                {activeTab === "chat"
+                  ? loading
+                    ? "생성 중..."
+                    : "질문하기"
+                  : searchLoading
+                  ? "검색 중..."
+                  : "검색하기"}
+              </Button>
+              {loading && activeTab === "chat" && (
+                <Button
+                  size="large"
+                  icon={<StopOutlined />}
+                  onClick={onStop}
+                  style={{
+                    borderRadius: "0 12px 12px 0",
+                    marginLeft: "8px",
+                  }}
+                >
+                  중지
+                </Button>
+              )}
+            </Space.Compact>
+          </form>
+        </Card>
+
+        {/* 탭 영역 */}
+        <Card
+          style={{
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+            border: "none",
+            minHeight: "400px",
+          }}
+        >
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={[
+              {
+                key: "chat",
+                label: (
+                  <span>
+                    <SendOutlined />
+                    채팅
+                  </span>
+                ),
+                children: (
+                  <div
+                    ref={viewRef}
+                    style={{
+                      minHeight: "300px",
+                      maxHeight: "500px",
+                      overflow: "auto",
+                      padding: "16px",
+                      background: "#f8f9fa",
+                      borderRadius: "12px",
+                      border: "1px solid #e0e0e0",
+                      whiteSpace: "pre-wrap",
+                      lineHeight: "1.6",
+                      fontSize: "16px",
+                    }}
+                  >
+                    {loading ? (
+                      <div style={{ textAlign: "center", padding: "40px" }}>
+                        <Spin size="large" />
+                        <div style={{ marginTop: "16px", color: "#666" }}>
+                          답변을 생성하고 있습니다...
+                        </div>
+                      </div>
+                    ) : answer ? (
+                      answer
+                    ) : (
+                      <div
+                        style={{
+                          color: "#999",
+                          textAlign: "center",
+                          padding: "40px",
+                        }}
+                      >
+                        질문을 입력하고 답변을 받아보세요
+                      </div>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: "search",
+                label: (
+                  <span>
+                    <SearchOutlined />
+                    검색
+                  </span>
+                ),
+                children: (
+                  <div
+                    style={{
+                      minHeight: "300px",
+                      maxHeight: "500px",
+                      overflow: "auto",
+                    }}
+                  >
+                    {searchLoading ? (
+                      <div style={{ textAlign: "center", padding: "40px" }}>
+                        <Spin size="large" />
+                        <div style={{ marginTop: "16px", color: "#666" }}>
+                          검색 중입니다...
+                        </div>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fill, minmax(300px, 1fr))",
+                          gap: "12px",
+                        }}
+                      >
+                        {searchResults.map((result, index) => (
+                          <Card
+                            key={result.id || index}
+                            size="small"
+                            style={{
+                              borderRadius: "8px",
+                              border: "1px solid #e0e0e0",
+                              background: "#f8f9fa",
+                            }}
+                          >
+                            <div style={{ marginBottom: "8px" }}>
+                              <Text strong style={{ fontSize: "14px" }}>
+                                {result.payload.title || "문서"}
+                              </Text>
+                              <div style={{ fontSize: "12px", color: "#999" }}>
+                                점수: {result.score.toFixed(3)}
+                              </div>
+                            </div>
+                            {result.payload.content && (
+                              <Text style={{ fontSize: "12px", color: "#666" }}>
+                                {result.payload.content.substring(0, 200)}
+                                {result.payload.content.length > 200 && "..."}
+                              </Text>
+                            )}
+                            {result.payload.url && (
+                              <div style={{ marginTop: "8px" }}>
+                                <a
+                                  href={result.payload.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{ fontSize: "12px", color: "#667eea" }}
+                                >
+                                  링크 보기
+                                </a>
+                              </div>
+                            )}
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          color: "#999",
+                          textAlign: "center",
+                          padding: "40px",
+                        }}
+                      >
+                        검색어를 입력하고 검색해보세요
+                      </div>
+                    )}
+                  </div>
+                ),
+              },
+            ]}
+          />
+        </Card>
+
+        {/* 출처 영역 */}
         {sources.length > 0 && (
-          <div className="border rounded-lg p-3 space-y-2">
-            <div className="font-semibold">출처</div>
-            <ul className="list-disc list-inside space-y-1">
+          <Card
+            style={{
+              borderRadius: "16px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+              border: "none",
+            }}
+          >
+            <Title level={4} style={{ margin: "0 0 16px 0" }}>
+              참고 자료
+            </Title>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                gap: "12px",
+              }}
+            >
               {sources
                 .filter((source, index, array) => {
-                  // doc_id가 있는 경우, 같은 doc_id를 가진 첫 번째 항목만 유지
                   if (source.doc_id) {
                     return (
                       array.findIndex((s) => s.doc_id === source.doc_id) ===
                       index
                     );
                   }
-                  // doc_id가 없는 경우는 모두 유지
                   return true;
                 })
                 .map((s, i) => (
-                  <li key={`${s.doc_id ?? s.video_url ?? i}`}>
-                    {s.title ? (
-                      s.video_url ? (
-                        <a
-                          href={s.video_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-medium underline"
-                        >
-                          {s.title}
-                        </a>
-                      ) : (
-                        <span className="font-medium">{s.title}</span>
-                      )
-                    ) : (
-                      "문서"
-                    )}
-                  </li>
+                  <Card
+                    key={`${s.doc_id ?? s.video_url ?? i}`}
+                    size="small"
+                    style={{
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0",
+                      background: "#f8f9fa",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <FileTextOutlined
+                        style={{ marginRight: "8px", color: "#667eea" }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        {s.title ? (
+                          s.video_url ? (
+                            <a
+                              href={s.video_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{
+                                color: "#667eea",
+                                textDecoration: "none",
+                                fontWeight: "500",
+                              }}
+                            >
+                              {s.title}
+                            </a>
+                          ) : (
+                            <Text strong>{s.title}</Text>
+                          )
+                        ) : (
+                          <Text>문서</Text>
+                        )}
+                        {s.doc_id && (
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#999",
+                              marginTop: "4px",
+                            }}
+                          >
+                            ID: {s.doc_id}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
                 ))}
-            </ul>
-          </div>
+            </div>
+          </Card>
         )}
       </div>
     </div>
