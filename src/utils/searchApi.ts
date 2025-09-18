@@ -1,18 +1,15 @@
 export interface SearchResult {
-  id: string;
-  score: number;
-  payload: {
-    title?: string;
-    content?: string;
-    url?: string;
-    doc_id?: string;
-    [key: string]: any;
-  };
+  doc_id: string;
+  title: string;
+  snippet: string;
+  video_url: string;
+  video_label: string | null;
 }
 
 export interface SearchResponse {
+  query: string;
   results: SearchResult[];
-  total: number;
+  total_count: number;
 }
 
 export interface SearchParams {

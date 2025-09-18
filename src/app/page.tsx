@@ -12,7 +12,6 @@ import {
   Typography,
   Space,
   Spin,
-  Divider,
   Tabs,
 } from "antd";
 import {
@@ -25,13 +24,16 @@ import {
 const { Title, Text } = Typography;
 
 export default function Home() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState("HDA BIM 어워드");
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState<ChatSource[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    "MeetUp / Seminar"
+  );
   const abortRef = useRef<AbortController | null>(null);
   const viewRef = useRef<HTMLDivElement>(null);
 
@@ -62,8 +64,9 @@ export default function Home() {
           temperature: 0.2,
           top_p: 0.9,
           max_tokens: 1024,
-          // 필요하면 필터:
-          // filters: { categories: { top: 'EV', upper: '...' } }
+          ...(selectedCategory && {
+            filters: { categories: { top: selectedCategory } },
+          }),
         },
         (delta) => setAnswer((prev) => prev + delta),
         (srcs) => setSources(srcs),
@@ -97,13 +100,15 @@ export default function Home() {
     try {
       const searchParams: SearchParams = {
         messages: [{ role: "user", content: input }],
-        top_k: 10,
+        top_k: 5,
         use_context: 5,
-        filters: {
-          categories: {
-            top: "건축",
+        ...(selectedCategory && {
+          filters: {
+            categories: {
+              top: selectedCategory,
+            },
           },
-        },
+        }),
       };
 
       const response = await searchDocuments(searchParams);
@@ -142,6 +147,82 @@ export default function Home() {
             궁금한 것을 질문해보세요
           </Text>
         </div>
+
+        {/* 카테고리 버튼 */}
+        <Card
+          style={{
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+            border: "none",
+            marginBottom: "16px",
+          }}
+        >
+          <div style={{ textAlign: "center", marginBottom: "16px" }}>
+            <Text
+              style={{
+                color: "#666",
+                fontSize: "14px",
+                marginBottom: "12px",
+                display: "block",
+              }}
+            >
+              카테고리를 선택하세요
+            </Text>
+            <Space>
+              <Button
+                type={selectedCategory === "Learning" ? "primary" : "default"}
+                size="large"
+                onClick={() =>
+                  setSelectedCategory(
+                    selectedCategory === "Learning" ? null : "Learning"
+                  )
+                }
+                style={{
+                  borderRadius: "8px",
+                  minWidth: "120px",
+                  ...(selectedCategory === "Learning" && {
+                    background: "linear-gradient(45deg, #667eea, #764ba2)",
+                    border: "none",
+                  }),
+                }}
+              >
+                Learning
+              </Button>
+              <Button
+                type={
+                  selectedCategory === "MeetUp / Seminar"
+                    ? "primary"
+                    : "default"
+                }
+                size="large"
+                onClick={() =>
+                  setSelectedCategory(
+                    selectedCategory === "MeetUp / Seminar"
+                      ? null
+                      : "MeetUp / Seminar"
+                  )
+                }
+                style={{
+                  borderRadius: "8px",
+                  minWidth: "120px",
+                  ...(selectedCategory === "MeetUp / Seminar" && {
+                    background: "linear-gradient(45deg, #667eea, #764ba2)",
+                    border: "none",
+                  }),
+                }}
+              >
+                MeetUp / Seminar
+              </Button>
+            </Space>
+            {selectedCategory && (
+              <div style={{ marginTop: "12px" }}>
+                <Text style={{ color: "#667eea", fontSize: "12px" }}>
+                  선택된 카테고리: {selectedCategory}
+                </Text>
+              </div>
+            )}
+          </div>
+        </Card>
 
         {/* 입력 폼 */}
         <Card
@@ -305,52 +386,69 @@ export default function Home() {
                         </div>
                       </div>
                     ) : searchResults.length > 0 ? (
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(300px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {searchResults.map((result, index) => (
-                          <Card
-                            key={result.id || index}
-                            size="small"
-                            style={{
-                              borderRadius: "8px",
-                              border: "1px solid #e0e0e0",
-                              background: "#f8f9fa",
-                            }}
-                          >
-                            <div style={{ marginBottom: "8px" }}>
-                              <Text strong style={{ fontSize: "14px" }}>
-                                {result.payload.title || "문서"}
-                              </Text>
-                              <div style={{ fontSize: "12px", color: "#999" }}>
-                                점수: {result.score.toFixed(3)}
-                              </div>
-                            </div>
-                            {result.payload.content && (
-                              <Text style={{ fontSize: "12px", color: "#666" }}>
-                                {result.payload.content.substring(0, 200)}
-                                {result.payload.content.length > 200 && "..."}
-                              </Text>
-                            )}
-                            {result.payload.url && (
-                              <div style={{ marginTop: "8px" }}>
-                                <a
-                                  href={result.payload.url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  style={{ fontSize: "12px", color: "#667eea" }}
+                      <div>
+                        <div
+                          style={{
+                            marginBottom: "16px",
+                            color: "#666",
+                            fontSize: "14px",
+                          }}
+                        >
+                          총 {searchResults.length}개의 결과를 찾았습니다
+                        </div>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fill, minmax(300px, 1fr))",
+                            gap: "12px",
+                          }}
+                        >
+                          {searchResults.map((result, index) => (
+                            <Card
+                              key={result.doc_id || index}
+                              size="small"
+                              style={{
+                                borderRadius: "8px",
+                                border: "1px solid #e0e0e0",
+                                background: "#f8f9fa",
+                              }}
+                            >
+                              <div style={{ marginBottom: "8px" }}>
+                                <Text strong style={{ fontSize: "14px" }}>
+                                  {result.title}
+                                </Text>
+                                <div
+                                  style={{ fontSize: "12px", color: "#999" }}
                                 >
-                                  링크 보기
-                                </a>
+                                  ID: {result.doc_id}
+                                </div>
                               </div>
-                            )}
-                          </Card>
-                        ))}
+                              {result.snippet && (
+                                <Text
+                                  style={{ fontSize: "12px", color: "#666" }}
+                                >
+                                  {result.snippet}
+                                </Text>
+                              )}
+                              {result.video_url && (
+                                <div style={{ marginTop: "8px" }}>
+                                  <a
+                                    href={result.video_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#667eea",
+                                    }}
+                                  >
+                                    {result.video_label || "영상 보기"}
+                                  </a>
+                                </div>
+                              )}
+                            </Card>
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <div
