@@ -79,12 +79,15 @@ export async function streamChatKure(
   onSources?: (s: ChatSource[]) => void,
   signal?: AbortSignal
 ) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chat/stream-kure`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    signal,
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/chat/stream-kure`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
 
   if (res.status === 204) {
     throw new Error("NO_MATCH");
