@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { streamChat, ChatSource } from "@/utils/streamChat";
-import { searchDocuments, SearchResult, SearchParams } from "@/utils/searchApi";
+import { streamChat, streamChatKure, ChatSource } from "@/utils/streamChat";
+import {
+  searchDocuments,
+  searchDocumentsKure,
+  SearchResult,
+  SearchParams,
+} from "@/utils/searchApi";
 import "@ant-design/v5-patch-for-react-19";
 import {
   Button,
@@ -34,6 +39,9 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     "MeetUp / Seminar"
   );
+  const [selectedModel, setSelectedModel] = useState<"bge-m3" | "kure">(
+    "bge-m3"
+  );
   const abortRef = useRef<AbortController | null>(null);
   const viewRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +64,9 @@ export default function Home() {
     setSources([]);
     setLoading(true);
     try {
-      await streamChat(
+      const streamFunction =
+        selectedModel === "kure" ? streamChatKure : streamChat;
+      await streamFunction(
         {
           messages: [{ role: "user", content: input }],
           top_k: 5,
@@ -111,7 +121,9 @@ export default function Home() {
         }),
       };
 
-      const response = await searchDocuments(searchParams);
+      const searchFunction =
+        selectedModel === "kure" ? searchDocumentsKure : searchDocuments;
+      const response = await searchFunction(searchParams);
       setSearchResults(response.results);
     } catch (err) {
       const errorMessage = (err as Error).message;
@@ -221,6 +233,69 @@ export default function Home() {
                 </Text>
               </div>
             )}
+          </div>
+        </Card>
+
+        {/* 모델 선택 버튼 */}
+        <Card
+          style={{
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+            border: "none",
+            marginBottom: "16px",
+          }}
+        >
+          <div style={{ textAlign: "center", marginBottom: "16px" }}>
+            <Text
+              style={{
+                color: "#666",
+                fontSize: "14px",
+                marginBottom: "12px",
+                display: "block",
+              }}
+            >
+              검색 모델을 선택하세요
+            </Text>
+            <Space>
+              <Button
+                type={selectedModel === "bge-m3" ? "primary" : "default"}
+                size="large"
+                onClick={() => setSelectedModel("bge-m3")}
+                style={{
+                  borderRadius: "8px",
+                  minWidth: "140px",
+                  ...(selectedModel === "bge-m3" && {
+                    background: "linear-gradient(45deg, #667eea, #764ba2)",
+                    border: "none",
+                  }),
+                }}
+              >
+                BAAI/bge-m3
+              </Button>
+              <Button
+                type={selectedModel === "kure" ? "primary" : "default"}
+                size="large"
+                onClick={() => setSelectedModel("kure")}
+                style={{
+                  borderRadius: "8px",
+                  minWidth: "140px",
+                  ...(selectedModel === "kure" && {
+                    background: "linear-gradient(45deg, #667eea, #764ba2)",
+                    border: "none",
+                  }),
+                }}
+              >
+                nlpai-lab/KURE-v1
+              </Button>
+            </Space>
+            <div style={{ marginTop: "12px" }}>
+              <Text style={{ color: "#667eea", fontSize: "12px" }}>
+                선택된 모델:{" "}
+                {selectedModel === "bge-m3"
+                  ? "BAAI/bge-m3"
+                  : "nlpai-lab/KURE-v1"}
+              </Text>
+            </div>
           </div>
         </Card>
 
