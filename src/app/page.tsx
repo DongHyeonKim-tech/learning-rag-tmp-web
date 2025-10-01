@@ -35,7 +35,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState("search");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     "MeetUp / Seminar"
   );
@@ -391,53 +391,6 @@ export default function Home() {
             onChange={setActiveTab}
             items={[
               {
-                key: "chat",
-                label: (
-                  <span>
-                    <SendOutlined />
-                    채팅
-                  </span>
-                ),
-                children: (
-                  <div
-                    ref={viewRef}
-                    style={{
-                      minHeight: "300px",
-                      maxHeight: "500px",
-                      overflow: "auto",
-                      padding: "16px",
-                      background: "#f8f9fa",
-                      borderRadius: "12px",
-                      border: "1px solid #e0e0e0",
-                      whiteSpace: "pre-wrap",
-                      lineHeight: "1.6",
-                      fontSize: "16px",
-                    }}
-                  >
-                    {loading ? (
-                      <div style={{ textAlign: "center", padding: "40px" }}>
-                        <Spin size="large" />
-                        <div style={{ marginTop: "16px", color: "#666" }}>
-                          답변을 생성하고 있습니다...
-                        </div>
-                      </div>
-                    ) : answer ? (
-                      answer
-                    ) : (
-                      <div
-                        style={{
-                          color: "#999",
-                          textAlign: "center",
-                          padding: "40px",
-                        }}
-                      >
-                        질문을 입력하고 답변을 받아보세요
-                      </div>
-                    )}
-                  </div>
-                ),
-              },
-              {
                 key: "search",
                 label: (
                   <span>
@@ -534,6 +487,53 @@ export default function Home() {
                         }}
                       >
                         검색어를 입력하고 검색해보세요
+                      </div>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: "chat",
+                label: (
+                  <span>
+                    <SendOutlined />
+                    채팅
+                  </span>
+                ),
+                children: (
+                  <div
+                    ref={viewRef}
+                    style={{
+                      minHeight: "300px",
+                      maxHeight: "500px",
+                      overflow: "auto",
+                      padding: "16px",
+                      background: "#f8f9fa",
+                      borderRadius: "12px",
+                      border: "1px solid #e0e0e0",
+                      whiteSpace: "pre-wrap",
+                      lineHeight: "1.6",
+                      fontSize: "16px",
+                    }}
+                  >
+                    {loading ? (
+                      <div style={{ textAlign: "center", padding: "40px" }}>
+                        <Spin size="large" />
+                        <div style={{ marginTop: "16px", color: "#666" }}>
+                          답변을 생성하고 있습니다...
+                        </div>
+                      </div>
+                    ) : answer ? (
+                      answer
+                    ) : (
+                      <div
+                        style={{
+                          color: "#999",
+                          textAlign: "center",
+                          padding: "40px",
+                        }}
+                      >
+                        질문을 입력하고 답변을 받아보세요
                       </div>
                     )}
                   </div>
