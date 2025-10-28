@@ -7,6 +7,8 @@ import {
   searchDocumentsKure,
   SearchResult,
   SearchParams,
+  searchDocumentsOpenAI,
+  SearchParamsOpenAI,
 } from "@/utils/searchApi";
 import "@ant-design/v5-patch-for-react-19";
 import {
@@ -24,6 +26,7 @@ import {
   StopOutlined,
   FileTextOutlined,
   SearchOutlined,
+  OpenAIOutlined,
 } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
@@ -36,6 +39,7 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
+  const [openAISummary, setOpenAISummary] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     "MeetUp / Seminar"
   );
@@ -106,6 +110,7 @@ export default function Home() {
 
     setSearchLoading(true);
     setSearchResults([]);
+    setOpenAISummary("");
 
     try {
       const searchParams: SearchParams = {
@@ -133,6 +138,49 @@ export default function Home() {
       setSearchLoading(false);
     }
   };
+
+  const onSearchOpenAI = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!input.trim()) return;
+
+    setSearchLoading(true);
+    setSearchResults([]);
+    setOpenAISummary("");
+
+    try {
+      const searchParams: SearchParamsOpenAI = {
+        query: input,
+        top_k: 10,
+        use_context: 5,
+        temperature: 0.5,
+        max_tokens: 2048,
+      };
+      console.log("searchParams: ", searchParams);
+      const response = await searchDocumentsOpenAI(searchParams);
+      // SearchSource를 SearchResult 형식으로 변환
+      const convertedResults: SearchResult[] = response.sources.map(
+        (source) => ({
+          doc_id: source.doc_id,
+          title: source.title,
+          snippet: source.snippet,
+          video_url: source.video_url,
+          video_label: source.video_label,
+        })
+      );
+      setSearchResults(convertedResults);
+      setOpenAISummary(response.summary);
+    } catch (err) {
+      const errorMessage = (err as Error).message;
+      console.error("OpenAI Search error:", errorMessage);
+      notification.error({
+        message: "OpenAI 검색 중 오류가 발생했습니다.",
+        description: errorMessage,
+      });
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -311,6 +359,8 @@ export default function Home() {
             onSubmit={
               activeTab === "chat"
                 ? onSubmit
+                : activeTab === "openai"
+                ? onSearchOpenAI
                 : (e) => {
                     e.preventDefault();
                     onSearch();
@@ -332,7 +382,13 @@ export default function Home() {
                   border: "2px solid #e0e0e0",
                   fontSize: "16px",
                 }}
-                onPressEnter={activeTab === "chat" ? onSubmit : onSearch}
+                onPressEnter={
+                  activeTab === "chat"
+                    ? onSubmit
+                    : activeTab === "openai"
+                    ? onSearchOpenAI
+                    : onSearch
+                }
               />
               <Button
                 type="primary"
@@ -534,6 +590,131 @@ export default function Home() {
                         }}
                       >
                         질문을 입력하고 답변을 받아보세요
+                      </div>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: "openai",
+                label: (
+                  <span>
+                    <OpenAIOutlined />
+                    OpenAI
+                  </span>
+                ),
+                children: (
+                  <div
+                    style={{
+                      minHeight: "300px",
+                      maxHeight: "500px",
+                      overflow: "auto",
+                    }}
+                  >
+                    {searchLoading ? (
+                      <div style={{ textAlign: "center", padding: "40px" }}>
+                        <Spin size="large" />
+                        <div style={{ marginTop: "16px", color: "#666" }}>
+                          검색 중입니다...
+                        </div>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div>
+                        {openAISummary && (
+                          <div
+                            style={{
+                              marginBottom: "20px",
+                              padding: "16px",
+                              background: "#f0f8ff",
+                              borderRadius: "8px",
+                              border: "1px solid #d0e7ff",
+                            }}
+                          >
+                            <Text
+                              strong
+                              style={{ color: "#1890ff", fontSize: "14px" }}
+                            >
+                              AI 요약
+                            </Text>
+                            <div
+                              style={{ marginTop: "8px", lineHeight: "1.6" }}
+                            >
+                              {openAISummary}
+                            </div>
+                          </div>
+                        )}
+                        <div
+                          style={{
+                            marginBottom: "16px",
+                            color: "#666",
+                            fontSize: "14px",
+                          }}
+                        >
+                          총 {searchResults.length}개의 결과를 찾았습니다
+                        </div>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fill, minmax(300px, 1fr))",
+                            gap: "12px",
+                          }}
+                        >
+                          {searchResults.map((result, index) => (
+                            <Card
+                              key={result.doc_id || index}
+                              size="small"
+                              style={{
+                                borderRadius: "8px",
+                                border: "1px solid #e0e0e0",
+                                background: "#f8f9fa",
+                              }}
+                            >
+                              <div style={{ marginBottom: "8px" }}>
+                                <Text strong style={{ fontSize: "14px" }}>
+                                  {result.title}
+                                </Text>
+                                <div
+                                  style={{ fontSize: "12px", color: "#999" }}
+                                >
+                                  ID: {result.doc_id}
+                                </div>
+                              </div>
+                              {result.snippet && (
+                                <Text
+                                  style={{ fontSize: "12px", color: "#666" }}
+                                >
+                                  {result.snippet}
+                                </Text>
+                              )}
+                              {result.video_url && (
+                                <div style={{ marginTop: "8px" }}>
+                                  <a
+                                    href={result.video_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#667eea",
+                                    }}
+                                  >
+                                    {result.video_label || "영상 보기"}
+                                  </a>
+                                </div>
+                              )}
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          color: "#999",
+                          textAlign: "center",
+                          padding: "40px",
+                        }}
+                      >
+                        OpenAI 검색어를 입력하고 검색해보세요
                       </div>
                     )}
                   </div>
