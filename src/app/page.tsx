@@ -40,9 +40,6 @@ export default function Home() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
   const [openAISummary, setOpenAISummary] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    "MeetUp / Seminar"
-  );
   const [selectedModel, setSelectedModel] = useState<"bge-m3" | "kure">(
     "bge-m3"
   );
@@ -78,9 +75,6 @@ export default function Home() {
           temperature: 0.2,
           top_p: 0.9,
           max_tokens: 1024,
-          ...(selectedCategory && {
-            filters: { categories: { top: selectedCategory } },
-          }),
         },
         (delta) => setAnswer((prev) => prev + delta),
         (srcs) => setSources(srcs),
@@ -117,13 +111,6 @@ export default function Home() {
         messages: [{ role: "user", content: input }],
         top_k: 5,
         use_context: 5,
-        ...(selectedCategory && {
-          filters: {
-            categories: {
-              top: selectedCategory,
-            },
-          },
-        }),
       };
 
       const searchFunction =
@@ -154,6 +141,7 @@ export default function Home() {
         use_context: 5,
         temperature: 0.5,
         max_tokens: 2048,
+        model: selectedModel,
       };
       console.log("searchParams: ", searchParams);
       const response = await searchDocumentsOpenAI(searchParams);
@@ -207,82 +195,6 @@ export default function Home() {
             style={{ color: "rgba(255,255,255,0.8)", fontSize: "16px" }}
           ></Text>
         </div>
-
-        {/* 카테고리 버튼 */}
-        <Card
-          style={{
-            borderRadius: "16px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-            border: "none",
-            marginBottom: "16px",
-          }}
-        >
-          <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <Text
-              style={{
-                color: "#666",
-                fontSize: "14px",
-                marginBottom: "12px",
-                display: "block",
-              }}
-            >
-              카테고리를 선택하세요
-            </Text>
-            <Space>
-              <Button
-                type={selectedCategory === "Learning" ? "primary" : "default"}
-                size="large"
-                onClick={() =>
-                  setSelectedCategory(
-                    selectedCategory === "Learning" ? null : "Learning"
-                  )
-                }
-                style={{
-                  borderRadius: "8px",
-                  minWidth: "120px",
-                  ...(selectedCategory === "Learning" && {
-                    background: "linear-gradient(45deg, #667eea, #764ba2)",
-                    border: "none",
-                  }),
-                }}
-              >
-                Learning
-              </Button>
-              <Button
-                type={
-                  selectedCategory === "MeetUp / Seminar"
-                    ? "primary"
-                    : "default"
-                }
-                size="large"
-                onClick={() =>
-                  setSelectedCategory(
-                    selectedCategory === "MeetUp / Seminar"
-                      ? null
-                      : "MeetUp / Seminar"
-                  )
-                }
-                style={{
-                  borderRadius: "8px",
-                  minWidth: "120px",
-                  ...(selectedCategory === "MeetUp / Seminar" && {
-                    background: "linear-gradient(45deg, #667eea, #764ba2)",
-                    border: "none",
-                  }),
-                }}
-              >
-                MeetUp / Seminar
-              </Button>
-            </Space>
-            {selectedCategory && (
-              <div style={{ marginTop: "12px" }}>
-                <Text style={{ color: "#667eea", fontSize: "12px" }}>
-                  선택된 카테고리: {selectedCategory}
-                </Text>
-              </div>
-            )}
-          </div>
-        </Card>
 
         {/* 모델 선택 버튼 */}
         <Card

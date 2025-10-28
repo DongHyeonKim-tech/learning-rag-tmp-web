@@ -45,6 +45,7 @@ export interface SearchParamsOpenAI {
   use_context?: number;
   temperature?: number;
   max_tokens?: number;
+  model?: string;
 }
 
 export async function searchDocuments(
