@@ -40,7 +40,7 @@ export default function Home() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("openai");
   const [openAISummary, setOpenAISummary] = useState<string>("");
-  const [selectedModel, setSelectedModel] = useState<"bge-m3" | "kure">(
+  const [selectedModel, setSelectedModel] = useState<"bge-m3" | "kure" | "bge-m3-full-docs">(
     "bge-m3"
   );
   const abortRef = useRef<AbortController | null>(null);
@@ -231,6 +231,21 @@ export default function Home() {
                 }}
               >
                 BAAI/bge-m3
+              </Button>
+              <Button
+                type={selectedModel === "bge-m3-full-docs" ? "primary" : "default"}
+                size="large"
+                onClick={() => setSelectedModel("bge-m3-full-docs")}
+                style={{
+                  borderRadius: "8px",
+                  minWidth: "140px",
+                  ...(selectedModel === "bge-m3-full-docs" && {
+                    background: "linear-gradient(45deg, #667eea, #764ba2)",
+                    border: "none",
+                  }),
+                }}
+              >
+                BAAI/bge-m3 Full Docs
               </Button>
               <Button
                 type={selectedModel === "kure" ? "primary" : "default"}
