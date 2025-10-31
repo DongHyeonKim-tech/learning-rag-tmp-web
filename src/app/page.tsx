@@ -40,9 +40,9 @@ export default function Home() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("openai");
   const [openAISummary, setOpenAISummary] = useState<string>("");
-  const [selectedModel, setSelectedModel] = useState<"bge-m3" | "kure" | "bge-m3-full-docs">(
-    "bge-m3"
-  );
+  const [selectedModel, setSelectedModel] = useState<
+    "bge-m3" | "kure" | "full"
+  >("bge-m3");
   const abortRef = useRef<AbortController | null>(null);
   const viewRef = useRef<HTMLDivElement>(null);
 
@@ -233,13 +233,13 @@ export default function Home() {
                 BAAI/bge-m3
               </Button>
               <Button
-                type={selectedModel === "bge-m3-full-docs" ? "primary" : "default"}
+                type={selectedModel === "full" ? "primary" : "default"}
                 size="large"
-                onClick={() => setSelectedModel("bge-m3-full-docs")}
+                onClick={() => setSelectedModel("full")}
                 style={{
                   borderRadius: "8px",
                   minWidth: "140px",
-                  ...(selectedModel === "bge-m3-full-docs" && {
+                  ...(selectedModel === "full" && {
                     background: "linear-gradient(45deg, #667eea, #764ba2)",
                     border: "none",
                   }),
