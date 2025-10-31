@@ -41,7 +41,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("openai");
   const [openAISummary, setOpenAISummary] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState<
-    "bge-m3" | "kure" | "full"
+    "bge-m3" | "kure" | "full" | "json"
   >("bge-m3");
   const abortRef = useRef<AbortController | null>(null);
   const viewRef = useRef<HTMLDivElement>(null);
@@ -261,6 +261,21 @@ export default function Home() {
                 }}
               >
                 nlpai-lab/KURE-v1
+              </Button>
+              <Button
+                type={selectedModel === "json" ? "primary" : "default"}
+                size="large"
+                onClick={() => setSelectedModel("json")}
+                style={{
+                  borderRadius: "8px",
+                  minWidth: "140px",
+                  ...(selectedModel === "json" && {
+                    background: "linear-gradient(45deg, #667eea, #764ba2)",
+                    border: "none",
+                  }),
+                }}
+              >
+                JSON 원본 추가 검색
               </Button>
             </Space>
             <div style={{ marginTop: "12px" }}>
