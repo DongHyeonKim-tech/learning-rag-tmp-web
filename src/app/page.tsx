@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button, Flex, notification, Typography } from "antd";
 import Learning from "@/app/components/Learning";
 import Framework from "@/app/components/Framework";
-import { frameworkHealthCheck, learningHealthCheck } from "@/utils/searchApi";
 
 const { Title } = Typography;
 
@@ -103,65 +102,6 @@ export default function Home() {
               }}
             >
               Framework
-            </Button>
-            <Button
-              type="primary"
-              onClick={async () => {
-                try {
-                  const learningHealthResponse = await learningHealthCheck();
-                  if (!learningHealthResponse) {
-                    notification.error({
-                      message: "Learning 서비스가 중단되었습니다.",
-                    });
-                  } else {
-                    notification.success({
-                      message: "Learning 서비스가 정상입니다.",
-                    });
-                  }
-                } catch (error) {
-                  notification.error({
-                    message: "Learning 서비스 오류가 발생했습니다.",
-                  });
-                }
-              }}
-              style={{
-                minWidth: "120px",
-                height: "40px",
-                borderRadius: "8px",
-                fontWeight: 500,
-                marginRight: "8px",
-              }}
-            >
-              Learning Health Check
-            </Button>
-            <Button
-              type="primary"
-              onClick={async () => {
-                try {
-                  const frameworkHealthResponse = await frameworkHealthCheck();
-                  if (!frameworkHealthResponse) {
-                    notification.error({
-                      message: "Framework 서비스가 중단되었습니다.",
-                    });
-                  } else {
-                    notification.success({
-                      message: "Framework 서비스가 정상입니다.",
-                    });
-                  }
-                } catch (error) {
-                  notification.error({
-                    message: "Framework 서비스 오류가 발생했습니다.",
-                  });
-                }
-              }}
-              style={{
-                minWidth: "120px",
-                height: "40px",
-                borderRadius: "8px",
-                fontWeight: 500,
-              }}
-            >
-              Framework Health Check
             </Button>
           </Flex>
         </Flex>
