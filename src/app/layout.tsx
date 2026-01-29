@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "러닝웹 RAG 시스템",
-  description: "러닝웹 RAG 시스템",
+  title: "BIM RAG",
+  description: "BIM RAG",
 };
 
 export default function RootLayout({
