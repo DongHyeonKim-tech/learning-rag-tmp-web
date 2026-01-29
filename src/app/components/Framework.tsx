@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { streamChat, streamChatKure, ChatSource } from "@/utils/streamChat";
+import { useState, useRef } from "react";
 import {
   SearchResponseFramework,
   searchFrameworkDocuments,
@@ -19,15 +18,9 @@ import {
   Tabs,
   Flex,
 } from "antd";
-import {
-  SendOutlined,
-  StopOutlined,
-  FileTextOutlined,
-  SearchOutlined,
-  OpenAIOutlined,
-} from "@ant-design/icons";
+import { StopOutlined, SearchOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const Framework = () => {
   const [input, setInput] = useState("프로젝트 파일 생성");
@@ -188,22 +181,20 @@ const Framework = () => {
                       </div>
                     </div>
                   ) : searchResults.answer ? (
-                    <Flex>
+                    <Flex vertical>
                       {searchResults.images &&
                         searchResults.images.map((image) => (
                           <div key={image.id}>
                             <img
                               src={image.file_path}
                               alt={image.id}
+                              style={{ maxWidth: 1100 }}
                             />
                           </div>
                         ))}
                       <div
                         style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(300px, 1fr))",
-                          gap: "12px",
+                          display: "flex",
                         }}
                       >
                         <Card

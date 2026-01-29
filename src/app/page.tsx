@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Flex, notification, Typography } from "antd";
+import { Button, Flex, Typography } from "antd";
 import Learning from "@/app/components/Learning";
 import Framework from "@/app/components/Framework";
 
