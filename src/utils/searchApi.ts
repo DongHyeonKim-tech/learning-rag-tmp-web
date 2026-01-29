@@ -48,22 +48,32 @@ export interface SearchParamsOpenAI {
   model?: string;
 }
 
-export async function searchDocuments(
-  params: SearchParams
-): Promise<SearchResponse> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/search`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(params),
-  });
+export interface SearchParamsFramework {
+  query: string;
+  top_k?: number;
+  use_context?: number;
+  filters?: {
+    category_path?: string[];
+  };
+  temperature?: number;
+  top_p?: number;
+  max_tokens?: number;
+  model?: string;
+  use_kure?: boolean;
+}
 
-  if (!response.ok) {
-    throw new Error(`Search failed: ${response.status}`);
-  }
-
-  return response.json();
+export interface SearchResponseFramework {
+  prompt: string;
+  answer: string;
+  images?: {
+    id: string;
+    file_path: string;
+  }[];
+  links?: string[];
+  sources?: {
+    url: string;
+  }[];
+  total_sources?: number;
 }
 
 export async function searchDocumentsKure(
@@ -110,6 +120,45 @@ export async function searchDocumentsOpenAI(
       // JSON 파싱 실패 시 기본 메시지 사용
     }
     throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
+export async function searchDocuments(
+  params: SearchParams
+): Promise<SearchResponse> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/search`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Search failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function searchFrameworkDocuments(
+  params: SearchParamsFramework
+): Promise<SearchResponseFramework> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_FRAMEWORK_API_BASE}/framework`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Search failed: ${response.status}`);
   }
 
   return response.json();
