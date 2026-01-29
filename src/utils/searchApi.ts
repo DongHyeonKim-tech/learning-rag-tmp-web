@@ -163,3 +163,20 @@ export async function searchFrameworkDocuments(
 
   return response.json();
 }
+
+export async function learningHealthCheck(): Promise<boolean> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/healthz`, {
+    method: "GET",
+  });
+  return response.ok;
+}
+
+export async function frameworkHealthCheck(): Promise<boolean> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_FRAMEWORK_API_BASE}/healthz`,
+    {
+      method: "GET",
+    }
+  );
+  return response.ok;
+}
