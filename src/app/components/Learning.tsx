@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle, useCallback } from "react";
 import {
   searchDocuments,
   searchDocumentsKure,
@@ -10,46 +10,40 @@ import {
   SearchParamsOpenAI,
 } from "@/utils/searchApi";
 import "@ant-design/v5-patch-for-react-19";
-import {
-  Button,
-  Input,
-  notification,
-  Card,
-  Typography,
-  Space,
-  Spin,
-  Tabs,
-} from "antd";
+import { notification, Card, Typography, Spin, Tabs } from "antd";
 import { SearchOutlined, OpenAIOutlined } from "@ant-design/icons";
+import type { LearningRef } from "@/app/page";
 import styles from "@/styles/search.module.css";
 
 const { Text } = Typography;
 
-const Learning = ({
-  selectedModel,
-}: {
-  selectedModel: "bge-m3" | "kure" | "full" | "json";
-}) => {
-  const [input, setInput] = useState("HDA BIM 어워드");
+const Learning = forwardRef<
+  LearningRef,
+  {
+    input: string;
+    searchLoading: boolean;
+    setSearchLoading: (v: boolean) => void;
+    selectedModel: "bge-m3" | "kure" | "full" | "json";
+  }
+>(function Learning(
+  { input, searchLoading, setSearchLoading, selectedModel },
+  ref
+) {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("openai");
   const [openAISummary, setOpenAISummary] = useState<string>("");
 
-  const onSearch = async () => {
+  const onSearch = useCallback(async () => {
     if (!input.trim()) return;
-
     setSearchLoading(true);
     setSearchResults([]);
     setOpenAISummary("");
-
     try {
       const searchParams: SearchParams = {
         messages: [{ role: "user", content: input }],
         top_k: 5,
         use_context: 5,
       };
-
       const searchFunction =
         selectedModel === "kure" ? searchDocumentsKure : searchDocuments;
       const response = await searchFunction(searchParams);
@@ -61,16 +55,13 @@ const Learning = ({
     } finally {
       setSearchLoading(false);
     }
-  };
+  }, [input, selectedModel, setSearchLoading]);
 
-  const onSearchOpenAI = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  const onSearchOpenAI = useCallback(async () => {
     if (!input.trim()) return;
-
     setSearchLoading(true);
     setSearchResults([]);
     setOpenAISummary("");
-
     try {
       const searchParams: SearchParamsOpenAI = {
         query: input,
@@ -103,9 +94,20 @@ const Learning = ({
     } finally {
       setSearchLoading(false);
     }
-  };
+  }, [input, selectedModel, setSearchLoading]);
 
-  const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel460}`;
+  useImperativeHandle(
+    ref,
+    () => ({
+      search: () => {
+        if (activeTab === "openai") onSearchOpenAI();
+        else onSearch();
+      },
+    }),
+    [activeTab, onSearch, onSearchOpenAI]
+  );
+
+  const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;
   const loadingBlock = (
     <div className={styles.loadingWrap}>
       <Spin size="large" />
@@ -155,38 +157,34 @@ const Learning = ({
   return (
     <>
       <Card className={styles.contentCard}>
-        <form
-          onSubmit={
-            activeTab === "openai"
-              ? onSearchOpenAI
-              : (e) => {
-                  e.preventDefault();
-                  onSearch();
-                }
-          }
-        >
-          <Space.Compact className={styles.compactFull}>
-            <Input
-              size="large"
-              placeholder={"검색어를 입력해주세요."}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className={styles.searchInput}
-              onPressEnter={activeTab === "openai" ? onSearchOpenAI : onSearch}
-            />
-            <Button
-              type="primary"
-              size="large"
-              htmlType="submit"
-              disabled={searchLoading || !input.trim()}
-              icon={<SearchOutlined />}
-              className={styles.searchSubmitBtn}
-            >
-              {searchLoading ? "검색 중..." : "검색하기"}
-            </Button>
-          </Space.Compact>
-        </form>
-        <Tabs
+        <div className={tabPanelClass}>
+          {searchLoading ? (
+            loadingBlock
+          ) : searchResults.length > 0 ? (
+            <div>
+              {openAISummary && (
+                <div className={styles.summaryBox}>
+                  <Text
+                    strong
+                    className={styles.summaryTitle}
+                  >
+                    AI 요약
+                  </Text>
+                  <div className={styles.summaryContent}>{openAISummary}</div>
+                </div>
+              )}
+              {resultCountText(searchResults.length)}
+              <div className={resultGridClass}>
+                {searchResults.map((result, index) =>
+                  resultCard(result, index)
+                )}
+              </div>
+            </div>
+          ) : (
+            emptyBlock("OpenAI 검색어를 입력하고 검색해보세요")
+          )}
+        </div>
+        {/* <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
           items={[
@@ -258,10 +256,10 @@ const Learning = ({
               ),
             },
           ]}
-        />
+        /> */}
       </Card>
     </>
   );
-};
+});
 
 export default Learning;
