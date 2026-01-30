@@ -84,161 +84,147 @@ const Framework = () => {
   };
 
   return (
-    <>
-      {/* 입력 폼 */}
-      <Card
-        style={{
-          borderRadius: "16px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-          border: "none",
+    <Card
+      style={{
+        borderRadius: "16px",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+        border: "none",
+        minHeight: "400px",
+      }}
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSearch();
         }}
       >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSearch();
-          }}
-        >
-          <Space.Compact style={{ width: "100%" }}>
-            <Input
-              size="large"
-              placeholder={"검색어를 입력해주세요..."}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              style={{
-                borderRadius: "12px 0 0 12px",
-                border: "2px solid #e0e0e0",
-                fontSize: "16px",
-              }}
-              onPressEnter={onSearch}
-            />
+        <Space.Compact style={{ width: "100%" }}>
+          <Input
+            size="large"
+            placeholder={"검색어를 입력해주세요..."}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            style={{
+              borderRadius: "12px 0 0 12px",
+              border: "2px solid #e0e0e0",
+              fontSize: "16px",
+            }}
+            onPressEnter={onSearch}
+          />
+          <Button
+            type="primary"
+            size="large"
+            htmlType="submit"
+            disabled={searchLoading || !input.trim()}
+            icon={<SearchOutlined />}
+            style={{
+              borderRadius: "0 12px 12px 0",
+              background: "linear-gradient(45deg, #667eea, #764ba2)",
+              border: "none",
+              height: "48px",
+            }}
+          >
+            {searchLoading ? "검색 중..." : "검색하기"}
+          </Button>
+          {loading && (
             <Button
-              type="primary"
               size="large"
-              htmlType="submit"
-              disabled={searchLoading || !input.trim()}
-              icon={<SearchOutlined />}
+              icon={<StopOutlined />}
+              onClick={onStop}
               style={{
                 borderRadius: "0 12px 12px 0",
-                background: "linear-gradient(45deg, #667eea, #764ba2)",
-                border: "none",
-                height: "48px",
+                marginLeft: "8px",
               }}
             >
-              {searchLoading ? "검색 중..." : "검색하기"}
+              중지
             </Button>
-            {loading && (
-              <Button
-                size="large"
-                icon={<StopOutlined />}
-                onClick={onStop}
+          )}
+        </Space.Compact>
+      </form>
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={[
+          {
+            key: "search",
+            label: (
+              <span>
+                <SearchOutlined />
+                검색
+              </span>
+            ),
+            children: (
+              <div
                 style={{
-                  borderRadius: "0 12px 12px 0",
-                  marginLeft: "8px",
+                  height: "533px",
+                  overflow: "auto",
                 }}
               >
-                중지
-              </Button>
-            )}
-          </Space.Compact>
-        </form>
-      </Card>
-
-      {/* 탭 영역 */}
-      <Card
-        style={{
-          borderRadius: "16px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-          border: "none",
-          minHeight: "400px",
-        }}
-      >
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={[
-            {
-              key: "search",
-              label: (
-                <span>
-                  <SearchOutlined />
-                  검색
-                </span>
-              ),
-              children: (
-                <div
-                  style={{
-                    minHeight: "300px",
-                    maxHeight: "500px",
-                    overflow: "auto",
-                  }}
-                >
-                  {searchLoading ? (
-                    <div style={{ textAlign: "center", padding: "40px" }}>
-                      <Spin size="large" />
-                      <div style={{ marginTop: "16px", color: "#666" }}>
-                        검색 중입니다...
-                      </div>
+                {searchLoading ? (
+                  <div style={{ textAlign: "center", padding: "40px" }}>
+                    <Spin size="large" />
+                    <div style={{ marginTop: "16px", color: "#666" }}>
+                      검색 중입니다...
                     </div>
-                  ) : searchResults.answer ? (
-                    <Flex vertical>
-                      {searchResults.images &&
-                        searchResults.images.map((image) => (
-                          <div key={image.id}>
-                            <img
-                              src={image.file_path}
-                              alt={image.id}
-                              style={{ maxWidth: 1100 }}
-                            />
-                          </div>
-                        ))}
-                      <div
-                        style={{
-                          display: "flex",
-                        }}
-                      >
-                        <Card
-                          size="small"
-                          style={{
-                            borderRadius: "8px",
-                            border: "1px solid #e0e0e0",
-                            background: "#f8f9fa",
-                          }}
-                        >
-                          <Text
-                            style={{
-                              fontSize: "12px",
-                              color: "#666",
-                              whiteSpace: "pre-line",
-                            }}
-                          >
-                            {searchResults.answer
-                              .split(/\*\*(.*?)\*\*/g)
-                              .map((part, idx) =>
-                                idx % 2 === 1 ? <b key={idx}>{part}</b> : part
-                              )}
-                          </Text>
-                        </Card>
-                      </div>
-                    </Flex>
-                  ) : (
+                  </div>
+                ) : searchResults.answer ? (
+                  <Flex vertical>
+                    {searchResults.images &&
+                      searchResults.images.map((image) => (
+                        <div key={image.id}>
+                          <img
+                            src={image.file_path}
+                            alt={image.id}
+                            style={{ maxWidth: 1100 }}
+                          />
+                        </div>
+                      ))}
                     <div
                       style={{
-                        color: "#999",
-                        textAlign: "center",
-                        padding: "40px",
+                        display: "flex",
                       }}
                     >
-                      검색어를 입력하고 검색해보세요
+                      <Card
+                        size="small"
+                        style={{
+                          borderRadius: "8px",
+                          border: "1px solid #e0e0e0",
+                          background: "#f8f9fa",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: "12px",
+                            color: "#666",
+                            whiteSpace: "pre-line",
+                          }}
+                        >
+                          {searchResults.answer
+                            .split(/\*\*(.*?)\*\*/g)
+                            .map((part, idx) =>
+                              idx % 2 === 1 ? <b key={idx}>{part}</b> : part
+                            )}
+                        </Text>
+                      </Card>
                     </div>
-                  )}
-                </div>
-              ),
-            },
-          ]}
-        />
-      </Card>
-    </>
+                  </Flex>
+                ) : (
+                  <div
+                    style={{
+                      color: "#999",
+                      textAlign: "center",
+                      padding: "40px",
+                    }}
+                  >
+                    검색어를 입력하고 검색해보세요
+                  </div>
+                )}
+              </div>
+            ),
+          },
+        ]}
+      />
+    </Card>
   );
 };
 

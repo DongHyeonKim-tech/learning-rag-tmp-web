@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Flex, Typography } from "antd";
+import { Button, Flex, Typography, Card, Space } from "antd";
 import Learning from "@/app/components/Learning";
 import Framework from "@/app/components/Framework";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("learning");
+  const [selectedModel, setSelectedModel] = useState<
+    "bge-m3" | "kure" | "full" | "json"
+  >("bge-m3");
 
   return (
     <div
@@ -27,85 +30,133 @@ export default function Home() {
           gap: "24px",
         }}
       >
-        {/* 헤더 */}
-        <Flex
-          vertical
-          gap={24}
-          align="center"
-          justify="center"
+        {/* 헤더 + 모델 선택 통합 */}
+        <Card
+          style={{
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+            border: "none",
+            overflow: "hidden",
+          }}
+          bodyStyle={{
+            padding: "24px 28px",
+            background: "rgba(255, 255, 255, 0.98)",
+            backdropFilter: "blur(12px)",
+          }}
         >
-          <Title
-            level={1}
-            style={{ color: "white", margin: 0 }}
-          >
-            BIM RAG
-          </Title>
           <Flex
-            gap={8}
+            vertical
+            gap={24}
             align="center"
-            justify="center"
-            style={{
-              background: "rgba(255, 255, 255, 0.15)",
-              backdropFilter: "blur(10px)",
-              padding: "6px",
-              borderRadius: "12px",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
           >
-            <Button
-              type={activeTab === "learning" ? "primary" : "default"}
-              onClick={() => setActiveTab("learning")}
-              style={{
-                minWidth: "120px",
-                height: "40px",
-                borderRadius: "8px",
-                fontWeight: 500,
-                transition: "all 0.3s ease",
-                ...(activeTab === "learning"
-                  ? {
-                      background: "rgba(255, 255, 255, 0.95)",
-                      color: "#667eea",
-                      border: "none",
-                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                    }
-                  : {
-                      background: "transparent",
-                      color: "white",
-                      border: "none",
-                    }),
-              }}
+            <Title
+              level={1}
+              style={{ color: "#667eea", margin: 0, fontSize: "28px" }}
             >
-              Learning
-            </Button>
-            <Button
-              type={activeTab === "framework" ? "primary" : "default"}
-              onClick={() => setActiveTab("framework")}
-              style={{
-                minWidth: "120px",
-                height: "40px",
-                borderRadius: "8px",
-                fontWeight: 500,
-                transition: "all 0.3s ease",
-                ...(activeTab === "framework"
-                  ? {
-                      background: "rgba(255, 255, 255, 0.95)",
-                      color: "#667eea",
-                      border: "none",
-                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                    }
-                  : {
-                      background: "transparent",
-                      color: "white",
-                      border: "none",
-                    }),
-              }}
+              BIM RAG
+            </Title>
+            <Flex
+              gap={8}
+              align="center"
+              wrap="wrap"
+              justify="center"
             >
-              Framework
-            </Button>
+              <Button
+                type={activeTab === "learning" ? "primary" : "default"}
+                onClick={() => setActiveTab("learning")}
+                style={{
+                  minWidth: "120px",
+                  height: "40px",
+                  borderRadius: "8px",
+                  fontWeight: 500,
+                  transition: "all 0.3s ease",
+                  ...(activeTab === "learning"
+                    ? {
+                        background: "linear-gradient(45deg, #667eea, #764ba2)",
+                        border: "none",
+                        color: "#fff",
+                      }
+                    : { borderColor: "#ddd" }),
+                }}
+              >
+                Learning
+              </Button>
+              <Button
+                type={activeTab === "framework" ? "primary" : "default"}
+                onClick={() => setActiveTab("framework")}
+                style={{
+                  minWidth: "120px",
+                  height: "40px",
+                  borderRadius: "8px",
+                  fontWeight: 500,
+                  transition: "all 0.3s ease",
+                  ...(activeTab === "framework"
+                    ? {
+                        background: "linear-gradient(45deg, #667eea, #764ba2)",
+                        border: "none",
+                        color: "#fff",
+                      }
+                    : { borderColor: "#ddd" }),
+                }}
+              >
+                Framework
+              </Button>
+            </Flex>
+            {activeTab === "learning" && (
+              <Flex
+                gap={12}
+                align="center"
+                style={{
+                  width: "100%",
+                  paddingTop: "16px",
+                  borderTop: "1px solid #f0f0f0",
+                }}
+                justify="center"
+              >
+                <Text style={{ color: "#666", fontSize: "13px" }}>
+                  검색 모델 선택
+                </Text>
+                <Space
+                  size="small"
+                  wrap
+                  style={{ justifyContent: "center" }}
+                >
+                  {(
+                    [
+                      ["bge-m3", "BAAI/bge-m3"],
+                      ["kure", "nlpai-lab/KURE-v1"],
+                      ["full", "BAAI/bge-m3 Full Docs"],
+                      ["json", "JSON 원본 추가 검색"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <Button
+                      key={key}
+                      type={selectedModel === key ? "primary" : "default"}
+                      size="middle"
+                      onClick={() => setSelectedModel(key)}
+                      style={{
+                        borderRadius: "8px",
+                        minWidth: "120px",
+                        ...(selectedModel === key && {
+                          background:
+                            "linear-gradient(45deg, #667eea, #764ba2)",
+                          border: "none",
+                        }),
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </Space>
+              </Flex>
+            )}
           </Flex>
-        </Flex>
-        {activeTab === "learning" ? <Learning /> : <Framework />}
+        </Card>
+        {activeTab === "learning" ? (
+          <Learning selectedModel={selectedModel} />
+        ) : (
+          <Framework />
+        )}
       </div>
     </div>
   );
