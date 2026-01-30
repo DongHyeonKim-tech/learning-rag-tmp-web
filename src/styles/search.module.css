@@ -1,0 +1,217 @@
+/* page.tsx - 레이아웃 */
+.pageRoot {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.pageContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.headerCard {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: none;
+  overflow: hidden;
+}
+
+.headerCard :global(.ant-card-body) {
+  padding: 24px 28px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+}
+
+.pageTitle {
+  color: #667eea;
+  margin: 0;
+  font-size: 28px;
+}
+
+.modelSection {
+  width: 100%;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.modelLabel {
+  color: #666;
+  font-size: 13px;
+}
+
+.modelButtonWrap {
+  justify-content: center;
+}
+
+.tabButton {
+  min-width: 120px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tabButtonActive {
+  background: linear-gradient(45deg, #667eea, #764ba2) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.tabButtonDefault {
+  border-color: #ddd;
+}
+
+.modelButton {
+  border-radius: 8px;
+  min-width: 120px;
+}
+
+.modelButtonActive {
+  background: linear-gradient(45deg, #667eea, #764ba2) !important;
+  border: none !important;
+}
+
+/* 공통 - 카드, 폼, 탭 */
+.contentCard {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.contentCardMinHeight {
+  min-height: 400px;
+}
+
+.compactFull {
+  width: 100%;
+}
+
+.searchInput {
+  border-radius: 12px 0 0 12px;
+  border: 2px solid #e0e0e0;
+  font-size: 16px;
+}
+
+.searchSubmitBtn {
+  border-radius: 0 12px 12px 0;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
+  height: 48px;
+}
+
+.searchStopBtn {
+  border-radius: 0 12px 12px 0;
+  margin-left: 8px;
+}
+
+.tabPanel {
+  overflow: auto;
+}
+
+.tabPanel460 {
+  height: 460px;
+}
+
+.tabPanel533 {
+  height: 533px;
+}
+
+.loadingWrap {
+  text-align: center;
+  padding: 40px;
+}
+
+.loadingText {
+  margin-top: 16px;
+  color: #666;
+}
+
+.emptyState {
+  color: #999;
+  text-align: center;
+  padding: 40px;
+}
+
+/* 공통 - 결과 카드/텍스트 */
+.smallCard {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.smallCardText {
+  font-size: 12px;
+  color: #666;
+  white-space: pre-line;
+}
+
+.resultFlex {
+  display: flex;
+}
+
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.resultItemBlock {
+  margin-bottom: 8px;
+}
+
+.resultTitle {
+  font-size: 14px;
+}
+
+.resultMeta {
+  font-size: 12px;
+  color: #999;
+}
+
+.resultSnippet {
+  font-size: 12px;
+  color: #666;
+}
+
+.resultLinkWrap {
+  margin-top: 8px;
+}
+
+.resultLink {
+  font-size: 12px;
+  color: #667eea;
+}
+
+.resultCount {
+  margin-bottom: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Learning - AI 요약 */
+.summaryBox {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f0f8ff;
+  border-radius: 8px;
+  border: 1px solid #d0e7ff;
+}
+
+.summaryTitle {
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.summaryContent {
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* Framework - 이미지 */
+.frameworkImage img {
+  max-width: 1100px;
+}

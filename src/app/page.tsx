@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button, Flex, Typography, Card, Space } from "antd";
 import Learning from "@/app/components/Learning";
 import Framework from "@/app/components/Framework";
+import styles from "@/styles/search.module.css";
 
 const { Title, Text } = Typography;
 
@@ -14,36 +15,9 @@ export default function Home() {
   >("bge-m3");
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        padding: "20px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
-        }}
-      >
-        {/* 헤더 + 모델 선택 통합 */}
-        <Card
-          style={{
-            borderRadius: "16px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-            border: "none",
-            overflow: "hidden",
-          }}
-          bodyStyle={{
-            padding: "24px 28px",
-            background: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(12px)",
-          }}
-        >
+    <div className={styles.pageRoot}>
+      <div className={styles.pageContainer}>
+        <Card className={styles.headerCard}>
           <Flex
             vertical
             gap={24}
@@ -51,7 +25,7 @@ export default function Home() {
           >
             <Title
               level={1}
-              style={{ color: "#667eea", margin: 0, fontSize: "28px" }}
+              className={styles.pageTitle}
             >
               BIM RAG
             </Title>
@@ -64,40 +38,14 @@ export default function Home() {
               <Button
                 type={activeTab === "learning" ? "primary" : "default"}
                 onClick={() => setActiveTab("learning")}
-                style={{
-                  minWidth: "120px",
-                  height: "40px",
-                  borderRadius: "8px",
-                  fontWeight: 500,
-                  transition: "all 0.3s ease",
-                  ...(activeTab === "learning"
-                    ? {
-                        background: "linear-gradient(45deg, #667eea, #764ba2)",
-                        border: "none",
-                        color: "#fff",
-                      }
-                    : { borderColor: "#ddd" }),
-                }}
+                className={`${styles.tabButton} ${activeTab === "learning" ? styles.tabButtonActive : styles.tabButtonDefault}`}
               >
                 Learning
               </Button>
               <Button
                 type={activeTab === "framework" ? "primary" : "default"}
                 onClick={() => setActiveTab("framework")}
-                style={{
-                  minWidth: "120px",
-                  height: "40px",
-                  borderRadius: "8px",
-                  fontWeight: 500,
-                  transition: "all 0.3s ease",
-                  ...(activeTab === "framework"
-                    ? {
-                        background: "linear-gradient(45deg, #667eea, #764ba2)",
-                        border: "none",
-                        color: "#fff",
-                      }
-                    : { borderColor: "#ddd" }),
-                }}
+                className={`${styles.tabButton} ${activeTab === "framework" ? styles.tabButtonActive : styles.tabButtonDefault}`}
               >
                 Framework
               </Button>
@@ -106,20 +54,14 @@ export default function Home() {
               <Flex
                 gap={12}
                 align="center"
-                style={{
-                  width: "100%",
-                  paddingTop: "16px",
-                  borderTop: "1px solid #f0f0f0",
-                }}
+                className={styles.modelSection}
                 justify="center"
               >
-                <Text style={{ color: "#666", fontSize: "13px" }}>
-                  검색 모델 선택
-                </Text>
+                <Text className={styles.modelLabel}>검색 모델 선택</Text>
                 <Space
                   size="small"
                   wrap
-                  style={{ justifyContent: "center" }}
+                  className={styles.modelButtonWrap}
                 >
                   {(
                     [
@@ -134,15 +76,7 @@ export default function Home() {
                       type={selectedModel === key ? "primary" : "default"}
                       size="middle"
                       onClick={() => setSelectedModel(key)}
-                      style={{
-                        borderRadius: "8px",
-                        minWidth: "120px",
-                        ...(selectedModel === key && {
-                          background:
-                            "linear-gradient(45deg, #667eea, #764ba2)",
-                          border: "none",
-                        }),
-                      }}
+                      className={`${styles.modelButton} ${selectedModel === key ? styles.modelButtonActive : ""}`}
                     >
                       {label}
                     </Button>

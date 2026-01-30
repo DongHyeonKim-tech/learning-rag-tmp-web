@@ -20,6 +20,7 @@ import {
   Image,
 } from "antd";
 import { StopOutlined, SearchOutlined } from "@ant-design/icons";
+import styles from "@/styles/search.module.css";
 
 const { Text } = Typography;
 
@@ -84,31 +85,20 @@ const Framework = () => {
   };
 
   return (
-    <Card
-      style={{
-        borderRadius: "16px",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-        border: "none",
-        minHeight: "400px",
-      }}
-    >
+    <Card className={`${styles.contentCard} ${styles.contentCardMinHeight}`}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSearch();
         }}
       >
-        <Space.Compact style={{ width: "100%" }}>
+        <Space.Compact className={styles.compactFull}>
           <Input
             size="large"
-            placeholder={"검색어를 입력해주세요..."}
+            placeholder={"검색어를 입력해주세요."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            style={{
-              borderRadius: "12px 0 0 12px",
-              border: "2px solid #e0e0e0",
-              fontSize: "16px",
-            }}
+            className={styles.searchInput}
             onPressEnter={onSearch}
           />
           <Button
@@ -117,12 +107,7 @@ const Framework = () => {
             htmlType="submit"
             disabled={searchLoading || !input.trim()}
             icon={<SearchOutlined />}
-            style={{
-              borderRadius: "0 12px 12px 0",
-              background: "linear-gradient(45deg, #667eea, #764ba2)",
-              border: "none",
-              height: "48px",
-            }}
+            className={styles.searchSubmitBtn}
           >
             {searchLoading ? "검색 중..." : "검색하기"}
           </Button>
@@ -131,10 +116,7 @@ const Framework = () => {
               size="large"
               icon={<StopOutlined />}
               onClick={onStop}
-              style={{
-                borderRadius: "0 12px 12px 0",
-                marginLeft: "8px",
-              }}
+              className={styles.searchStopBtn}
             >
               중지
             </Button>
@@ -154,18 +136,11 @@ const Framework = () => {
               </span>
             ),
             children: (
-              <div
-                style={{
-                  height: "533px",
-                  overflow: "auto",
-                }}
-              >
+              <div className={`${styles.tabPanel} ${styles.tabPanel533}`}>
                 {searchLoading ? (
-                  <div style={{ textAlign: "center", padding: "40px" }}>
+                  <div className={styles.loadingWrap}>
                     <Spin size="large" />
-                    <div style={{ marginTop: "16px", color: "#666" }}>
-                      검색 중입니다...
-                    </div>
+                    <div className={styles.loadingText}>검색 중입니다...</div>
                   </div>
                 ) : searchResults.answer ? (
                   <Flex vertical>
@@ -175,30 +150,16 @@ const Framework = () => {
                           <Image
                             src={image.file_path}
                             alt={image.id}
-                            style={{ maxWidth: 1100 }}
+                            className={styles.frameworkImage}
                           />
                         </div>
                       ))}
-                    <div
-                      style={{
-                        display: "flex",
-                      }}
-                    >
+                    <div className={styles.resultFlex}>
                       <Card
                         size="small"
-                        style={{
-                          borderRadius: "8px",
-                          border: "1px solid #e0e0e0",
-                          background: "#f8f9fa",
-                        }}
+                        className={styles.smallCard}
                       >
-                        <Text
-                          style={{
-                            fontSize: "12px",
-                            color: "#666",
-                            whiteSpace: "pre-line",
-                          }}
-                        >
+                        <Text className={styles.smallCardText}>
                           {searchResults.answer
                             .split(/\*\*(.*?)\*\*/g)
                             .map((part, idx) =>
@@ -209,13 +170,7 @@ const Framework = () => {
                     </div>
                   </Flex>
                 ) : (
-                  <div
-                    style={{
-                      color: "#999",
-                      textAlign: "center",
-                      padding: "40px",
-                    }}
-                  >
+                  <div className={styles.emptyState}>
                     검색어를 입력하고 검색해보세요
                   </div>
                 )}
