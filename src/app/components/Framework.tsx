@@ -56,7 +56,6 @@ const Framework = () => {
       sources: [],
       total_sources: 0,
     });
-    ("");
 
     try {
       const searchParams: SearchParamsFramework = {
