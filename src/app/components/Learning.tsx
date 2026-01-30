@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { streamChat, streamChatKure, ChatSource } from "@/utils/streamChat";
+import { useState } from "react";
 import {
   searchDocuments,
   searchDocumentsKure,
@@ -21,15 +20,9 @@ import {
   Spin,
   Tabs,
 } from "antd";
-import {
-  SendOutlined,
-  StopOutlined,
-  FileTextOutlined,
-  SearchOutlined,
-  OpenAIOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined, OpenAIOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const Learning = ({
   selectedModel,
