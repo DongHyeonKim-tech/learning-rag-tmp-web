@@ -17,6 +17,7 @@ import {
   Spin,
   Tabs,
   Flex,
+  Image,
 } from "antd";
 import { StopOutlined, SearchOutlined } from "@ant-design/icons";
 
@@ -172,7 +173,7 @@ const Framework = () => {
                     {searchResults.images &&
                       searchResults.images.map((image) => (
                         <div key={image.id}>
-                          <img
+                          <Image
                             src={image.file_path}
                             alt={image.id}
                             style={{ maxWidth: 1100 }}
