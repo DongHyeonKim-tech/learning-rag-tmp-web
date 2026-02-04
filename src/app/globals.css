@@ -40,3 +40,20 @@ a {
     color-scheme: dark;
   }
 }
+
+.markdown h1 {
+  margin: 0px 0px 10px 5px;
+}
+
+.markdown h2 {
+  margin: 0px 0px 3px 5px;
+}
+
+.markdown p {
+  margin: 0px 0px 10px 5px;
+}
+
+.markdown hr {
+  margin: 10px 5px;
+  border: 1px solid #e0e0e0;
+}

@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle, useCallback } from "react";
+import {
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import {
   searchDocuments,
   searchDocumentsKure,
@@ -8,14 +15,54 @@ import {
   SearchParams,
   searchDocumentsOpenAI,
   SearchParamsOpenAI,
+  searchLearningOpenAIStream,
 } from "@/utils/searchApi";
 import "@ant-design/v5-patch-for-react-19";
-import { notification, Card, Typography, Spin, Tabs } from "antd";
+import { notification, Card, Typography, Spin, Switch } from "antd";
 import { SearchOutlined, OpenAIOutlined } from "@ant-design/icons";
 import type { LearningRef } from "@/app/page";
 import styles from "@/styles/search.module.css";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 
 const { Text } = Typography;
+
+function renderBold(text: string) {
+  const parts = text.split(/\*\*(.*?)\*\*/g);
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <b key={i}>{part}</b> : <span key={i}>{part}</span>
+  );
+}
+
+const SUMMARY_HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
+
+function renderSummaryContent(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    const headingMatch = line.match(/^(#+)\s*(.*)$/);
+    if (headingMatch) {
+      const level = Math.min(6, headingMatch[1].length) - 1;
+      const Tag = SUMMARY_HEADING_TAGS[level];
+      return (
+        <Tag
+          key={i}
+          className={styles.summaryHeading}
+        >
+          {renderBold(headingMatch[2])}
+        </Tag>
+      );
+    }
+    return (
+      <div
+        key={i}
+        className={styles.summaryLine}
+      >
+        {renderBold(line)}
+      </div>
+    );
+  });
+}
 
 const Learning = forwardRef<
   LearningRef,
@@ -32,6 +79,30 @@ const Learning = forwardRef<
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [activeTab, setActiveTab] = useState("openai");
   const [openAISummary, setOpenAISummary] = useState<string>("");
+  const [stream, setStream] = useState<boolean>(true);
+  const [stickToBottom, setStickToBottom] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const SCROLL_BOTTOM_THRESHOLD = 24;
+
+  const checkAtBottom = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return false;
+    const { scrollTop, clientHeight, scrollHeight } = el;
+    return scrollTop + clientHeight >= scrollHeight - SCROLL_BOTTOM_THRESHOLD;
+  }, []);
+
+  const onScrollPanel = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    setStickToBottom(checkAtBottom(el));
+  }, [checkAtBottom]);
+
+  useEffect(() => {
+    if (!stickToBottom || !searchLoading || !stream) return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight - el.clientHeight;
+  }, [openAISummary, searchLoading, stream, stickToBottom]);
 
   const onSearch = useCallback(async () => {
     if (!input.trim()) return;
@@ -62,28 +133,46 @@ const Learning = forwardRef<
     setSearchLoading(true);
     setSearchResults([]);
     setOpenAISummary("");
+    setStickToBottom(true);
+    const searchParams: SearchParamsOpenAI = {
+      query: input,
+      top_k: 10,
+      use_context: 5,
+      temperature: 0.5,
+      max_tokens: 1024,
+      model: selectedModel,
+    };
     try {
-      const searchParams: SearchParamsOpenAI = {
-        query: input,
-        top_k: 10,
-        use_context: 5,
-        temperature: 0.5,
-        max_tokens: 2048,
-        model: selectedModel,
-      };
-      console.log("searchParams: ", searchParams);
-      const response = await searchDocumentsOpenAI(searchParams);
-      const convertedResults: SearchResult[] = response.sources.map(
-        (source) => ({
-          doc_id: source.doc_id,
-          title: source.title,
-          snippet: source.snippet,
-          video_url: source.video_url,
-          video_label: source.video_label,
-        })
-      );
-      setSearchResults(convertedResults);
-      setOpenAISummary(response.summary);
+      if (stream) {
+        const response = await searchLearningOpenAIStream(searchParams, {
+          onDelta(content) {
+            setOpenAISummary((prev) => prev + content);
+          },
+        });
+        const convertedResults: SearchResult[] = response.sources.map(
+          (source) => ({
+            doc_id: source.doc_id,
+            title: source.title,
+            snippet: source.snippet,
+            video_url: source.video_url,
+            video_label: source.video_label,
+          })
+        );
+        setSearchResults(convertedResults);
+      } else {
+        const response = await searchDocumentsOpenAI(searchParams);
+        const convertedResults: SearchResult[] = response.sources.map(
+          (source) => ({
+            doc_id: source.doc_id,
+            title: source.title,
+            snippet: source.snippet,
+            video_url: source.video_url,
+            video_label: source.video_label,
+          })
+        );
+        setSearchResults(convertedResults);
+        setOpenAISummary(response.summary);
+      }
     } catch (err) {
       const errorMessage = (err as Error).message;
       console.error("OpenAI Search error:", errorMessage);
@@ -94,7 +183,7 @@ const Learning = forwardRef<
     } finally {
       setSearchLoading(false);
     }
-  }, [input, selectedModel, setSearchLoading]);
+  }, [input, selectedModel, setSearchLoading, stream]);
 
   useImperativeHandle(
     ref,
@@ -157,10 +246,22 @@ const Learning = forwardRef<
   return (
     <>
       <Card className={styles.contentCard}>
-        <div className={tabPanelClass}>
-          {searchLoading ? (
+        <div
+          ref={scrollContainerRef}
+          className={tabPanelClass}
+          onScroll={onScrollPanel}
+        >
+          <div className={styles.streamOption}>
+            <Text>스트리밍 응답</Text>
+            <Switch
+              checked={stream}
+              onChange={setStream}
+              size="small"
+            />
+          </div>
+          {searchLoading && !openAISummary ? (
             loadingBlock
-          ) : searchResults.length > 0 ? (
+          ) : searchResults.length > 0 || openAISummary ? (
             <div>
               {openAISummary && (
                 <div className={styles.summaryBox}>
@@ -170,10 +271,18 @@ const Learning = forwardRef<
                   >
                     AI 요약
                   </Text>
-                  <div className={styles.summaryContent}>{openAISummary}</div>
+                  <div className={"markdown"}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeHighlight]}
+                    >
+                      {openAISummary}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               )}
-              {resultCountText(searchResults.length)}
+              {searchResults.length > 0 &&
+                resultCountText(searchResults.length)}
               <div className={resultGridClass}>
                 {searchResults.map((result, index) =>
                   resultCard(result, index)
@@ -184,79 +293,6 @@ const Learning = forwardRef<
             emptyBlock("OpenAI 검색어를 입력하고 검색해보세요")
           )}
         </div>
-        {/* <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={[
-            {
-              key: "openai",
-              label: (
-                <span>
-                  <OpenAIOutlined />
-                  OpenAI
-                </span>
-              ),
-              children: (
-                <div className={tabPanelClass}>
-                  {searchLoading ? (
-                    loadingBlock
-                  ) : searchResults.length > 0 ? (
-                    <div>
-                      {openAISummary && (
-                        <div className={styles.summaryBox}>
-                          <Text
-                            strong
-                            className={styles.summaryTitle}
-                          >
-                            AI 요약
-                          </Text>
-                          <div className={styles.summaryContent}>
-                            {openAISummary}
-                          </div>
-                        </div>
-                      )}
-                      {resultCountText(searchResults.length)}
-                      <div className={resultGridClass}>
-                        {searchResults.map((result, index) =>
-                          resultCard(result, index)
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    emptyBlock("OpenAI 검색어를 입력하고 검색해보세요")
-                  )}
-                </div>
-              ),
-            },
-            {
-              key: "search",
-              label: (
-                <span>
-                  <SearchOutlined />
-                  검색
-                </span>
-              ),
-              children: (
-                <div className={tabPanelClass}>
-                  {searchLoading ? (
-                    loadingBlock
-                  ) : searchResults.length > 0 ? (
-                    <div>
-                      {resultCountText(searchResults.length)}
-                      <div className={resultGridClass}>
-                        {searchResults.map((result, index) =>
-                          resultCard(result, index)
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    emptyBlock("검색어를 입력하고 검색해보세요")
-                  )}
-                </div>
-              ),
-            },
-          ]}
-        /> */}
       </Card>
     </>
   );

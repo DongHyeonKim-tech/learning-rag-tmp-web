@@ -201,6 +201,26 @@
   font-size: 14px;
 }
 
+/* Learning - 스트리밍 옵션 */
+.streamOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.streamingCursor {
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+  color: #1890ff;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 /* Learning - AI 요약 */
 .summaryBox {
   margin-bottom: 20px;
@@ -218,6 +238,41 @@
 .summaryContent {
   margin-top: 8px;
   line-height: 1.6;
+  white-space: pre-line;
+}
+
+.summaryContent .summaryHeading {
+  margin: 0.6em 0 0.3em;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.summaryContent h1.summaryHeading {
+  font-size: 1.5em;
+}
+
+.summaryContent h2.summaryHeading {
+  font-size: 1.35em;
+}
+
+.summaryContent h3.summaryHeading {
+  font-size: 1.2em;
+}
+
+.summaryContent h4.summaryHeading {
+  font-size: 1.1em;
+}
+
+.summaryContent h5.summaryHeading {
+  font-size: 1.05em;
+}
+
+.summaryContent h6.summaryHeading {
+  font-size: 1em;
+}
+
+.summaryContent .summaryLine {
+  margin-bottom: 0.25em;
 }
 
 /* Framework - 이미지 */

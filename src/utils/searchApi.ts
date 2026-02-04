@@ -125,6 +125,90 @@ export async function searchDocumentsOpenAI(
   return response.json();
 }
 
+export interface SearchLearningStreamCallbacks {
+  onDelta: (content: string) => void;
+}
+
+export async function searchLearningOpenAIStream(
+  params: SearchParamsOpenAI,
+  callbacks: SearchLearningStreamCallbacks
+): Promise<SearchResponseOpenAI> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/learning`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: params.query,
+      model: params.model ?? "json",
+      top_k: params.top_k,
+      use_context: params.use_context,
+      temperature: params.temperature,
+      max_tokens: params.max_tokens,
+    }),
+  });
+
+  if (!res.ok) {
+    let errorMessage = `Search failed: ${res.status}`;
+    try {
+      const errorData = await res.json();
+      errorMessage += ` - ${JSON.stringify(errorData)}`;
+    } catch {
+      // ignore
+    }
+    throw new Error(errorMessage);
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) {
+    throw new Error("Stream not supported");
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let finalResult: SearchResponseOpenAI | null = null;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        try {
+          const payload = JSON.parse(line.slice(6)) as {
+            type: string;
+            content?: string;
+            text?: string;
+            sources?: SearchSource[];
+          };
+          if (payload.type === "delta" && payload.content != null) {
+            callbacks.onDelta(payload.content);
+          } else if (payload.type === "done") {
+            finalResult = {
+              query: params.query,
+              summary: payload.text ?? "",
+              sources: payload.sources ?? [],
+              total_sources: payload.sources?.length ?? 0,
+            };
+          }
+        } catch {
+          // JSON 파싱 실패 시 해당 라인 스킵
+        }
+      }
+    }
+  }
+
+  if (!finalResult) {
+    return {
+      query: params.query,
+      summary: "",
+      sources: [],
+      total_sources: 0,
+    };
+  }
+  return finalResult;
+}
+
 export async function searchDocuments(
   params: SearchParams
 ): Promise<SearchResponse> {
