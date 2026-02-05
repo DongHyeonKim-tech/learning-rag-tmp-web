@@ -123,6 +123,7 @@
 
 .tabPanel500 {
   height: 500px;
+  padding: 10px;
 }
 
 .tabPanel544 {
@@ -135,7 +136,6 @@
 }
 
 .loadingText {
-  margin-top: 16px;
   color: #666;
 }
 
@@ -278,4 +278,61 @@
 /* Framework - 이미지 */
 .frameworkImage img {
   max-width: 1100px;
+}
+
+/* Learning - 채팅 말풍선 */
+.chatScroll {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.chatRow {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.chatRowAssistant {
+  justify-content: flex-end;
+}
+
+.chatBubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.chatBubbleUser {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-bottom-left-radius: 4px;
+}
+
+.chatBubbleAssistant {
+  /* background: #f0f4ff; */
+  /* border: 1px solid #d0daf0; */
+  color: #333;
+  border-radius: 10px;
+  padding: 15px 12px;
+}
+
+.chatBubbleAssistant .markdown {
+  font-size: 14px;
+}
+
+.chatTurnBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chatLoadingBubble {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }

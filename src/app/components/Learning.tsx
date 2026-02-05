@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useCallback,
-  useRef,
-  useEffect,
-} from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   searchDocuments,
   searchDocumentsKure,
@@ -28,7 +21,6 @@ import {
   Button,
   Space,
 } from "antd";
-import { SearchOutlined, OpenAIOutlined } from "@ant-design/icons";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -37,41 +29,7 @@ import SearchForm from "@/app/components/SearchForm";
 
 const { Text } = Typography;
 
-function renderBold(text: string) {
-  const parts = text.split(/\*\*(.*?)\*\*/g);
-  return parts.map((part, i) =>
-    i % 2 === 1 ? <b key={i}>{part}</b> : <span key={i}>{part}</span>
-  );
-}
-
-const SUMMARY_HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
-
-function renderSummaryContent(text: string) {
-  const lines = text.split("\n");
-  return lines.map((line, i) => {
-    const headingMatch = line.match(/^(#+)\s*(.*)$/);
-    if (headingMatch) {
-      const level = Math.min(6, headingMatch[1].length) - 1;
-      const Tag = SUMMARY_HEADING_TAGS[level];
-      return (
-        <Tag
-          key={i}
-          className={styles.summaryHeading}
-        >
-          {renderBold(headingMatch[2])}
-        </Tag>
-      );
-    }
-    return (
-      <div
-        key={i}
-        className={styles.summaryLine}
-      >
-        {renderBold(line)}
-      </div>
-    );
-  });
-}
+type Turn = { query: string; summary: string; results: SearchResult[] };
 
 const Learning = () => {
   const [searchInput, setSearchInput] = useState("HDA BIM 어워드");
@@ -79,13 +37,16 @@ const Learning = () => {
   const [selectedModel, setSelectedModel] = useState<
     "bge-m3" | "kure" | "full" | "json"
   >("bge-m3");
-
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
+  const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
   const [activeTab, setActiveTab] = useState("openai");
-  const [openAISummary, setOpenAISummary] = useState<string>("");
   const [stream, setStream] = useState<boolean>(true);
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    console.log("messageTurns: ", messageTurns);
+  }, [messageTurns]);
 
   const SCROLL_BOTTOM_THRESHOLD = 24;
 
@@ -106,13 +67,10 @@ const Learning = () => {
     const el = scrollContainerRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight - el.clientHeight;
-  }, [openAISummary, searchLoading, stream, stickToBottom]);
+  }, [currentTurn?.summary, searchLoading, stream, stickToBottom]);
 
   const onSearch = useCallback(async () => {
     if (!searchInput.trim()) return;
-    setSearchLoading(true);
-    setSearchResults([]);
-    setOpenAISummary("");
     try {
       const searchParams: SearchParams = {
         messages: [{ role: "user", content: searchInput }],
@@ -122,7 +80,9 @@ const Learning = () => {
       const searchFunction =
         selectedModel === "kure" ? searchDocumentsKure : searchDocuments;
       const response = await searchFunction(searchParams);
-      setSearchResults(response.results);
+      setCurrentTurn((prev) =>
+        prev ? { ...prev, results: response.results } : null
+      );
     } catch (err) {
       const errorMessage = (err as Error).message;
       console.error("Search error:", errorMessage);
@@ -130,13 +90,10 @@ const Learning = () => {
     } finally {
       setSearchLoading(false);
     }
-  }, [searchInput, selectedModel, setSearchLoading]);
+  }, [searchInput, selectedModel]);
 
   const onSearchOpenAI = useCallback(async () => {
     if (!searchInput.trim()) return;
-    setSearchLoading(true);
-    setSearchResults([]);
-    setOpenAISummary("");
     setStickToBottom(true);
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
@@ -150,9 +107,21 @@ const Learning = () => {
       if (stream) {
         const response = await searchLearningOpenAIStream(searchParams, {
           onDelta(content) {
-            setOpenAISummary((prev) => prev + content);
+            setCurrentTurn((prev) =>
+              prev ? { ...prev, summary: prev.summary + content } : null
+            );
           },
         });
+        setSearchInput("");
+        if (response.noContent) {
+          setCurrentTurn((prev) =>
+            prev
+              ? { ...prev, summary: "관련 정보가 없습니다.", results: [] }
+              : null
+          );
+          setSearchLoading(false);
+          return;
+        }
         const convertedResults: SearchResult[] = response.sources.map(
           (source) => ({
             doc_id: source.doc_id,
@@ -162,9 +131,12 @@ const Learning = () => {
             video_label: source.video_label,
           })
         );
-        setSearchResults(convertedResults);
+        setCurrentTurn((prev) =>
+          prev ? { ...prev, results: convertedResults } : null
+        );
       } else {
         const response = await searchDocumentsOpenAI(searchParams);
+        setSearchInput("");
         const convertedResults: SearchResult[] = response.sources.map(
           (source) => ({
             doc_id: source.doc_id,
@@ -174,8 +146,15 @@ const Learning = () => {
             video_label: source.video_label,
           })
         );
-        setSearchResults(convertedResults);
-        setOpenAISummary(response.summary);
+        setCurrentTurn((prev) =>
+          prev
+            ? {
+                ...prev,
+                summary: response.summary,
+                results: convertedResults,
+              }
+            : null
+        );
       }
     } catch (err) {
       const errorMessage = (err as Error).message;
@@ -187,7 +166,7 @@ const Learning = () => {
     } finally {
       setSearchLoading(false);
     }
-  }, [searchInput, selectedModel, setSearchLoading, stream]);
+  }, [searchInput, selectedModel, stream]);
 
   const search = useCallback(() => {
     if (activeTab === "openai") onSearchOpenAI();
@@ -197,25 +176,18 @@ const Learning = () => {
   const handleSearchSubmit = useCallback(
     (e?: React.FormEvent) => {
       e?.preventDefault();
+      if (!searchInput.trim()) return;
+      if (currentTurn?.query && !searchLoading) {
+        setMessageTurns((prev) => [...prev, currentTurn]);
+      }
+      setCurrentTurn({ query: searchInput, summary: "", results: [] });
+      setSearchLoading(true);
       search();
     },
-    [search]
+    [searchInput, currentTurn, searchLoading, search]
   );
 
   const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;
-  const loadingBlock = (
-    <div className={styles.loadingWrap}>
-      <Spin size="large" />
-      <div className={styles.loadingText}>검색 중입니다...</div>
-    </div>
-  );
-  const emptyBlock = (msg: string) => (
-    <div className={styles.emptyState}>{msg}</div>
-  );
-  const resultCountText = (count: number) => (
-    <div className={styles.resultCount}>총 {count}개의 결과를 찾았습니다</div>
-  );
-  const resultGridClass = styles.resultGrid;
   const resultCard = (result: SearchResult, index: number) => (
     <Card
       key={result.doc_id || index}
@@ -249,6 +221,38 @@ const Learning = () => {
     </Card>
   );
 
+  const renderAssistantContent = (turn: Turn) => (
+    <div className={styles.chatTurnBlock}>
+      {turn.summary && (
+        <div className={styles.chatBubbleAssistant}>
+          <div className="markdown">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+            >
+              {turn.summary}
+            </ReactMarkdown>
+          </div>
+        </div>
+      )}
+      {turn.results.length > 0 && (
+        <>
+          <div className={styles.resultCount}>
+            총 {turn.results.length}개의 결과를 찾았습니다
+          </div>
+          <div className={styles.resultGrid}>
+            {turn.results.map((result, index) => resultCard(result, index))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const hasContent =
+    messageTurns.length > 0 ||
+    currentTurn?.query ||
+    (currentTurn && (currentTurn.summary || currentTurn.results.length > 0));
+
   return (
     <>
       <Card className={styles.contentCard}>
@@ -265,39 +269,58 @@ const Learning = () => {
               size="small"
             />
           </div>
-          {searchLoading && !openAISummary ? (
-            loadingBlock
-          ) : searchResults.length > 0 || openAISummary ? (
-            <div>
-              {openAISummary && (
-                <div className={styles.summaryBox}>
-                  <Text
-                    strong
-                    className={styles.summaryTitle}
+          <div className={styles.chatScroll}>
+            {messageTurns.flatMap((turn, i) => [
+              <div
+                key={`u-${i}`}
+                className={styles.chatRow}
+              >
+                <div
+                  className={`${styles.chatBubble} ${styles.chatBubbleUser}`}
+                >
+                  {turn.query}
+                </div>
+              </div>,
+              <div
+                key={`a-${i}`}
+                className={`${styles.chatRow} ${styles.chatRowAssistant}`}
+              >
+                {renderAssistantContent(turn)}
+              </div>,
+            ])}
+            {currentTurn?.query && (
+              <>
+                <div className={styles.chatRow}>
+                  <div
+                    className={`${styles.chatBubble} ${styles.chatBubbleUser}`}
                   >
-                    AI 요약
-                  </Text>
-                  <div className={"markdown"}>
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeHighlight]}
-                    >
-                      {openAISummary}
-                    </ReactMarkdown>
+                    {currentTurn.query}
                   </div>
                 </div>
-              )}
-              {searchResults.length > 0 &&
-                resultCountText(searchResults.length)}
-              <div className={resultGridClass}>
-                {searchResults.map((result, index) =>
-                  resultCard(result, index)
-                )}
+                <div className={`${styles.chatRow} ${styles.chatRowAssistant}`}>
+                  {searchLoading &&
+                  !currentTurn.summary &&
+                  !currentTurn.results.length ? (
+                    <div
+                      className={`${styles.chatBubble} ${styles.chatBubbleAssistant} ${styles.chatLoadingBubble}`}
+                    >
+                      <Spin size="small" />
+                      <span className={styles.loadingText}>
+                        검색 중입니다...
+                      </span>
+                    </div>
+                  ) : (
+                    renderAssistantContent(currentTurn)
+                  )}
+                </div>
+              </>
+            )}
+            {!hasContent && (
+              <div className={styles.emptyState}>
+                OpenAI 검색어를 입력하고 검색해보세요
               </div>
-            </div>
-          ) : (
-            emptyBlock("OpenAI 검색어를 입력하고 검색해보세요")
-          )}
+            )}
+          </div>
         </div>
         <Flex
           gap={12}
