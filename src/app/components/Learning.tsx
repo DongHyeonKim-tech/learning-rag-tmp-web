@@ -18,13 +18,22 @@ import {
   searchLearningOpenAIStream,
 } from "@/utils/searchApi";
 import "@ant-design/v5-patch-for-react-19";
-import { notification, Card, Typography, Spin, Switch } from "antd";
+import {
+  notification,
+  Card,
+  Typography,
+  Spin,
+  Switch,
+  Flex,
+  Button,
+  Space,
+} from "antd";
 import { SearchOutlined, OpenAIOutlined } from "@ant-design/icons";
-import type { LearningRef } from "@/app/page";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import SearchForm from "@/app/components/SearchForm";
 
 const { Text } = Typography;
 
@@ -64,18 +73,13 @@ function renderSummaryContent(text: string) {
   });
 }
 
-const Learning = forwardRef<
-  LearningRef,
-  {
-    input: string;
-    searchLoading: boolean;
-    setSearchLoading: (v: boolean) => void;
-    selectedModel: "bge-m3" | "kure" | "full" | "json";
-  }
->(function Learning(
-  { input, searchLoading, setSearchLoading, selectedModel },
-  ref
-) {
+const Learning = () => {
+  const [searchInput, setSearchInput] = useState("HDA BIM 어워드");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<
+    "bge-m3" | "kure" | "full" | "json"
+  >("bge-m3");
+
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [activeTab, setActiveTab] = useState("openai");
   const [openAISummary, setOpenAISummary] = useState<string>("");
@@ -105,13 +109,13 @@ const Learning = forwardRef<
   }, [openAISummary, searchLoading, stream, stickToBottom]);
 
   const onSearch = useCallback(async () => {
-    if (!input.trim()) return;
+    if (!searchInput.trim()) return;
     setSearchLoading(true);
     setSearchResults([]);
     setOpenAISummary("");
     try {
       const searchParams: SearchParams = {
-        messages: [{ role: "user", content: input }],
+        messages: [{ role: "user", content: searchInput }],
         top_k: 5,
         use_context: 5,
       };
@@ -126,16 +130,16 @@ const Learning = forwardRef<
     } finally {
       setSearchLoading(false);
     }
-  }, [input, selectedModel, setSearchLoading]);
+  }, [searchInput, selectedModel, setSearchLoading]);
 
   const onSearchOpenAI = useCallback(async () => {
-    if (!input.trim()) return;
+    if (!searchInput.trim()) return;
     setSearchLoading(true);
     setSearchResults([]);
     setOpenAISummary("");
     setStickToBottom(true);
     const searchParams: SearchParamsOpenAI = {
-      query: input,
+      query: searchInput,
       top_k: 10,
       use_context: 5,
       temperature: 0.5,
@@ -183,17 +187,19 @@ const Learning = forwardRef<
     } finally {
       setSearchLoading(false);
     }
-  }, [input, selectedModel, setSearchLoading, stream]);
+  }, [searchInput, selectedModel, setSearchLoading, stream]);
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      search: () => {
-        if (activeTab === "openai") onSearchOpenAI();
-        else onSearch();
-      },
-    }),
-    [activeTab, onSearch, onSearchOpenAI]
+  const search = useCallback(() => {
+    if (activeTab === "openai") onSearchOpenAI();
+    else onSearch();
+  }, [activeTab, onSearch, onSearchOpenAI]);
+
+  const handleSearchSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault();
+      search();
+    },
+    [search]
   );
 
   const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;
@@ -293,9 +299,56 @@ const Learning = forwardRef<
             emptyBlock("OpenAI 검색어를 입력하고 검색해보세요")
           )}
         </div>
+        <Flex
+          gap={12}
+          align="center"
+          className={styles.modelSection}
+          justify="center"
+          vertical
+        >
+          <Flex
+            gap={12}
+            align="center"
+            justify="center"
+          >
+            <Text className={styles.modelLabel}>검색 모델 선택</Text>
+            <Space
+              size="small"
+              wrap
+              className={styles.modelButtonWrap}
+            >
+              {(
+                [
+                  ["bge-m3", "BAAI/bge-m3"],
+                  ["kure", "nlpai-lab/KURE-v1"],
+                  ["full", "BAAI/bge-m3 Full Docs"],
+                  ["json", "JSON 원본 추가 검색"],
+                ] as const
+              ).map(([key, label]) => (
+                <Button
+                  key={key}
+                  type={selectedModel === key ? "primary" : "default"}
+                  size="middle"
+                  onClick={() => setSelectedModel(key)}
+                  className={`${styles.modelButton} ${selectedModel === key ? styles.modelButtonActive : ""}`}
+                >
+                  {label}
+                </Button>
+              ))}
+            </Space>
+          </Flex>
+          <div style={{ width: "100%" }}>
+            <SearchForm
+              value={searchInput}
+              onChange={setSearchInput}
+              onSubmit={handleSearchSubmit}
+              loading={searchLoading}
+            />
+          </div>
+        </Flex>
       </Card>
     </>
   );
-});
+};
 
 export default Learning;
