@@ -6,11 +6,11 @@
 }
 
 .pageContainer {
-  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex: 5;
 }
 
 .headerCard {
@@ -122,12 +122,12 @@
 }
 
 .tabPanel500 {
-  height: 500px;
+  height: 78vh;
   padding: 10px;
 }
 
 .tabPanel544 {
-  height: 544px;
+  height: 82.78vh;
 }
 
 .loadingWrap {

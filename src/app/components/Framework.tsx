@@ -13,8 +13,13 @@ import SearchForm from "@/app/components/SearchForm";
 
 const { Text } = Typography;
 
-function Framework() {
-  const [searchInput, setSearchInput] = useState("프로젝트 파일 생성");
+function Framework({
+  searchInput,
+  setSearchInput,
+}: {
+  searchInput: string;
+  setSearchInput: (input: string) => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResponseFramework>({
     prompt: "",

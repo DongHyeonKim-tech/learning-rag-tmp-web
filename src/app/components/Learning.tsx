@@ -33,8 +33,15 @@ const { Text } = Typography;
 
 type Turn = { query: string; summary: string; results: SearchResult[] };
 
-const Learning = () => {
-  const [searchInput, setSearchInput] = useState("HDA BIM 어워드");
+const Learning = ({
+  searchInput,
+  setSearchInput,
+  createTitleHandler,
+}: {
+  searchInput: string;
+  setSearchInput: (input: string) => void;
+  createTitleHandler: () => void;
+}) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<
     "kure" | "baai" | "full" | "json"
@@ -114,6 +121,7 @@ const Learning = () => {
         },
       },
     };
+    createTitleHandler();
     try {
       if (stream) {
         const response = await searchLearningOpenAIStream(searchParams, {
@@ -417,7 +425,14 @@ const Learning = () => {
                     key={key}
                     type={selectedCategory === key ? "primary" : "default"}
                     size="middle"
-                    onClick={() => setSelectedCategory(key)}
+                    onClick={() => {
+                      setSelectedCategory(key);
+                      setSearchInput(
+                        key === "Learning"
+                          ? "캐드 import 하는 방법 알려줘"
+                          : "HDA BIM 어워드에 대해 알려줘"
+                      );
+                    }}
                     className={`${styles.modelButton} ${selectedCategory === key ? styles.modelButtonActive : ""}`}
                   >
                     {label}
