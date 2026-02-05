@@ -48,6 +48,11 @@ export interface SearchParamsOpenAI {
   temperature?: number;
   max_tokens?: number;
   model?: string;
+  filters?: {
+    categories?: {
+      top?: string;
+    };
+  };
 }
 
 export interface SearchParamsFramework {
@@ -145,6 +150,7 @@ export async function searchLearningOpenAIStream(
       use_context: params.use_context,
       temperature: params.temperature,
       max_tokens: params.max_tokens,
+      filters: params.filters,
     }),
   });
 

@@ -20,6 +20,8 @@ import {
   Flex,
   Button,
   Space,
+  Dropdown,
+  MenuProps,
 } from "antd";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
@@ -35,8 +37,13 @@ const Learning = () => {
   const [searchInput, setSearchInput] = useState("HDA BIM 어워드");
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<
-    "bge-m3" | "kure" | "full" | "json"
-  >("bge-m3");
+    "kure" | "baai" | "full" | "json"
+  >("kure");
+  const [modelLabel, setModelLabel] = useState<string>("nlpai-lab/KURE-v1");
+  const [selectedCategory, setSelectedCategory] = useState<
+    "Learning" | "MeetUp / Seminar"
+  >("Learning");
+
   const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
   const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
   const [activeTab, setActiveTab] = useState("openai");
@@ -100,8 +107,12 @@ const Learning = () => {
       top_k: 10,
       use_context: 5,
       temperature: 0.5,
-      max_tokens: 1024,
       model: selectedModel,
+      filters: {
+        categories: {
+          top: selectedCategory,
+        },
+      },
     };
     try {
       if (stream) {
@@ -248,6 +259,41 @@ const Learning = () => {
     </div>
   );
 
+  const items: MenuProps["items"] = [
+    {
+      key: "kure",
+      label: "nlpai-lab/KURE-v1",
+      onClick: () => {
+        setSelectedModel("kure");
+        setModelLabel("nlpai-lab/KURE-v1");
+      },
+    },
+    {
+      key: "baai",
+      label: "BAAI/bge-m3",
+      onClick: () => {
+        setSelectedModel("baai");
+        setModelLabel("BAAI/bge-m3");
+      },
+    },
+    {
+      key: "full",
+      label: "BAAI/bge-m3 Full Docs",
+      onClick: () => {
+        setSelectedModel("full");
+        setModelLabel("BAAI/bge-m3 Full Docs");
+      },
+    },
+    {
+      key: "json",
+      label: "JSON 원본 추가 검색",
+      onClick: () => {
+        setSelectedModel("json");
+        setModelLabel("JSON 원본 추가 검색");
+      },
+    },
+  ];
+
   const hasContent =
     messageTurns.length > 0 ||
     currentTurn?.query ||
@@ -297,10 +343,12 @@ const Learning = () => {
                     {currentTurn.query}
                   </div>
                 </div>
-                <div className={`${styles.chatRow} ${styles.chatRowAssistant}`}>
-                  {searchLoading &&
-                  !currentTurn.summary &&
-                  !currentTurn.results.length ? (
+                {searchLoading &&
+                !currentTurn.summary &&
+                !currentTurn.results.length ? (
+                  <div
+                    className={`${styles.chatRow} ${styles.chatRowAssistantLoading}`}
+                  >
                     <div
                       className={`${styles.chatBubble} ${styles.chatBubbleAssistant} ${styles.chatLoadingBubble}`}
                     >
@@ -309,10 +357,14 @@ const Learning = () => {
                         검색 중입니다...
                       </span>
                     </div>
-                  ) : (
-                    renderAssistantContent(currentTurn)
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div
+                    className={`${styles.chatRow} ${styles.chatRowAssistant}`}
+                  >
+                    {renderAssistantContent(currentTurn)}
+                  </div>
+                )}
               </>
             )}
             {!hasContent && (
@@ -322,6 +374,7 @@ const Learning = () => {
             )}
           </div>
         </div>
+
         <Flex
           gap={12}
           align="center"
@@ -330,36 +383,50 @@ const Learning = () => {
           vertical
         >
           <Flex
-            gap={12}
+            gap={6}
             align="center"
-            justify="center"
+            justify="space-around"
+            style={{ width: "100%" }}
           >
-            <Text className={styles.modelLabel}>검색 모델 선택</Text>
-            <Space
-              size="small"
-              wrap
-              className={styles.modelButtonWrap}
+            <Dropdown
+              menu={{
+                items: items,
+              }}
+              placement="topLeft"
             >
-              {(
-                [
-                  ["bge-m3", "BAAI/bge-m3"],
-                  ["kure", "nlpai-lab/KURE-v1"],
-                  ["full", "BAAI/bge-m3 Full Docs"],
-                  ["json", "JSON 원본 추가 검색"],
-                ] as const
-              ).map(([key, label]) => (
-                <Button
-                  key={key}
-                  type={selectedModel === key ? "primary" : "default"}
-                  size="middle"
-                  onClick={() => setSelectedModel(key)}
-                  className={`${styles.modelButton} ${selectedModel === key ? styles.modelButtonActive : ""}`}
-                >
-                  {label}
-                </Button>
-              ))}
-            </Space>
+              <Text>모델: {modelLabel}</Text>
+            </Dropdown>
+            <Flex
+              gap={12}
+              align="center"
+              justify="center"
+            >
+              <Text className={styles.modelLabel}>카테고리</Text>
+              <Space
+                size="small"
+                wrap
+                className={styles.modelButtonWrap}
+              >
+                {(
+                  [
+                    ["Learning", "학습"],
+                    ["MeetUp / Seminar", "MeetUp"],
+                  ] as const
+                ).map(([key, label]) => (
+                  <Button
+                    key={key}
+                    type={selectedCategory === key ? "primary" : "default"}
+                    size="middle"
+                    onClick={() => setSelectedCategory(key)}
+                    className={`${styles.modelButton} ${selectedCategory === key ? styles.modelButtonActive : ""}`}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </Space>
+            </Flex>
           </Flex>
+
           <div style={{ width: "100%" }}>
             <SearchForm
               value={searchInput}
