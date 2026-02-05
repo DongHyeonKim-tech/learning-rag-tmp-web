@@ -143,6 +143,10 @@
   color: #999;
   text-align: center;
   padding: 40px;
+  height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 공통 - 결과 카드/텍스트 */

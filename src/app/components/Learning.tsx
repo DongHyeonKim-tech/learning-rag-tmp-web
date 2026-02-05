@@ -377,7 +377,7 @@ const Learning = ({
             )}
             {!hasContent && (
               <div className={styles.emptyState}>
-                OpenAI 검색어를 입력하고 검색해보세요
+                BIM에 관련된 질문을 입력하고 검색해보세요
               </div>
             )}
           </div>
