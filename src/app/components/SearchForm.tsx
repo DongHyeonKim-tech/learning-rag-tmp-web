@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Space } from "antd";
+import { Button, Input, Space, Spin } from "antd";
 import { SearchOutlined, StopOutlined } from "@ant-design/icons";
 import styles from "@/styles/search.module.css";
 
@@ -44,11 +44,9 @@ export default function SearchForm({
           size="large"
           htmlType="submit"
           disabled={loading || !value.trim()}
-          icon={<SearchOutlined />}
+          icon={loading ? <Spin size="small" /> : <SearchOutlined />}
           className={styles.searchSubmitBtn}
-        >
-          {loading ? "검색 중..." : "검색하기"}
-        </Button>
+        ></Button>
         {showStopButton && onStop && (
           <Button
             size="large"
