@@ -25,6 +25,8 @@ export interface SearchResponseOpenAI {
   summary: string;
   sources: SearchSource[];
   total_sources: number;
+  /** 204 No Content일 때 true */
+  noContent?: boolean;
 }
 
 export interface SearchParams {
@@ -155,6 +157,16 @@ export async function searchLearningOpenAIStream(
       // ignore
     }
     throw new Error(errorMessage);
+  }
+
+  if (res.status === 204) {
+    return {
+      query: params.query,
+      summary: "",
+      sources: [],
+      total_sources: 0,
+      noContent: true,
+    };
   }
 
   const reader = res.body?.getReader();
