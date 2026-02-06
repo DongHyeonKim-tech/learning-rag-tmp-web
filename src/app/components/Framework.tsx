@@ -5,9 +5,18 @@ import {
   SearchResponseFramework,
   searchFrameworkDocuments,
   SearchParamsFramework,
+  syncFrameworkDocuments,
 } from "@/utils/searchApi";
 import "@ant-design/v5-patch-for-react-19";
-import { notification, Card, Typography, Spin, Flex, Image } from "antd";
+import {
+  notification,
+  Card,
+  Typography,
+  Spin,
+  Flex,
+  Image,
+  Button,
+} from "antd";
 import styles from "@/styles/search.module.css";
 import SearchForm from "@/app/components/SearchForm";
 
@@ -81,6 +90,15 @@ function Framework({
     [onSearch]
   );
 
+  const handleSync = useCallback(async () => {
+    const status = await syncFrameworkDocuments();
+    if (status === 200) {
+      notification.success({ message: "문서 동기화 완료" });
+    } else {
+      notification.error({ message: "문서 동기화 실패" });
+    }
+  }, []);
+
   return (
     <>
       <Card className={`${styles.contentCard} ${styles.contentCardMinHeight}`}>
@@ -130,6 +148,12 @@ function Framework({
           justify="center"
           vertical
         >
+          <Button
+            type="primary"
+            onClick={handleSync}
+          >
+            문서 동기화
+          </Button>
           <div style={{ width: "100%" }}>
             <SearchForm
               value={searchInput}

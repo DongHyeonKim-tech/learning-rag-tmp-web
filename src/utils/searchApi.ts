@@ -276,3 +276,18 @@ export async function createChatTitle(input: string): Promise<string> {
   const data = await response.json(); // { title: "요약된 제목" }
   return data.title;
 }
+
+export async function syncFrameworkDocuments() {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_FRAMEWORK_API_BASE}/sync/run`,
+    {
+      method: "POST",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Search failed: ${response.status}`);
+  }
+
+  return response.status;
+}
