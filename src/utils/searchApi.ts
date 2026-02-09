@@ -140,19 +140,22 @@ export async function searchLearningOpenAIStream(
   params: SearchParamsOpenAI,
   callbacks: SearchLearningStreamCallbacks
 ): Promise<SearchResponseOpenAI> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/learning`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query: params.query,
-      model: params.model ?? "json",
-      top_k: params.top_k,
-      use_context: params.use_context,
-      temperature: params.temperature,
-      max_tokens: params.max_tokens,
-      filters: params.filters,
-    }),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/learning/stream`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: params.query,
+        model: params.model ?? "json",
+        top_k: params.top_k,
+        use_context: params.use_context,
+        temperature: params.temperature,
+        max_tokens: params.max_tokens,
+        filters: params.filters,
+      }),
+    }
+  );
 
   if (!res.ok) {
     let errorMessage = `Search failed: ${res.status}`;
