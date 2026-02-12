@@ -38,6 +38,7 @@ export default function SearchForm({
           onChange={(e) => onChange(e.target.value)}
           className={styles.searchInput}
           onPressEnter={() => onSubmit()}
+          disabled={loading}
         />
         <Button
           type="primary"
