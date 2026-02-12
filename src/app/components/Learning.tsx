@@ -112,7 +112,7 @@ const Learning = ({
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
       top_k: 10,
-      use_context: 5,
+      use_context: 3,
       temperature: 0.5,
       model: selectedModel,
       filters: {
