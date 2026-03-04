@@ -4,12 +4,14 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import {
   searchDocuments,
   searchDocumentsKure,
-  SearchResult,
-  SearchParams,
   searchDocumentsOpenAI,
-  SearchParamsOpenAI,
   searchLearningOpenAIStream,
 } from "@/utils/searchApi";
+import {
+  SearchResult,
+  SearchParams,
+  SearchParamsOpenAI,
+} from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
 import {
   notification,
@@ -57,10 +59,6 @@ const Learning = ({
   const [stream, setStream] = useState<boolean>(true);
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    console.log("messageTurns: ", messageTurns);
-  }, [messageTurns]);
 
   const SCROLL_BOTTOM_THRESHOLD = 24;
 
