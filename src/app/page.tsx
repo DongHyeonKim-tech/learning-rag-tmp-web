@@ -75,6 +75,14 @@ export default function Home() {
     fetchChatRooms();
   }, []);
 
+  const handleLearningStreamMeta = useCallback(
+    (nextChatId: number | null, nextMessageId: number | null) => {
+      setChatId(nextChatId);
+      setMessageId(nextMessageId);
+    },
+    []
+  );
+
   return (
     <div className={styles.pageRoot}>
       <Flex gap={24}>
@@ -93,8 +101,7 @@ export default function Home() {
               searchInput={searchInput}
               setSearchInput={setSearchInput}
               chatId={chatId}
-              setChatId={setChatId}
-              setMessageId={setMessageId}
+              onStreamMetaUpdate={handleLearningStreamMeta}
               messageTurns={messageTurns}
               setMessageTurns={setMessageTurns}
               empNo={"20230808"}

@@ -3,13 +3,10 @@ import {
   SearchResponse,
   SearchParamsOpenAI,
   SearchResponseOpenAI,
-  SearchSource,
   SearchParamsFramework,
   SearchResponseFramework,
   SearchLearningStreamCallbacks,
   GetMessagesParams,
-  CreateChatRoomResponse,
-  InsertUserMessageResponse,
   StreamEvent,
   StreamMetaData,
   StreamDoneData,
@@ -113,7 +110,6 @@ export async function searchLearningOpenAIStream(
 
   const stream = res.body;
   if (!stream) throw new Error("Stream not supported");
-  console.log("stream: ", stream);
 
   // done 이벤트 받을 때까지 기다렸다가 결과를 반환하기 위한 Promise
   return await new Promise<SearchResponseOpenAI>((resolve, reject) => {
@@ -245,17 +241,6 @@ export async function searchFrameworkDocuments(
   return response.json();
 }
 
-export async function createChatTitle(input: string): Promise<string> {
-  // 클라이언트에서 호출
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ input: input }),
-  });
-  const data = await response.json(); // { title: "요약된 제목" }
-  return data.title;
-}
-
 export async function syncFrameworkDocuments() {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_FRAMEWORK_API_BASE}/sync/run`,
@@ -270,110 +255,9 @@ export async function syncFrameworkDocuments() {
   return response.status;
 }
 
-// ----- 채팅방/메시지 API (MSSQL Stored Procedure 백엔드) -----
-//
-// [상태 업데이트 예시]
-// 메시지 모델: { id, message_id?, role: "user"|"assistant", content: string, isStreaming?: boolean }
-// 1) 신규 채팅: chatId 없음 -> createChatRoomIfNeeded(emp_no, prompt) -> chatId 저장, 채팅방 리스트에 반영
-// 2) 유저 메시지: optimistic으로 messages에 { id: tempId, role: "user", content } 추가
-//    -> insertUserMessage(chatId, prompt) 후 응답 message_id로 해당 메시지 message_id 갱신
-// 3) 스트리밍: startChatStream(..., signal) 호출 전 기존 AbortController.abort(), 새 controller 생성
-//    - onEvent({ type: "meta", data }) -> assistant 메시지 placeholder 추가 (message_id: data.assistant_message_id, isStreaming: true)
-//    - onEvent({ type: "delta", data }) -> 해당 assistant 메시지 content에 data.text append (또는 50~150ms 버퍼 후 반영)
-//    - onEvent({ type: "done" }) -> isStreaming: false, 로딩 제거
-//    - onEvent({ type: "error", data }) -> 에러 표시 후 스트림 종료, cleanup
-
-const CHAT_API_BASE = process.env.NEXT_PUBLIC_API_BASE;
-
-function getChatBaseUrl(): string {
-  if (!CHAT_API_BASE) {
-    throw new Error("NEXT_PUBLIC_API_BASE is not set");
-  }
-  return CHAT_API_BASE.replace(/\/$/, "");
-}
-
-/**
- * 신규 채팅 시 채팅방을 생성하고 chatId를 반환한다.
- * title은 prompt를 잘라 임시 제목으로 사용한다.
- */
-export async function createChatRoomIfNeeded(
-  emp_no: string,
-  prompt: string
-): Promise<number> {
-  const base = getChatBaseUrl();
-  const title = prompt.trim().slice(0, 100) || "새 대화";
-  // const response = await fetch(`${base}/chat/rooms`, {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({ emp_no, title }),
-  // });
-  const response = await client.post(
-    `/chat/rooms`,
-    { emp_no: emp_no, title: title },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  console.log("response: ", response);
-
-  if (response.status !== 200) {
-    const text = response.statusText;
-    let errMessage = `채팅방 생성 실패: ${response.status}`;
-    try {
-      const json = JSON.parse(text) as { message?: string; detail?: string };
-      errMessage += ` - ${json.message ?? json.detail ?? text}`;
-    } catch {
-      if (text) errMessage += ` - ${text}`;
-    }
-    throw new Error(errMessage);
-  }
-
-  const data = (await camelcaseKeys(response.data)) as CreateChatRoomResponse;
-  if (typeof data.chatId !== "number") {
-    throw new Error("Invalid response: chatId is required");
-  }
-  return data.chatId;
-}
-
-/**
- * 유저 메시지를 DB에 저장하고 message_id를 반환한다.
- */
-export async function insertUserMessage(
-  chatId: number,
-  content: string
-): Promise<number> {
-  const base = getChatBaseUrl();
-  const response = await fetch(`${base}/chat/rooms/${chatId}/messages/user`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: content.trim() }),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    let errMessage = `유저 메시지 저장 실패: ${response.status}`;
-    try {
-      const json = JSON.parse(text) as { message?: string; detail?: string };
-      errMessage += ` - ${json.message ?? json.detail ?? text}`;
-    } catch {
-      if (text) errMessage += ` - ${text}`;
-    }
-    throw new Error(errMessage);
-  }
-
-  const data = (await response.json()) as InsertUserMessageResponse;
-  if (typeof data.message_id !== "number") {
-    throw new Error("Invalid response: message_id is required");
-  }
-  return data.message_id;
-}
-
 /**
  * fetch + ReadableStream으로 SSE를 파싱하고 onEvent로 이벤트를 전달한다.
- * meta 전에 오는 delta는 버퍼에 모았다가 meta 수신 후 합쳐서 한 번에 delta로 전달한다.
+ * options.bufferDeltaUntilMeta가 true면 meta 이전 delta를 버퍼링한다.
  */
 export async function parseSSEStream(
   readableStream: ReadableStream<Uint8Array>,
@@ -500,65 +384,6 @@ const DEFAULT_STREAM_OPTIONS: Required<ChatStreamOptions> = {
   temperature: 0.2,
 };
 
-/**
- * 스트리밍 답변을 요청하고 SSE를 파싱하여 onEvent로 전달한다.
- * AbortController.signal을 넘기면 취소 시 스트림을 중단하고 리소스를 정리한다.
- */
-export async function startChatStream(
-  chatId: number,
-  emp_no: string,
-  prompt: string,
-  options: ChatStreamOptions,
-  onEvent: (event: StreamEvent) => void,
-  signal?: AbortSignal
-): Promise<void> {
-  const base = getChatBaseUrl();
-  const opts = { ...DEFAULT_STREAM_OPTIONS, ...options };
-  const body = {
-    emp_no,
-    prompt: prompt.trim(),
-    top_k: opts.top_k,
-    embedding_model: opts.embedding_model,
-    filters: opts.filters,
-    llm_model: opts.llm_model,
-    temperature: opts.temperature,
-  };
-
-  const response = await fetch(`${base}/chat/rooms/${chatId}/stream`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    signal,
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    let errMessage = `스트리밍 요청 실패: ${response.status}`;
-    try {
-      const json = JSON.parse(text) as { message?: string; detail?: string };
-      errMessage += ` - ${json.message ?? json.detail ?? text}`;
-    } catch {
-      if (text) errMessage += ` - ${text}`;
-    }
-    throw new Error(errMessage);
-  }
-
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.includes("text/event-stream")) {
-    const text = await response.text();
-    throw new Error(
-      `Unexpected content-type: ${contentType}. Body: ${text.slice(0, 200)}`
-    );
-  }
-
-  const stream = response.body;
-  if (!stream) {
-    throw new Error("Response body is not a stream");
-  }
-
-  await parseSSEStream(stream, onEvent);
-}
-
 /** 채팅방 목록 조회 (offset/limit 지원) */
 export async function getChatRooms(
   empNo: string,
@@ -576,7 +401,6 @@ export async function getChatRooms(
   if (response.status !== 200) {
     throw new Error(`채팅방 목록 조회 실패: ${response.status}`);
   }
-  console.log("response: ", response);
   return camelcaseKeys(response.data);
 }
 
@@ -602,6 +426,5 @@ export async function getChatMessages(
   if (response.status !== 200) {
     throw new Error(`채팅방 목록 조회 실패: ${response.status}`);
   }
-  console.log("response: ", response);
   return camelcaseKeys(response.data);
 }

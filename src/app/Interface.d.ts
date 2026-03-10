@@ -106,11 +106,6 @@ export interface CreateChatRoomResponse {
   chatId: number;
 }
 
-/** 유저 메시지 저장 응답 */
-export interface InsertUserMessageResponse {
-  message_id: number;
-}
-
 /** 스트리밍 요청 옵션 */
 export interface ChatStreamOptions {
   top_k?: number;

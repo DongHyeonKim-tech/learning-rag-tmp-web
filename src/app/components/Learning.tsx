@@ -9,14 +9,10 @@ import {
   SetStateAction,
 } from "react";
 import {
-  searchDocuments,
-  searchDocumentsKure,
-  searchDocumentsOpenAI,
   searchLearningOpenAIStream,
 } from "@/utils/searchApi";
 import {
   SearchResult,
-  SearchParams,
   SearchParamsOpenAI,
   Turn,
 } from "@/app/Interface";
@@ -26,12 +22,9 @@ import {
   Card,
   Typography,
   Spin,
-  Switch,
   Flex,
   Button,
   Space,
-  Dropdown,
-  MenuProps,
 } from "antd";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
@@ -46,8 +39,7 @@ const Learning = ({
   searchInput,
   setSearchInput,
   chatId,
-  setChatId,
-  setMessageId,
+  onStreamMetaUpdate,
   messageTurns,
   setMessageTurns,
   empNo,
@@ -57,8 +49,7 @@ const Learning = ({
   searchInput: string;
   setSearchInput: (input: string) => void;
   chatId: number | null;
-  setChatId: (chatId: number | null) => void;
-  setMessageId: (messageId: number | null) => void;
+  onStreamMetaUpdate: (chatId: number | null, messageId: number | null) => void;
   messageTurns: Turn[];
   setMessageTurns: Dispatch<SetStateAction<Turn[]>>;
   empNo: string;
@@ -69,7 +60,6 @@ const Learning = ({
   const [selectedModel, setSelectedModel] = useState<
     "kure" | "baai" | "full" | "json"
   >("kure");
-  const [modelLabel, setModelLabel] = useState<string>("nlpai-lab/KURE-v1");
   const [selectedCategory, setSelectedCategory] = useState<
     "Learning" | "MeetUp / Seminar"
   >("Learning");
@@ -104,7 +94,6 @@ const Learning = ({
 
   const onSearchOpenAI = useCallback(async () => {
     if (!searchInput.trim()) return;
-    // insertUserMessageHandler(searchInput);
     setStickToBottom(true);
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
@@ -142,8 +131,7 @@ const Learning = ({
 
       console.log("response: ", response);
 
-      setChatId(response.chat_id ?? null);
-      setMessageId(response.user_message_id ?? null);
+      onStreamMetaUpdate(response.chat_id ?? null, response.user_message_id ?? null);
 
       setSearchInput("");
 
@@ -151,7 +139,11 @@ const Learning = ({
         setCurrentTurn((prev) =>
           prev
             ? { ...prev, summary: "관련 정보가 없습니다.", results: [] }
-            : { query: searchInput, summary: "관련 정보가 없습니다.", results: [] }
+            : {
+                query: searchInput,
+                summary: "관련 정보가 없습니다.",
+                results: [],
+              }
         );
         return;
       }
@@ -189,21 +181,14 @@ const Learning = ({
     } finally {
       setSearchLoading(false);
     }
-  }, [
-    searchInput,
-    selectedModel,
-    selectedCategory,
-    // createChatRoomHandler,
-    // insertUserMessageHandler,
-    setSearchInput,
-  ]);
+  }, [searchInput, selectedModel, selectedCategory, setSearchInput]);
 
   const handleSearchSubmit = useCallback(
     (e?: React.FormEvent) => {
       e?.preventDefault();
       if (!searchInput.trim()) return;
       if (currentTurn?.query && !searchLoading) {
-        setMessageTurns([...messageTurns, currentTurn]);
+        setMessageTurns((prev) => [...prev, currentTurn]);
       }
       setCurrentTurn({ query: searchInput, summary: "", results: [] });
       setSearchLoading(true);
@@ -262,41 +247,6 @@ const Learning = ({
       )}
     </div>
   );
-
-  const items: MenuProps["items"] = [
-    {
-      key: "kure",
-      label: "nlpai-lab/KURE-v1",
-      onClick: () => {
-        setSelectedModel("kure");
-        setModelLabel("nlpai-lab/KURE-v1");
-      },
-    },
-    {
-      key: "baai",
-      label: "BAAI/bge-m3",
-      onClick: () => {
-        setSelectedModel("baai");
-        setModelLabel("BAAI/bge-m3");
-      },
-    },
-    {
-      key: "full",
-      label: "BAAI/bge-m3 Full Docs",
-      onClick: () => {
-        setSelectedModel("full");
-        setModelLabel("BAAI/bge-m3 Full Docs");
-      },
-    },
-    {
-      key: "json",
-      label: "JSON 원본 추가 검색",
-      onClick: () => {
-        setSelectedModel("json");
-        setModelLabel("JSON 원본 추가 검색");
-      },
-    },
-  ];
 
   const hasContent =
     messageTurns.length > 0 ||
@@ -382,16 +332,8 @@ const Learning = ({
             gap={6}
             align="center"
             justify="space-around"
-            style={{ width: "100%" }}
+            className={styles.fullWidth}
           >
-            {/* <Dropdown
-              menu={{
-                items: items,
-              }}
-              placement="topLeft"
-            >
-              <Text>모델: {modelLabel}</Text>
-            </Dropdown> */}
             <Flex
               gap={12}
               align="center"
@@ -430,7 +372,7 @@ const Learning = ({
             </Flex>
           </Flex>
 
-          <div style={{ width: "100%" }}>
+          <div className={styles.fullWidth}>
             <SearchForm
               value={searchInput}
               onChange={setSearchInput}

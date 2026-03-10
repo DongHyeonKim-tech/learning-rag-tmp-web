@@ -98,6 +98,10 @@
   width: 100%;
 }
 
+.fullWidth {
+  width: 100%;
+}
+
 .searchInput {
   border-radius: 12px 0 0 12px;
   border: 2px solid #e0e0e0;
