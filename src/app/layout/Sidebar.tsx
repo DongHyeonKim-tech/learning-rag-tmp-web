@@ -19,7 +19,6 @@ const Sidebar = ({
   chatRooms: any[];
   fetchChatMessages: (chatId: number) => void;
   createTempChatRoomHandler: () => void;
-  createChatRoomHandler: (prompt: string) => void;
   newChatLoading: boolean;
 }) => {
   console.log("chatRooms: ", chatRooms);

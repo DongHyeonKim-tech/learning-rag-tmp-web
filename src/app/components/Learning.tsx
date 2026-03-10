@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import {
   searchDocuments,
   searchDocumentsKure,
@@ -38,25 +45,25 @@ const { Text } = Typography;
 const Learning = ({
   searchInput,
   setSearchInput,
-  createChatRoomHandler,
-  insertUserMessageHandler,
   chatId,
   setChatId,
   setMessageId,
   messageTurns,
   setMessageTurns,
   empNo,
+  currentTurn,
+  setCurrentTurn,
 }: {
   searchInput: string;
   setSearchInput: (input: string) => void;
-  createChatRoomHandler: () => void;
-  insertUserMessageHandler: (content: string) => void;
   chatId: number | null;
   setChatId: (chatId: number | null) => void;
   setMessageId: (messageId: number | null) => void;
   messageTurns: Turn[];
-  setMessageTurns: (turns: Turn[]) => void;
+  setMessageTurns: Dispatch<SetStateAction<Turn[]>>;
   empNo: string;
+  currentTurn: Turn | null;
+  setCurrentTurn: Dispatch<SetStateAction<Turn | null>>;
 }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<
@@ -67,7 +74,6 @@ const Learning = ({
     "Learning" | "MeetUp / Seminar"
   >("Learning");
 
-  const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -116,26 +122,21 @@ const Learning = ({
       emp_no: empNo,
     };
     try {
-      createChatRoomHandler();
-    } catch {
-      openNotification("error", "채팅방 생성 중 오류가 발생했습니다.");
-    }
-    try {
       setSearchLoading(true);
 
-      setCurrentTurn((prev) => ({
-        query: prev?.query ?? searchInput,
-        summary: "",
-        results: [],
-      }));
+      setCurrentTurn((prev) =>
+        prev
+          ? { ...prev, summary: "", results: [] }
+          : { query: searchInput, summary: "", results: [] }
+      );
 
       const response = await searchLearningOpenAIStream(searchParams, {
         onDelta(content) {
-          setCurrentTurn((prev) => ({
-            query: prev?.query ?? searchInput,
-            summary: (prev?.summary ?? "") + content,
-            results: prev?.results ?? [],
-          }));
+          setCurrentTurn((prev) =>
+            prev
+              ? { ...prev, summary: (prev.summary ?? "") + content }
+              : { query: searchInput, summary: content, results: [] }
+          );
         },
       });
 
@@ -147,11 +148,11 @@ const Learning = ({
       setSearchInput("");
 
       if (response.noContent) {
-        setCurrentTurn((prev) => ({
-          query: prev?.query ?? searchInput,
-          summary: "관련 정보가 없습니다.",
-          results: [],
-        }));
+        setCurrentTurn((prev) =>
+          prev
+            ? { ...prev, summary: "관련 정보가 없습니다.", results: [] }
+            : { query: searchInput, summary: "관련 정보가 없습니다.", results: [] }
+        );
         return;
       }
 
@@ -165,11 +166,19 @@ const Learning = ({
         })
       );
 
-      setCurrentTurn((prev) => ({
-        query: prev?.query ?? searchInput,
-        summary: prev?.summary || response.summary || "",
-        results: convertedResults,
-      }));
+      setCurrentTurn((prev) =>
+        prev
+          ? {
+              ...prev,
+              summary: prev.summary || response.summary || "",
+              results: convertedResults,
+            }
+          : {
+              query: searchInput,
+              summary: response.summary || "",
+              results: convertedResults,
+            }
+      );
     } catch (err) {
       const errorMessage = (err as Error).message;
       console.error("OpenAI Search error:", errorMessage);
@@ -184,7 +193,7 @@ const Learning = ({
     searchInput,
     selectedModel,
     selectedCategory,
-    createChatRoomHandler,
+    // createChatRoomHandler,
     // insertUserMessageHandler,
     setSearchInput,
   ]);

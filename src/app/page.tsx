@@ -6,15 +6,8 @@ import Learning from "@/app/components/Learning";
 import Framework from "@/app/components/Framework";
 import styles from "@/styles/search.module.css";
 import Sidebar from "@/app/layout/Sidebar";
-import {
-  createChatRoomIfNeeded,
-  createChatTitle,
-  getChatMessages,
-  getChatRooms,
-  insertUserMessage,
-} from "@/utils/searchApi";
+import { getChatMessages, getChatRooms } from "@/utils/searchApi";
 import { openNotification } from "@/utils/common";
-import camelcaseKeys from "camelcase-keys";
 import { ChatRoomData, Turn } from "@/app/Interface";
 
 export default function Home() {
@@ -27,6 +20,7 @@ export default function Home() {
   const [messageId, setMessageId] = useState<number | null>(null);
   const [newChatLoading, setNewChatLoading] = useState<boolean>(false);
   const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
+  const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
 
   useEffect(() => {
     console.log("messageTurns: ", messageTurns);
@@ -53,6 +47,7 @@ export default function Home() {
       const res = await getChatMessages(selectedChatId);
       console.log("fetchChatMessages res: ", res);
       setMessageTurns(res);
+      setCurrentTurn(null);
       setChatId(selectedChatId);
       setSearchInput("");
       console.log("messages: ", res);
@@ -76,48 +71,6 @@ export default function Home() {
     }
   };
 
-  const createChatRoomHandler = async () => {
-    if (!chatId) {
-      setNewChatLoading(true);
-      try {
-        const newChatTitle = await createChatTitle(searchInput);
-        const newChatId = await createChatRoomIfNeeded(
-          "99999999",
-          newChatTitle
-        );
-        console.log("create chat room newChatId: ", newChatId);
-        setChatRooms((prev: ChatRoomData[]) => {
-          return prev.map((prevItem: ChatRoomData) => {
-            if (!prevItem.chatId)
-              return { chatId: newChatId, title: newChatTitle };
-            return prevItem;
-          });
-        });
-        setChatId(newChatId);
-
-        const newMessageId = await insertUserMessage(newChatId, searchInput);
-        console.log("create chat message new MessageId: ", newMessageId);
-        setMessageId(newMessageId);
-      } catch {
-        openNotification("error", "새로운 채팅방 생성 중 오류가 발생했습니다.");
-      } finally {
-        setNewChatLoading(false);
-      }
-    }
-  };
-
-  const insertUserMessageHandler = async (content: string) => {
-    if (chatId) {
-      try {
-        const messageId = await insertUserMessage(chatId, content);
-        setMessageId(messageId);
-        console.log("insert user message handler message id: ", messageId);
-      } catch {
-        openNotification("error", "유저 메시지 저장 중 오류가 발생했습니다.");
-      }
-    }
-  };
-
   useEffect(() => {
     fetchChatRooms();
   }, []);
@@ -132,7 +85,6 @@ export default function Home() {
           chatRooms={chatRooms}
           fetchChatMessages={fetchChatMessages}
           createTempChatRoomHandler={createTempChatRoomHandler}
-          createChatRoomHandler={createChatRoomHandler}
           newChatLoading={newChatLoading}
         />
         <div className={styles.pageContainer}>
@@ -140,14 +92,14 @@ export default function Home() {
             <Learning
               searchInput={searchInput}
               setSearchInput={setSearchInput}
-              createChatRoomHandler={createChatRoomHandler}
-              insertUserMessageHandler={insertUserMessageHandler}
               chatId={chatId}
               setChatId={setChatId}
               setMessageId={setMessageId}
               messageTurns={messageTurns}
               setMessageTurns={setMessageTurns}
               empNo={"20230808"}
+              currentTurn={currentTurn}
+              setCurrentTurn={setCurrentTurn}
             />
           ) : (
             <Framework
