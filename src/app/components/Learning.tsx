@@ -11,6 +11,7 @@ import {
   SearchResult,
   SearchParams,
   SearchParamsOpenAI,
+  Turn,
 } from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
 import {
@@ -30,19 +31,32 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import SearchForm from "@/app/components/SearchForm";
+import { openNotification } from "@/utils/common";
 
 const { Text } = Typography;
-
-type Turn = { query: string; summary: string; results: SearchResult[] };
 
 const Learning = ({
   searchInput,
   setSearchInput,
-  createTitleHandler,
+  createChatRoomHandler,
+  insertUserMessageHandler,
+  chatId,
+  setChatId,
+  setMessageId,
+  messageTurns,
+  setMessageTurns,
+  empNo,
 }: {
   searchInput: string;
   setSearchInput: (input: string) => void;
-  createTitleHandler: () => void;
+  createChatRoomHandler: () => void;
+  insertUserMessageHandler: (content: string) => void;
+  chatId: number | null;
+  setChatId: (chatId: number | null) => void;
+  setMessageId: (messageId: number | null) => void;
+  messageTurns: Turn[];
+  setMessageTurns: (turns: Turn[]) => void;
+  empNo: string;
 }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<
@@ -53,12 +67,13 @@ const Learning = ({
     "Learning" | "MeetUp / Seminar"
   >("Learning");
 
-  const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
   const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
-  const [activeTab, setActiveTab] = useState("openai");
-  const [stream, setStream] = useState<boolean>(true);
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    console.log("messageTurns: ", messageTurns);
+  }, [messageTurns]);
 
   const SCROLL_BOTTOM_THRESHOLD = 24;
 
@@ -75,37 +90,15 @@ const Learning = ({
   }, [checkAtBottom]);
 
   useEffect(() => {
-    if (!stickToBottom || !searchLoading || !stream) return;
+    if (!stickToBottom || !searchLoading) return;
     const el = scrollContainerRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight - el.clientHeight;
-  }, [currentTurn?.summary, searchLoading, stream, stickToBottom]);
-
-  const onSearch = useCallback(async () => {
-    if (!searchInput.trim()) return;
-    try {
-      const searchParams: SearchParams = {
-        messages: [{ role: "user", content: searchInput }],
-        top_k: 5,
-        use_context: 5,
-      };
-      const searchFunction =
-        selectedModel === "kure" ? searchDocumentsKure : searchDocuments;
-      const response = await searchFunction(searchParams);
-      setCurrentTurn((prev) =>
-        prev ? { ...prev, results: response.results } : null
-      );
-    } catch (err) {
-      const errorMessage = (err as Error).message;
-      console.error("Search error:", errorMessage);
-      notification.error({ message: "검색 중 오류가 발생했습니다." });
-    } finally {
-      setSearchLoading(false);
-    }
-  }, [searchInput, selectedModel]);
+  }, [currentTurn?.summary, searchLoading, stickToBottom]);
 
   const onSearchOpenAI = useCallback(async () => {
     if (!searchInput.trim()) return;
+    // insertUserMessageHandler(searchInput);
     setStickToBottom(true);
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
@@ -118,61 +111,65 @@ const Learning = ({
           top: selectedCategory,
         },
       },
+      chat_id: chatId,
+      embedding_model: "nlpai-lab/KURE-v1",
+      emp_no: empNo,
     };
-    createTitleHandler();
     try {
-      if (stream) {
-        const response = await searchLearningOpenAIStream(searchParams, {
-          onDelta(content) {
-            setCurrentTurn((prev) =>
-              prev ? { ...prev, summary: prev.summary + content } : null
-            );
-          },
-        });
-        setSearchInput("");
-        if (response.noContent) {
-          setCurrentTurn((prev) =>
-            prev
-              ? { ...prev, summary: "관련 정보가 없습니다.", results: [] }
-              : null
-          );
-          setSearchLoading(false);
-          return;
-        }
-        const convertedResults: SearchResult[] = response.sources.map(
-          (source) => ({
-            doc_id: source.doc_id,
-            title: source.title,
-            snippet: source.snippet,
-            video_url: source.video_url,
-            video_label: source.video_label,
-          })
-        );
-        setCurrentTurn((prev) =>
-          prev ? { ...prev, results: convertedResults } : null
-        );
-      } else {
-        const response = await searchDocumentsOpenAI(searchParams);
-        setSearchInput("");
-        const convertedResults: SearchResult[] = response.sources.map(
-          (source) => ({
-            doc_id: source.doc_id,
-            title: source.title,
-            snippet: source.snippet,
-            video_url: source.video_url,
-            video_label: source.video_label,
-          })
-        );
-        setCurrentTurn((prev) =>
-          prev
-            ? {
-                ...prev,
-                summary: response.summary,
-                results: convertedResults,
-              }
-            : null
-        );
+      createChatRoomHandler();
+    } catch {
+      openNotification("error", "채팅방 생성 중 오류가 발생했습니다.");
+    }
+    try {
+      setSearchLoading(true);
+
+      setCurrentTurn((prev) => ({
+        query: prev?.query ?? searchInput,
+        summary: "",
+        results: [],
+      }));
+
+      const response = await searchLearningOpenAIStream(searchParams, {
+        onDelta(content) {
+          setCurrentTurn((prev) => ({
+            query: prev?.query ?? searchInput,
+            summary: (prev?.summary ?? "") + content,
+            results: prev?.results ?? [],
+          }));
+        },
+      });
+
+      console.log("response: ", response);
+
+      setChatId(response.chat_id ?? null);
+      setMessageId(response.user_message_id ?? null);
+
+      setSearchInput("");
+
+      if (response.noContent) {
+        setCurrentTurn((prev) => ({
+          query: prev?.query ?? searchInput,
+          summary: "관련 정보가 없습니다.",
+          results: [],
+        }));
+        return;
       }
+
+      const convertedResults: SearchResult[] = (response.sources ?? []).map(
+        (source) => ({
+          doc_id: source.doc_id,
+          title: source.title,
+          snippet: source.snippet,
+          video_url: source.video_url,
+          video_label: source.video_label,
+        })
+      );
+
+      setCurrentTurn((prev) => ({
+        query: prev?.query ?? searchInput,
+        summary: prev?.summary || response.summary || "",
+        results: convertedResults,
+      }));
     } catch (err) {
       const errorMessage = (err as Error).message;
       console.error("OpenAI Search error:", errorMessage);
@@ -183,25 +180,27 @@ const Learning = ({
     } finally {
       setSearchLoading(false);
     }
-  }, [searchInput, selectedModel, stream]);
-
-  const search = useCallback(() => {
-    if (activeTab === "openai") onSearchOpenAI();
-    else onSearch();
-  }, [activeTab, onSearch, onSearchOpenAI]);
+  }, [
+    searchInput,
+    selectedModel,
+    selectedCategory,
+    createChatRoomHandler,
+    // insertUserMessageHandler,
+    setSearchInput,
+  ]);
 
   const handleSearchSubmit = useCallback(
     (e?: React.FormEvent) => {
       e?.preventDefault();
       if (!searchInput.trim()) return;
       if (currentTurn?.query && !searchLoading) {
-        setMessageTurns((prev) => [...prev, currentTurn]);
+        setMessageTurns([...messageTurns, currentTurn]);
       }
       setCurrentTurn({ query: searchInput, summary: "", results: [] });
       setSearchLoading(true);
-      search();
+      onSearchOpenAI();
     },
-    [searchInput, currentTurn, searchLoading, search]
+    [searchInput, currentTurn, searchLoading, onSearchOpenAI]
   );
 
   const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;
@@ -251,16 +250,6 @@ const Learning = ({
             </ReactMarkdown>
           </div>
         </div>
-      )}
-      {turn.results.length > 0 && (
-        <>
-          <div className={styles.resultCount}>
-            총 {turn.results.length}개의 결과를 찾았습니다
-          </div>
-          <div className={styles.resultGrid}>
-            {turn.results.map((result, index) => resultCard(result, index))}
-          </div>
-        </>
       )}
     </div>
   );
@@ -313,14 +302,6 @@ const Learning = ({
           className={tabPanelClass}
           onScroll={onScrollPanel}
         >
-          <div className={styles.streamOption}>
-            <Text>스트리밍 응답</Text>
-            <Switch
-              checked={stream}
-              onChange={setStream}
-              size="small"
-            />
-          </div>
           <div className={styles.chatScroll}>
             {messageTurns.flatMap((turn, i) => [
               <div
@@ -394,14 +375,14 @@ const Learning = ({
             justify="space-around"
             style={{ width: "100%" }}
           >
-            <Dropdown
+            {/* <Dropdown
               menu={{
                 items: items,
               }}
               placement="topLeft"
             >
               <Text>모델: {modelLabel}</Text>
-            </Dropdown>
+            </Dropdown> */}
             <Flex
               gap={12}
               align="center"

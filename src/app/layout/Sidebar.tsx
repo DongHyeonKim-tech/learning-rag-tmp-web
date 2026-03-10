@@ -1,21 +1,28 @@
-import React, { useState } from "react";
+"use client";
+
+import React from "react";
 import styles from "@/styles/sidebar.module.css";
 import { Flex, Button } from "antd";
-import { createChatTitle } from "@/utils/searchApi";
 
 const Sidebar = ({
   activeTab,
   setActiveTab,
-  searchInput,
   setSearchInput,
-  chatTitle,
+  chatRooms,
+  fetchChatMessages,
+  createTempChatRoomHandler,
+  newChatLoading,
 }: {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  searchInput: string;
   setSearchInput: (input: string) => void;
-  chatTitle: string;
+  chatRooms: any[];
+  fetchChatMessages: (chatId: number) => void;
+  createTempChatRoomHandler: () => void;
+  createChatRoomHandler: (prompt: string) => void;
+  newChatLoading: boolean;
 }) => {
+  console.log("chatRooms: ", chatRooms);
   return (
     <div className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
@@ -49,8 +56,37 @@ const Sidebar = ({
         </Flex>
       </div>
       <div className={styles.sidebarContent}>
-        <Button type={"default"}>New Chat</Button>
-        <div className={styles.chatTitle}>{chatTitle}</div>
+        <Button
+          type="default"
+          onClick={() => {
+            createTempChatRoomHandler();
+          }}
+        >
+          New Chat
+        </Button>
+        {chatRooms.map((item) => {
+          return (
+            <div
+              className={styles.chatTitle}
+              style={{
+                border: "1px solid #d9d9d9",
+                borderRadius: "6px",
+                cursor: "pointer",
+                padding: "6px 10px",
+              }}
+              key={item.chatId}
+              onClick={() => {
+                fetchChatMessages(item.chatId);
+              }}
+            >
+              {newChatLoading && !item.chatId ? (
+                <span>loading</span>
+              ) : (
+                item.title
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

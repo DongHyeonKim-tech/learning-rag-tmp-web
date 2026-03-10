@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "axios": "^1.13.6",
+    "camelcase-keys": "^10.0.2",
     "next": "15.5.3",
     "openai": "^5.20.2",
     "prettier": "^3.8.1",

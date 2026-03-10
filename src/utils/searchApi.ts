@@ -15,7 +15,11 @@ import {
   StreamDoneData,
   StreamErrorData,
   ChatStreamOptions,
+  ChatRoomData,
+  Turn,
 } from "@/app/Interface";
+import camelcaseKeys from "camelcase-keys";
+import { client } from "@/utils/client";
 
 export async function searchDocumentsKure(
   params: SearchParams
@@ -79,8 +83,10 @@ export async function searchLearningOpenAIStream(
       top_k: params.top_k,
       use_context: params.use_context,
       temperature: params.temperature,
-      max_tokens: params.max_tokens,
       filters: params.filters,
+      chat_id: params.chat_id,
+      embedding_model: params.embedding_model,
+      emp_no: params.emp_no,
     }),
   });
 
@@ -105,56 +111,99 @@ export async function searchLearningOpenAIStream(
     };
   }
 
-  const reader = res.body?.getReader();
-  if (!reader) {
-    throw new Error("Stream not supported");
-  }
+  const stream = res.body;
+  if (!stream) throw new Error("Stream not supported");
+  console.log("stream: ", stream);
 
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let finalResult: SearchResponseOpenAI | null = null;
+  // done 이벤트 받을 때까지 기다렸다가 결과를 반환하기 위한 Promise
+  return await new Promise<SearchResponseOpenAI>((resolve, reject) => {
+    let finalResult: SearchResponseOpenAI | null = null;
+    let settled = false;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        try {
-          const payload = JSON.parse(line.slice(6)) as {
-            type: string;
-            content?: string;
-            text?: string;
-            sources?: SearchSource[];
-          };
-          if (payload.type === "delta" && payload.content != null) {
-            callbacks.onDelta(payload.content);
-          } else if (payload.type === "done") {
-            finalResult = {
-              query: params.query,
-              summary: payload.text ?? "",
-              sources: payload.sources ?? [],
-              total_sources: payload.sources?.length ?? 0,
-            };
-          }
-        } catch {
-          // JSON 파싱 실패 시 해당 라인 스킵
-        }
-      }
-    }
-  }
-
-  if (!finalResult) {
-    return {
-      query: params.query,
-      summary: "",
-      sources: [],
-      total_sources: 0,
+    const safeResolve = (v: SearchResponseOpenAI) => {
+      if (settled) return;
+      settled = true;
+      resolve(v);
     };
-  }
-  return finalResult;
+
+    const safeReject = (e: unknown) => {
+      if (settled) return;
+      settled = true;
+      reject(e);
+    };
+
+    parseSSEStream(
+      stream,
+      (evt) => {
+        if (evt.type === "delta") {
+          const text =
+            (evt.data as any)?.text ??
+            (evt.data as any)?.delta ??
+            (evt.data as any)?.content;
+          if (typeof text === "string" && text.length > 0) {
+            callbacks.onDelta(text);
+          }
+          return;
+        }
+
+        if (evt.type === "meta") {
+          callbacks.onMeta?.(evt.data as StreamMetaData);
+          return;
+        }
+
+        if (evt.type === "done") {
+          const doneData = evt.data as StreamDoneData;
+          const chatId = doneData?.chat_id ?? null;
+          const userMessageId = doneData?.user_message_id ?? null;
+          const assistantMessageId = doneData?.assistant_message_id ?? null;
+          const searchId = doneData?.search_id ?? null;
+          const summaryText =
+            (doneData as any)?.text ??
+            (doneData as any)?.summary ??
+            (doneData as any)?.content ??
+            "";
+
+          // 서버가 done에 sources/text를 주는 형태면 여기서 매핑
+          finalResult = {
+            query: params.query,
+            summary: summaryText,
+            sources: (doneData as any)?.sources ?? [],
+            total_sources: ((doneData as any)?.sources?.length ?? 0) as number,
+            chat_id: chatId,
+            user_message_id: userMessageId,
+            assistant_message_id: assistantMessageId,
+            search_id: searchId,
+          };
+
+          safeResolve(finalResult);
+          return;
+        }
+
+        if (evt.type === "error") {
+          callbacks.onError?.(evt.data as StreamErrorData);
+          safeReject(evt.data);
+          return;
+        }
+      },
+      { bufferDeltaUntilMeta: false }
+    )
+      .then(() => {
+        // 스트림이 끝났는데 done을 못 받았을 때 fallback
+        if (!settled) {
+          safeResolve(
+            finalResult ?? {
+              query: params.query,
+              summary: "",
+              sources: [],
+              total_sources: 0,
+            }
+          );
+        }
+      })
+      .catch((e) => {
+        safeReject(e);
+      });
+  });
 }
 
 export async function searchDocuments(
@@ -225,9 +274,9 @@ export async function syncFrameworkDocuments() {
 //
 // [상태 업데이트 예시]
 // 메시지 모델: { id, message_id?, role: "user"|"assistant", content: string, isStreaming?: boolean }
-// 1) 신규 채팅: chat_id 없음 -> createChatRoomIfNeeded(emp_no, prompt) -> chat_id 저장, 채팅방 리스트에 반영
+// 1) 신규 채팅: chatId 없음 -> createChatRoomIfNeeded(emp_no, prompt) -> chatId 저장, 채팅방 리스트에 반영
 // 2) 유저 메시지: optimistic으로 messages에 { id: tempId, role: "user", content } 추가
-//    -> insertUserMessage(chat_id, prompt) 후 응답 message_id로 해당 메시지 message_id 갱신
+//    -> insertUserMessage(chatId, prompt) 후 응답 message_id로 해당 메시지 message_id 갱신
 // 3) 스트리밍: startChatStream(..., signal) 호출 전 기존 AbortController.abort(), 새 controller 생성
 //    - onEvent({ type: "meta", data }) -> assistant 메시지 placeholder 추가 (message_id: data.assistant_message_id, isStreaming: true)
 //    - onEvent({ type: "delta", data }) -> 해당 assistant 메시지 content에 data.text append (또는 50~150ms 버퍼 후 반영)
@@ -244,7 +293,7 @@ function getChatBaseUrl(): string {
 }
 
 /**
- * 신규 채팅 시 채팅방을 생성하고 chat_id를 반환한다.
+ * 신규 채팅 시 채팅방을 생성하고 chatId를 반환한다.
  * title은 prompt를 잘라 임시 제목으로 사용한다.
  */
 export async function createChatRoomIfNeeded(
@@ -253,14 +302,25 @@ export async function createChatRoomIfNeeded(
 ): Promise<number> {
   const base = getChatBaseUrl();
   const title = prompt.trim().slice(0, 100) || "새 대화";
-  const response = await fetch(`${base}/chat/rooms`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ emp_no, title }),
-  });
+  // const response = await fetch(`${base}/chat/rooms`, {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify({ emp_no, title }),
+  // });
+  const response = await client.post(
+    `/chat/rooms`,
+    { emp_no: emp_no, title: title },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-  if (!response.ok) {
-    const text = await response.text();
+  console.log("response: ", response);
+
+  if (response.status !== 200) {
+    const text = response.statusText;
     let errMessage = `채팅방 생성 실패: ${response.status}`;
     try {
       const json = JSON.parse(text) as { message?: string; detail?: string };
@@ -271,22 +331,22 @@ export async function createChatRoomIfNeeded(
     throw new Error(errMessage);
   }
 
-  const data = (await response.json()) as CreateChatRoomResponse;
-  if (typeof data.chat_id !== "number") {
-    throw new Error("Invalid response: chat_id is required");
+  const data = (await camelcaseKeys(response.data)) as CreateChatRoomResponse;
+  if (typeof data.chatId !== "number") {
+    throw new Error("Invalid response: chatId is required");
   }
-  return data.chat_id;
+  return data.chatId;
 }
 
 /**
  * 유저 메시지를 DB에 저장하고 message_id를 반환한다.
  */
 export async function insertUserMessage(
-  chat_id: number,
+  chatId: number,
   content: string
 ): Promise<number> {
   const base = getChatBaseUrl();
-  const response = await fetch(`${base}/chat/rooms/${chat_id}/messages/user`, {
+  const response = await fetch(`${base}/chat/rooms/${chatId}/messages/user`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ content: content.trim() }),
@@ -317,13 +377,44 @@ export async function insertUserMessage(
  */
 export async function parseSSEStream(
   readableStream: ReadableStream<Uint8Array>,
-  onEvent: (event: StreamEvent) => void
+  onEvent: (event: StreamEvent) => void,
+  options?: { bufferDeltaUntilMeta?: boolean }
 ): Promise<void> {
+  const bufferDeltaUntilMeta = options?.bufferDeltaUntilMeta ?? true;
   const decoder = new TextDecoder();
   let buffer = "";
   let currentEventType: string | null = null;
   let deltaBufferBeforeMeta: string[] = [];
   let metaReceived = false;
+  let doneEmitted = false;
+
+  const flushDeltaBuffer = () => {
+    if (deltaBufferBeforeMeta.length === 0) return;
+    onEvent({
+      type: "delta",
+      data: { text: deltaBufferBeforeMeta.join("") },
+    });
+    deltaBufferBeforeMeta = [];
+  };
+
+  const emitDone = (data: StreamDoneData = {}) => {
+    if (doneEmitted) return;
+    doneEmitted = true;
+    onEvent({ type: "done", data });
+  };
+
+  const getDeltaText = (data: Record<string, unknown>): string | null => {
+    const direct =
+      (data as any).text ?? (data as any).delta ?? (data as any).content;
+    if (typeof direct === "string" && direct.length > 0) return direct;
+
+    const nestedContent = (data as any)?.choices?.[0]?.delta?.content;
+    if (typeof nestedContent === "string" && nestedContent.length > 0) {
+      return nestedContent;
+    }
+
+    return null;
+  };
 
   const processLine = (line: string): void => {
     if (line.startsWith("event:")) {
@@ -332,47 +423,42 @@ export async function parseSSEStream(
     }
     if (line.startsWith("data:")) {
       const raw = line.slice(5).trim();
-      if (raw === "[DONE]" || raw === "") return;
+      if (raw === "") return;
+      if (raw === "[DONE]") {
+        flushDeltaBuffer();
+        emitDone({});
+        currentEventType = null;
+        return;
+      }
       try {
         const data = JSON.parse(raw) as Record<string, unknown>;
-        const type = (currentEventType ?? "delta").toLowerCase();
+        const inferredType =
+          typeof data.type === "string"
+            ? data.type
+            : (currentEventType ?? "delta");
+        const type = inferredType.toLowerCase();
 
         if (type === "meta") {
-          if (deltaBufferBeforeMeta.length > 0) {
-            const combined = deltaBufferBeforeMeta.join("");
-            deltaBufferBeforeMeta = [];
-            onEvent({ type: "delta", data: { text: combined } });
-          }
+          flushDeltaBuffer();
           metaReceived = true;
           onEvent({
             type: "meta",
             data: data as unknown as StreamMetaData,
           });
         } else if (type === "delta") {
-          if (data.text != null && typeof data.text === "string") {
-            if (!metaReceived) {
-              deltaBufferBeforeMeta.push(data.text);
+          const deltaText = getDeltaText(data);
+          if (deltaText) {
+            if (bufferDeltaUntilMeta && !metaReceived) {
+              deltaBufferBeforeMeta.push(deltaText);
             } else {
-              onEvent({ type: "delta", data: { text: data.text } });
+              onEvent({ type: "delta", data: { text: deltaText } });
             }
           }
         } else if (type === "done") {
-          if (deltaBufferBeforeMeta.length > 0) {
-            onEvent({
-              type: "delta",
-              data: { text: deltaBufferBeforeMeta.join("") },
-            });
-            deltaBufferBeforeMeta = [];
-          }
-          onEvent({ type: "done", data: data as unknown as StreamDoneData });
+          flushDeltaBuffer();
+          emitDone(data as unknown as StreamDoneData);
         } else if (type === "error") {
-          if (deltaBufferBeforeMeta.length > 0) {
-            onEvent({
-              type: "delta",
-              data: { text: deltaBufferBeforeMeta.join("") },
-            });
-            deltaBufferBeforeMeta = [];
-          }
+          flushDeltaBuffer();
           onEvent({
             type: "error",
             data: data as unknown as StreamErrorData,
@@ -400,12 +486,7 @@ export async function parseSSEStream(
     if (buffer.trim()) {
       buffer.split("\n").forEach(processLine);
     }
-    if (deltaBufferBeforeMeta.length > 0) {
-      onEvent({
-        type: "delta",
-        data: { text: deltaBufferBeforeMeta.join("") },
-      });
-    }
+    flushDeltaBuffer();
   } finally {
     reader.releaseLock();
   }
@@ -413,9 +494,9 @@ export async function parseSSEStream(
 
 const DEFAULT_STREAM_OPTIONS: Required<ChatStreamOptions> = {
   top_k: 5,
-  embedding_model: "BAAI/bge-m3",
+  embedding_model: "nlpai-lab/KURE-v1",
   filters: null,
-  llm_model: "EXAONE-4.0-32B",
+  llm_model: "gpt-5-",
   temperature: 0.2,
 };
 
@@ -424,7 +505,7 @@ const DEFAULT_STREAM_OPTIONS: Required<ChatStreamOptions> = {
  * AbortController.signal을 넘기면 취소 시 스트림을 중단하고 리소스를 정리한다.
  */
 export async function startChatStream(
-  chat_id: number,
+  chatId: number,
   emp_no: string,
   prompt: string,
   options: ChatStreamOptions,
@@ -443,7 +524,7 @@ export async function startChatStream(
     temperature: opts.temperature,
   };
 
-  const response = await fetch(`${base}/chat/rooms/${chat_id}/stream`, {
+  const response = await fetch(`${base}/chat/rooms/${chatId}/stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -483,29 +564,27 @@ export async function getChatRooms(
   empNo: string,
   offset?: number,
   limit?: number
-): Promise<{ data?: unknown[]; [key: string]: unknown }> {
-  const base = getChatBaseUrl();
+): Promise<ChatRoomData[]> {
   const params = new URLSearchParams({ emp_no: empNo });
   if (offset != null) params.set("offset", String(offset));
   if (limit != null) params.set("limit", String(limit));
-  const response = await fetch(`${base}/chat/rooms?${params.toString()}`, {
-    method: "GET",
+
+  const response = await client.get(`/chat/rooms?${params.toString()}`, {
     headers: { "Content-Type": "application/json" },
   });
 
-  if (!response.ok) {
+  if (response.status !== 200) {
     throw new Error(`채팅방 목록 조회 실패: ${response.status}`);
   }
-
-  return response.json();
+  console.log("response: ", response);
+  return camelcaseKeys(response.data);
 }
 
 export async function getChatMessages(
-  chat_id: number,
+  chatId: number,
   params?: GetMessagesParams
-): Promise<{ data?: unknown[]; [key: string]: unknown }> {
-  const base = getChatBaseUrl();
-  const search = new URLSearchParams();
+): Promise<Turn[]> {
+  const search = new URLSearchParams({ chat_id: String(chatId) });
   if (params?.before_message_id != null) {
     search.set("before_message_id", String(params.before_message_id));
   }
@@ -513,15 +592,16 @@ export async function getChatMessages(
     search.set("limit", String(params.limit));
   }
   const qs = search.toString();
-  const url = `${base}/chat/rooms/${chat_id}/messages${qs ? `?${qs}` : ""}`;
-  const response = await fetch(url, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const response = await client.get(
+    `/chat/rooms/${chatId}/messages${qs ? `?${qs}` : ""}`,
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 
-  if (!response.ok) {
-    throw new Error(`메시지 조회 실패: ${response.status}`);
+  if (response.status !== 200) {
+    throw new Error(`채팅방 목록 조회 실패: ${response.status}`);
   }
-
-  return response.json();
+  console.log("response: ", response);
+  return camelcaseKeys(response.data);
 }

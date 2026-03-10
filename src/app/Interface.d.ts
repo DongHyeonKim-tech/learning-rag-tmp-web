@@ -27,6 +27,10 @@ export interface SearchResponseOpenAI {
   total_sources: number;
   /** 204 No Content일 때 true */
   noContent?: boolean;
+  chat_id?: number | null;
+  user_message_id?: number | null;
+  assistant_message_id?: number | null;
+  search_id?: number | null;
 }
 
 export interface SearchParams {
@@ -46,13 +50,15 @@ export interface SearchParamsOpenAI {
   top_k?: number;
   use_context?: number;
   temperature?: number;
-  max_tokens?: number;
   model?: string;
   filters?: {
     categories?: {
       top?: string;
     };
   };
+  chat_id?: number | null;
+  embedding_model?: string;
+  emp_no?: string;
 }
 
 export interface SearchParamsFramework {
@@ -83,9 +89,11 @@ export interface SearchResponseFramework {
   total_sources?: number;
 }
 
-export interface SearchLearningStreamCallbacks {
-  onDelta: (content: string) => void;
-}
+type SearchLearningStreamCallbacks = {
+  onDelta: (text: string) => void;
+  onMeta?: (meta: StreamMetaData) => void;
+  onError?: (err: StreamErrorData) => void;
+};
 
 /** 채팅방 메시지 조회 */
 export interface GetMessagesParams {
@@ -95,7 +103,7 @@ export interface GetMessagesParams {
 
 /** 채팅방 생성 응답 */
 export interface CreateChatRoomResponse {
-  chat_id: number;
+  chatId: number;
 }
 
 /** 유저 메시지 저장 응답 */
@@ -128,6 +136,10 @@ export interface StreamDeltaData {
 
 /** SSE done 이벤트 데이터 */
 export interface StreamDoneData {
+  chat_id?: number | null;
+  user_message_id?: number | null;
+  assistant_message_id?: number | null;
+  search_id?: number | null;
   usage_id?: number;
   elapsed_ms?: number;
 }
@@ -144,3 +156,22 @@ export type StreamEvent =
   | { type: "delta"; data: StreamDeltaData }
   | { type: "done"; data: StreamDoneData }
   | { type: "error"; data: StreamErrorData };
+
+/* 채팅룸 */
+export type ChatRoomData = {
+  chatId?: number | null;
+  title?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type Turn = { query: string; summary: string; results: SearchResult[] };
+
+export type ChatMessage = {
+  chatId: number;
+  messageId: number;
+  content: string;
+  createdAt: string;
+  responseTimeMs: number;
+  role: string;
+};
