@@ -2,11 +2,13 @@
 
 import { useState, useRef, useCallback } from "react";
 import {
-  SearchResponseFramework,
   searchFrameworkDocuments,
-  SearchParamsFramework,
   syncFrameworkDocuments,
 } from "@/utils/searchApi";
+import {
+  SearchParamsFramework,
+  SearchResponseFramework,
+} from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
 import {
   notification,
