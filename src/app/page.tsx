@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Flex } from "antd";
+import { Button, Flex } from "antd";
 import Learning from "@/app/components/Learning";
 import Framework from "@/app/components/Framework";
 import styles from "@/styles/search.module.css";
@@ -68,6 +68,7 @@ export default function Home() {
         return [{ chatId: null, title: "새 채팅방" }, ...prev];
       });
       setMessageTurns([]);
+      setCurrentTurn(null);
     }
   };
 
@@ -76,9 +77,21 @@ export default function Home() {
   }, []);
 
   const handleLearningStreamMeta = useCallback(
-    (nextChatId: number | null, nextMessageId: number | null) => {
+    (
+      nextChatId: number | null,
+      nextMessageId: number | null,
+      nextTitle: string | null
+    ) => {
       setChatId(nextChatId);
       setMessageId(nextMessageId);
+      setChatRooms((prev: ChatRoomData[]) => {
+        return prev.map((item: ChatRoomData) => {
+          if (!item.chatId) {
+            return { ...item, chatId: nextChatId, title: nextTitle ?? "" };
+          }
+          return item;
+        });
+      });
     },
     []
   );
@@ -94,6 +107,7 @@ export default function Home() {
           fetchChatMessages={fetchChatMessages}
           createTempChatRoomHandler={createTempChatRoomHandler}
           newChatLoading={newChatLoading}
+          chatId={chatId}
         />
         <div className={styles.pageContainer}>
           {activeTab === "learning" ? (
@@ -107,6 +121,7 @@ export default function Home() {
               empNo={"20230808"}
               currentTurn={currentTurn}
               setCurrentTurn={setCurrentTurn}
+              setNewChatLoading={setNewChatLoading}
             />
           ) : (
             <Framework

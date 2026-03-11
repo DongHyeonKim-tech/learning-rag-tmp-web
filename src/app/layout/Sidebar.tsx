@@ -12,6 +12,7 @@ const Sidebar = ({
   fetchChatMessages,
   createTempChatRoomHandler,
   newChatLoading,
+  chatId,
 }: {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -20,6 +21,7 @@ const Sidebar = ({
   fetchChatMessages: (chatId: number) => void;
   createTempChatRoomHandler: () => void;
   newChatLoading: boolean;
+  chatId: number | null;
 }) => {
   console.log("chatRooms: ", chatRooms);
   return (
@@ -63,29 +65,32 @@ const Sidebar = ({
         >
           New Chat
         </Button>
-        {chatRooms.map((item) => {
-          return (
-            <div
-              className={styles.chatTitle}
-              style={{
-                border: "1px solid #d9d9d9",
-                borderRadius: "6px",
-                cursor: "pointer",
-                padding: "6px 10px",
-              }}
-              key={item.chatId}
-              onClick={() => {
-                fetchChatMessages(item.chatId);
-              }}
-            >
-              {newChatLoading && !item.chatId ? (
-                <span>loading</span>
-              ) : (
-                item.title
-              )}
-            </div>
-          );
-        })}
+        <div className={styles.chatRoomList}>
+          {chatRooms.map((item) => {
+            return (
+              <div
+                className={styles.chatTitle}
+                style={{
+                  border: "1px solid #d9d9d9",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  padding: "6px 10px",
+                  fontWeight: chatId === item.chatId ? "bold" : "normal",
+                }}
+                key={item.chatId}
+                onClick={() => {
+                  fetchChatMessages(item.chatId);
+                }}
+              >
+                {newChatLoading && !item.chatId ? (
+                  <span>loading</span>
+                ) : (
+                  item.title
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

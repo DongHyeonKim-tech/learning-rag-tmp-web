@@ -31,6 +31,7 @@ export interface SearchResponseOpenAI {
   user_message_id?: number | null;
   assistant_message_id?: number | null;
   search_id?: number | null;
+  title?: string | null;
 }
 
 export interface SearchParams {
@@ -137,6 +138,7 @@ export interface StreamDoneData {
   search_id?: number | null;
   usage_id?: number;
   elapsed_ms?: number;
+  title?: string | null;
 }
 
 /** SSE error 이벤트 데이터 */

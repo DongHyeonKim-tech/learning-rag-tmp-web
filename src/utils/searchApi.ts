@@ -153,6 +153,7 @@ export async function searchLearningOpenAIStream(
           const userMessageId = doneData?.user_message_id ?? null;
           const assistantMessageId = doneData?.assistant_message_id ?? null;
           const searchId = doneData?.search_id ?? null;
+          const title = doneData?.title ?? null;
           const summaryText =
             (doneData as any)?.text ??
             (doneData as any)?.summary ??
@@ -169,6 +170,7 @@ export async function searchLearningOpenAIStream(
             user_message_id: userMessageId,
             assistant_message_id: assistantMessageId,
             search_id: searchId,
+            title: title,
           };
 
           safeResolve(finalResult);

@@ -8,14 +8,8 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import {
-  searchLearningOpenAIStream,
-} from "@/utils/searchApi";
-import {
-  SearchResult,
-  SearchParamsOpenAI,
-  Turn,
-} from "@/app/Interface";
+import { searchLearningOpenAIStream } from "@/utils/searchApi";
+import { SearchResult, SearchParamsOpenAI, Turn } from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
 import {
   notification,
@@ -45,16 +39,22 @@ const Learning = ({
   empNo,
   currentTurn,
   setCurrentTurn,
+  setNewChatLoading,
 }: {
   searchInput: string;
   setSearchInput: (input: string) => void;
   chatId: number | null;
-  onStreamMetaUpdate: (chatId: number | null, messageId: number | null) => void;
+  onStreamMetaUpdate: (
+    chatId: number | null,
+    messageId: number | null,
+    title: string | null
+  ) => void;
   messageTurns: Turn[];
   setMessageTurns: Dispatch<SetStateAction<Turn[]>>;
   empNo: string;
   currentTurn: Turn | null;
   setCurrentTurn: Dispatch<SetStateAction<Turn | null>>;
+  setNewChatLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<
@@ -95,6 +95,7 @@ const Learning = ({
   const onSearchOpenAI = useCallback(async () => {
     if (!searchInput.trim()) return;
     setStickToBottom(true);
+    if (!chatId) setNewChatLoading(true);
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
       top_k: 10,
@@ -102,9 +103,9 @@ const Learning = ({
       temperature: 0.5,
       model: selectedModel,
       filters: {
-        categories: {
-          top: selectedCategory,
-        },
+        // categories: {
+        //   top: selectedCategory,
+        // },
       },
       chat_id: chatId,
       embedding_model: "nlpai-lab/KURE-v1",
@@ -131,7 +132,11 @@ const Learning = ({
 
       console.log("response: ", response);
 
-      onStreamMetaUpdate(response.chat_id ?? null, response.user_message_id ?? null);
+      onStreamMetaUpdate(
+        response.chat_id ?? null,
+        response.user_message_id ?? null,
+        response.title ?? null
+      );
 
       setSearchInput("");
 
@@ -181,7 +186,7 @@ const Learning = ({
     } finally {
       setSearchLoading(false);
     }
-  }, [searchInput, selectedModel, selectedCategory, setSearchInput]);
+  }, [searchInput, selectedModel, setSearchInput]);
 
   const handleSearchSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -328,7 +333,7 @@ const Learning = ({
           justify="center"
           vertical
         >
-          <Flex
+          {/* <Flex
             gap={6}
             align="center"
             justify="space-around"
@@ -370,7 +375,7 @@ const Learning = ({
                 ))}
               </Space>
             </Flex>
-          </Flex>
+          </Flex> */}
 
           <div className={styles.fullWidth}>
             <SearchForm
