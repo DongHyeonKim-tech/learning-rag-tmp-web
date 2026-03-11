@@ -71,7 +71,7 @@ export async function searchLearningOpenAIStream(
   params: SearchParamsOpenAI,
   callbacks: SearchLearningStreamCallbacks
 ): Promise<SearchResponseOpenAI> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/learning`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
