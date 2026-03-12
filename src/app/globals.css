@@ -41,6 +41,11 @@ a {
   }
 }
 
+.markdown {
+  font-family: Pretendard;
+  font-weight: 500;
+}
+
 .markdown h1 {
   margin: 0px 0px 10px 5px;
 }
@@ -51,6 +56,7 @@ a {
 
 .markdown p {
   margin: 0px 0px 10px 5px;
+  font-size: 18px;
 }
 
 .markdown hr {

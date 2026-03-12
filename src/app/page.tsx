@@ -62,6 +62,7 @@ export default function Home() {
   }, [chatId]);
 
   const createTempChatRoomHandler = async () => {
+    setNewChatLoading(false);
     if (chatId) {
       setChatId(null);
       setChatRooms((prev: ChatRoomData[]) => {
@@ -82,16 +83,18 @@ export default function Home() {
       nextMessageId: number | null,
       nextTitle: string | null
     ) => {
-      setChatId(nextChatId);
-      setMessageId(nextMessageId);
-      setChatRooms((prev: ChatRoomData[]) => {
-        return prev.map((item: ChatRoomData) => {
-          if (!item.chatId) {
-            return { ...item, chatId: nextChatId, title: nextTitle ?? "" };
-          }
-          return item;
+      if (nextChatId) {
+        setChatId(nextChatId);
+        setMessageId(nextMessageId);
+        setChatRooms((prev: ChatRoomData[]) => {
+          return prev.map((item: ChatRoomData) => {
+            if (!item.chatId) {
+              return { ...item, chatId: nextChatId, title: nextTitle ?? "" };
+            }
+            return item;
+          });
         });
-      });
+      }
     },
     []
   );

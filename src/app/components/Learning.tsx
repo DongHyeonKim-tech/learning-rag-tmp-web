@@ -98,8 +98,8 @@ const Learning = ({
     if (!chatId) setNewChatLoading(true);
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
-      top_k: 10,
-      use_context: 3,
+      top_k: 20,
+      use_context: 5,
       temperature: 0.5,
       model: selectedModel,
       filters: {
@@ -185,6 +185,7 @@ const Learning = ({
       });
     } finally {
       setSearchLoading(false);
+      setNewChatLoading(false);
     }
   }, [searchInput, selectedModel, setSearchInput]);
 
