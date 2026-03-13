@@ -29,9 +29,9 @@ export default function Home() {
   const fetchChatRooms = async () => {
     try {
       const data = await getChatRooms("20230808");
-      setChatRooms([{ chatId: null, title: "새 채팅방" }, ...data]);
+      setChatRooms(data);
     } catch {
-      setChatRooms([{ chatId: null, title: "새 채팅방" }]);
+      setChatRooms([]);
       openNotification("error", "채팅 기록 조회 중 오류가 발생했습니다.");
     }
   };
@@ -65,9 +65,6 @@ export default function Home() {
     setNewChatLoading(false);
     if (chatId) {
       setChatId(null);
-      setChatRooms((prev: ChatRoomData[]) => {
-        return [{ chatId: null, title: "새 채팅방" }, ...prev];
-      });
       setMessageTurns([]);
       setCurrentTurn(null);
     }
@@ -86,6 +83,7 @@ export default function Home() {
       if (nextChatId) {
         setChatId(nextChatId);
         setMessageId(nextMessageId);
+
         setChatRooms((prev: ChatRoomData[]) => {
           return prev.map((item: ChatRoomData) => {
             if (!item.chatId) {
@@ -125,6 +123,7 @@ export default function Home() {
               currentTurn={currentTurn}
               setCurrentTurn={setCurrentTurn}
               setNewChatLoading={setNewChatLoading}
+              setChatRooms={setChatRooms}
             />
           ) : (
             <Framework

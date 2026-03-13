@@ -9,7 +9,12 @@ import {
   SetStateAction,
 } from "react";
 import { searchLearningOpenAIStream } from "@/utils/searchApi";
-import { SearchResult, SearchParamsOpenAI, Turn } from "@/app/Interface";
+import {
+  SearchResult,
+  SearchParamsOpenAI,
+  Turn,
+  ChatRoomData,
+} from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
 import {
   notification,
@@ -40,6 +45,7 @@ const Learning = ({
   currentTurn,
   setCurrentTurn,
   setNewChatLoading,
+  setChatRooms,
 }: {
   searchInput: string;
   setSearchInput: (input: string) => void;
@@ -55,6 +61,7 @@ const Learning = ({
   currentTurn: Turn | null;
   setCurrentTurn: Dispatch<SetStateAction<Turn | null>>;
   setNewChatLoading: Dispatch<SetStateAction<boolean>>;
+  setChatRooms: Dispatch<SetStateAction<ChatRoomData[]>>;
 }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<
@@ -193,6 +200,9 @@ const Learning = ({
     (e?: React.FormEvent) => {
       e?.preventDefault();
       if (!searchInput.trim()) return;
+      if (!chatId) {
+        setChatRooms((prev) => [{ chatId: null, title: "새 채팅방" }, ...prev]);
+      }
       if (currentTurn?.query && !searchLoading) {
         setMessageTurns((prev) => [...prev, currentTurn]);
       }

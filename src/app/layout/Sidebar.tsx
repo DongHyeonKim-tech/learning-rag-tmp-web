@@ -62,6 +62,20 @@ const Sidebar = ({
           onClick={() => {
             createTempChatRoomHandler();
           }}
+          disabled={newChatLoading}
+          style={{
+            border: chatId === null ? "2px solid #6ea6ff" : undefined,
+            boxShadow:
+              chatId === null
+                ? "0 0 0 0 #a78bfa, 0 0 8px 2px #6ea6ff, 0 0 16px 4px #a78bfa"
+                : undefined,
+            animation:
+              chatId === null
+                ? "flash-border 1.2s infinite alternate"
+                : undefined,
+            backgroundColor: chatId === null ? "#82b2ff" : undefined,
+            color: chatId === null ? "#fff" : undefined,
+          }}
         >
           New Chat
         </Button>
