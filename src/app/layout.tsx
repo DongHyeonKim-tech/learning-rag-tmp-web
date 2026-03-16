@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BIM RAG",
-  description: "BIM RAG",
+  title: "BIM Search",
+  description: "BIM Search",
 };
 
 export default function RootLayout({
