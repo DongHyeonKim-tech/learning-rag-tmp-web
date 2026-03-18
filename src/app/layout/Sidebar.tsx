@@ -2,21 +2,15 @@
 
 import React from "react";
 import styles from "@/styles/sidebar.module.css";
-import { Flex, Button } from "antd";
+import { Button } from "antd";
 
 const Sidebar = ({
-  activeTab,
-  setActiveTab,
-  setSearchInput,
   chatRooms,
   fetchChatMessages,
   createTempChatRoomHandler,
   newChatLoading,
   chatId,
 }: {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  setSearchInput: (input: string) => void;
   chatRooms: any[];
   fetchChatMessages: (chatId: number) => void;
   createTempChatRoomHandler: () => void;

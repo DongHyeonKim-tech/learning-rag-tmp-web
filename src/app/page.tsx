@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Button, Flex } from "antd";
+import { Flex } from "antd";
 import Learning from "@/app/components/Learning";
 import Framework from "@/app/components/Framework";
 import styles from "@/styles/search.module.css";
@@ -105,9 +105,6 @@ export default function Home() {
     <div className={styles.pageRoot}>
       <Flex gap={24}>
         <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          setSearchInput={setSearchInput}
           chatRooms={chatRooms}
           fetchChatMessages={fetchChatMessages}
           createTempChatRoomHandler={createTempChatRoomHandler}

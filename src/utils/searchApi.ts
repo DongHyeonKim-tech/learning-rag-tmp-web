@@ -378,14 +378,6 @@ export async function parseSSEStream(
   }
 }
 
-const DEFAULT_STREAM_OPTIONS: Required<ChatStreamOptions> = {
-  top_k: 5,
-  embedding_model: "nlpai-lab/KURE-v1",
-  filters: null,
-  llm_model: "gpt-5-",
-  temperature: 0.2,
-};
-
 /** 채팅방 목록 조회 (offset/limit 지원) */
 export async function getChatRooms(
   empNo: string,

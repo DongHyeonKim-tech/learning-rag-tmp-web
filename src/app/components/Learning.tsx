@@ -74,12 +74,10 @@ const Learning = ({
   setChatRooms: Dispatch<SetStateAction<ChatRoomData[]>>;
 }) => {
   const [searchLoading, setSearchLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<
-    "kure" | "baai" | "full" | "json"
-  >("kure");
+  const [selectedModel] = useState<"kure" | "baai" | "full" | "json">("kure");
   const [selectedCategory, setSelectedCategory] = useState<
-    "" | "Learning" | "MeetUp / Seminar" | "framework"
-  >("");
+    "all" | "Learning" | "MeetUp / Seminar" | "framework"
+  >("all");
 
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -120,7 +118,7 @@ const Learning = ({
       temperature: 0.5,
       model: selectedModel,
       filters:
-        selectedCategory === ""
+        selectedCategory === "all"
           ? undefined
           : {
               categories: {
@@ -207,6 +205,7 @@ const Learning = ({
       setSearchLoading(false);
       setNewChatLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, selectedModel, setSearchInput]);
 
   const handleSearchSubmit = useCallback(
@@ -223,42 +222,11 @@ const Learning = ({
       setSearchLoading(true);
       onSearchOpenAI();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchInput, currentTurn, searchLoading, onSearchOpenAI]
   );
 
   const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;
-  const resultCard = (result: SearchResult, index: number) => (
-    <Card
-      key={result.doc_id || index}
-      size="small"
-      className={styles.smallCard}
-    >
-      <div className={styles.resultItemBlock}>
-        <Text
-          strong
-          className={styles.resultTitle}
-        >
-          {result.title}
-        </Text>
-        <div className={styles.resultMeta}>ID: {result.doc_id}</div>
-      </div>
-      {result.snippet && (
-        <Text className={styles.resultSnippet}>{result.snippet}</Text>
-      )}
-      {result.video_url && (
-        <div className={styles.resultLinkWrap}>
-          <a
-            href={result.video_url}
-            target="_blank"
-            rel="noreferrer"
-            className={styles.resultLink}
-          >
-            {result.video_label || "영상 보기"}
-          </a>
-        </div>
-      )}
-    </Card>
-  );
 
   const renderAssistantContent = (turn: Turn) => (
     <div className={styles.chatTurnBlock}>
@@ -396,10 +364,18 @@ const Learning = ({
               >
                 {(
                   [
-                    ["", "통합", <GlobalOutlined />],
-                    ["Learning", "학습", <BookOutlined />],
-                    ["MeetUp / Seminar", "사례", <CompassOutlined />],
-                    ["framework", "문서", <FileTextOutlined />],
+                    ["all", "통합", <GlobalOutlined key="icon-global" />],
+                    ["Learning", "학습", <BookOutlined key="icon-book" />],
+                    [
+                      "MeetUp / Seminar",
+                      "사례",
+                      <CompassOutlined key="icon-compass" />,
+                    ],
+                    [
+                      "framework",
+                      "문서",
+                      <FileTextOutlined key="icon-filetext" />,
+                    ],
                   ] as const
                 ).map(([key, label, icon]) => (
                   <Button
@@ -409,7 +385,7 @@ const Learning = ({
                     onClick={() => {
                       setSelectedCategory(key);
                       setSearchInput(
-                        key === ""
+                        key === "all"
                           ? ""
                           : key === "Learning"
                             ? "캐드 import 하는 방법 알려줘"
