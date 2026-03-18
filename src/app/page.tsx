@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Flex } from "antd";
-import Learning from "@/app/components/Learning";
 import styles from "@/styles/search.module.css";
 import Sidebar from "@/app/layout/Sidebar";
 import { getChatMessages, getChatRooms } from "@/utils/searchApi";
 import { openNotification } from "@/utils/common";
 import { ChatRoomData, Turn } from "@/app/Interface";
+import Search from "@/app/components/Search";
 
 export default function Home() {
   const [searchInput, setSearchInput] = useState(
@@ -110,7 +110,7 @@ export default function Home() {
           chatId={chatId}
         />
         <div className={styles.pageContainer}>
-          <Learning
+          <Search
             searchInput={searchInput}
             setSearchInput={setSearchInput}
             chatId={chatId}

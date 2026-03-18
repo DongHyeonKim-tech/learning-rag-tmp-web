@@ -34,7 +34,7 @@ import {
   LikeOutlined,
 } from "@ant-design/icons";
 
-const Learning = ({
+const Search = ({
   searchInput,
   setSearchInput,
   chatId,
@@ -407,4 +407,4 @@ const Learning = ({
   );
 };
 
-export default Learning;
+export default Search;
