@@ -23,7 +23,6 @@ const Sidebar = ({
   newChatLoading: boolean;
   chatId: number | null;
 }) => {
-  console.log("chatRooms: ", chatRooms);
   return (
     <div className={styles.sidebar}>
       <div className={styles.sidebarHeader}>

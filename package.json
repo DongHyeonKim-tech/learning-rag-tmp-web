@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "axios": "^1.13.6",
     "camelcase-keys": "^10.0.2",

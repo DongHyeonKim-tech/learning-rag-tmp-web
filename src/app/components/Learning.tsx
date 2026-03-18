@@ -31,6 +31,11 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import SearchForm from "@/app/components/SearchForm";
 import { openNotification } from "@/utils/common";
+import {
+  CommentOutlined,
+  DislikeOutlined,
+  LikeOutlined,
+} from "@ant-design/icons";
 
 const { Text } = Typography;
 
@@ -252,7 +257,7 @@ const Learning = ({
 
   const renderAssistantContent = (turn: Turn) => (
     <div className={styles.chatTurnBlock}>
-      {turn.summary && (
+      {turn.summary ? (
         <div className={styles.chatBubbleAssistant}>
           <div className="markdown">
             <ReactMarkdown
@@ -262,6 +267,19 @@ const Learning = ({
               {turn.summary}
             </ReactMarkdown>
           </div>
+          <Flex
+            gap={12}
+            align="center"
+            justify="flex-start"
+          >
+            <LikeOutlined style={{ fontSize: 24 }} />
+            <DislikeOutlined style={{ fontSize: 24 }} />
+            <CommentOutlined style={{ fontSize: 24 }} />
+          </Flex>
+        </div>
+      ) : (
+        <div className={styles.chatBubbleAssistant}>
+          답변을 불러올 수 없습니다.
         </div>
       )}
     </div>

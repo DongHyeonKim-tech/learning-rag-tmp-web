@@ -74,6 +74,10 @@ export default function Home() {
     fetchChatRooms();
   }, []);
 
+  useEffect(() => {
+    console.log("currentTurn: ", currentTurn);
+  }, [currentTurn]);
+
   const handleLearningStreamMeta = useCallback(
     (
       nextChatId: number | null,
