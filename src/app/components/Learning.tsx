@@ -68,8 +68,8 @@ const Learning = ({
     "kure" | "baai" | "full" | "json"
   >("kure");
   const [selectedCategory, setSelectedCategory] = useState<
-    "Learning" | "MeetUp / Seminar"
-  >("Learning");
+    "" | "Learning" | "MeetUp / Seminar" | "framework"
+  >("");
 
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -109,11 +109,14 @@ const Learning = ({
       use_context: 5,
       temperature: 0.5,
       model: selectedModel,
-      filters: {
-        // categories: {
-        //   top: selectedCategory,
-        // },
-      },
+      filters:
+        selectedCategory === ""
+          ? undefined
+          : {
+              categories: {
+                top: selectedCategory,
+              },
+            },
       chat_id: chatId,
       embedding_model: "nlpai-lab/KURE-v1",
       emp_no: empNo,
@@ -344,7 +347,7 @@ const Learning = ({
           justify="center"
           vertical
         >
-          {/* <Flex
+          <Flex
             gap={6}
             align="center"
             justify="space-around"
@@ -355,7 +358,6 @@ const Learning = ({
               align="center"
               justify="center"
             >
-              <Text className={styles.modelLabel}>카테고리</Text>
               <Space
                 size="small"
                 wrap
@@ -363,8 +365,10 @@ const Learning = ({
               >
                 {(
                   [
+                    ["", "통합"],
                     ["Learning", "학습"],
-                    ["MeetUp / Seminar", "MeetUp"],
+                    ["MeetUp / Seminar", "사례"],
+                    ["framework", "문서"],
                   ] as const
                 ).map(([key, label]) => (
                   <Button
@@ -374,9 +378,13 @@ const Learning = ({
                     onClick={() => {
                       setSelectedCategory(key);
                       setSearchInput(
-                        key === "Learning"
-                          ? "캐드 import 하는 방법 알려줘"
-                          : "HDA BIM 어워드에 대해 알려줘"
+                        key === ""
+                          ? ""
+                          : key === "Learning"
+                            ? "캐드 import 하는 방법 알려줘"
+                            : key === "MeetUp / Seminar"
+                              ? "HDA BIM 어워드에 대해 알려줘"
+                              : "프로젝트 파일 생성"
                       );
                     }}
                     className={`${styles.modelButton} ${selectedCategory === key ? styles.modelButtonActive : ""}`}
@@ -386,7 +394,7 @@ const Learning = ({
                 ))}
               </Space>
             </Flex>
-          </Flex> */}
+          </Flex>
 
           <div className={styles.fullWidth}>
             <SearchForm

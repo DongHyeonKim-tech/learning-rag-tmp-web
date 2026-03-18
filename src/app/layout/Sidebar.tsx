@@ -28,7 +28,7 @@ const Sidebar = ({
     <div className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
         <div className={styles.sidebarHeaderTitle}>BIM Search</div>
-        <Flex
+        {/* <Flex
           gap={8}
           align="center"
           wrap="wrap"
@@ -54,7 +54,7 @@ const Sidebar = ({
           >
             Framework
           </Button>
-        </Flex>
+        </Flex> */}
       </div>
       <div className={styles.sidebarContent}>
         <Button
