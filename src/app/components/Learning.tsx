@@ -32,8 +32,13 @@ import rehypeHighlight from "rehype-highlight";
 import SearchForm from "@/app/components/SearchForm";
 import { openNotification } from "@/utils/common";
 import {
+  BookOutlined,
   CommentOutlined,
+  CompassOutlined,
+  CopyOutlined,
   DislikeOutlined,
+  FileTextOutlined,
+  GlobalOutlined,
   LikeOutlined,
 } from "@ant-design/icons";
 
@@ -275,6 +280,14 @@ const Learning = ({
             <LikeOutlined style={{ fontSize: 24 }} />
             <DislikeOutlined style={{ fontSize: 24 }} />
             <CommentOutlined style={{ fontSize: 24 }} />
+            <CopyOutlined
+              style={{ fontSize: 24 }}
+              onClick={() => {
+                console.log("turn.summary: ", turn.summary);
+                navigator.clipboard.writeText(turn.summary);
+                openNotification("success", "복사되었습니다.");
+              }}
+            />
           </Flex>
         </div>
       ) : (
@@ -383,12 +396,12 @@ const Learning = ({
               >
                 {(
                   [
-                    ["", "통합"],
-                    ["Learning", "학습"],
-                    ["MeetUp / Seminar", "사례"],
-                    ["framework", "문서"],
+                    ["", "통합", <GlobalOutlined />],
+                    ["Learning", "학습", <BookOutlined />],
+                    ["MeetUp / Seminar", "사례", <CompassOutlined />],
+                    ["framework", "문서", <FileTextOutlined />],
                   ] as const
-                ).map(([key, label]) => (
+                ).map(([key, label, icon]) => (
                   <Button
                     key={key}
                     type={selectedCategory === key ? "primary" : "default"}
@@ -407,7 +420,7 @@ const Learning = ({
                     }}
                     className={`${styles.modelButton} ${selectedCategory === key ? styles.modelButtonActive : ""}`}
                   >
-                    {label}
+                    {icon} {label}
                   </Button>
                 ))}
               </Space>
