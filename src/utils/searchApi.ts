@@ -11,7 +11,6 @@ import {
   StreamMetaData,
   StreamDoneData,
   StreamErrorData,
-  ChatStreamOptions,
   ChatRoomData,
   Turn,
 } from "@/app/Interface";

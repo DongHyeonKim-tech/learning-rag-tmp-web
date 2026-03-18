@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Flex } from "antd";
 import Learning from "@/app/components/Learning";
-import Framework from "@/app/components/Framework";
 import styles from "@/styles/search.module.css";
 import Sidebar from "@/app/layout/Sidebar";
 import { getChatMessages, getChatRooms } from "@/utils/searchApi";
@@ -11,7 +10,6 @@ import { openNotification } from "@/utils/common";
 import { ChatRoomData, Turn } from "@/app/Interface";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("learning");
   const [searchInput, setSearchInput] = useState(
     "캐드 import 하는 방법 알려줘"
   );
@@ -112,26 +110,19 @@ export default function Home() {
           chatId={chatId}
         />
         <div className={styles.pageContainer}>
-          {activeTab === "learning" ? (
-            <Learning
-              searchInput={searchInput}
-              setSearchInput={setSearchInput}
-              chatId={chatId}
-              onStreamMetaUpdate={handleLearningStreamMeta}
-              messageTurns={messageTurns}
-              setMessageTurns={setMessageTurns}
-              empNo={"20230808"}
-              currentTurn={currentTurn}
-              setCurrentTurn={setCurrentTurn}
-              setNewChatLoading={setNewChatLoading}
-              setChatRooms={setChatRooms}
-            />
-          ) : (
-            <Framework
-              searchInput={searchInput}
-              setSearchInput={setSearchInput}
-            />
-          )}
+          <Learning
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+            chatId={chatId}
+            onStreamMetaUpdate={handleLearningStreamMeta}
+            messageTurns={messageTurns}
+            setMessageTurns={setMessageTurns}
+            empNo={"20230808"}
+            currentTurn={currentTurn}
+            setCurrentTurn={setCurrentTurn}
+            setNewChatLoading={setNewChatLoading}
+            setChatRooms={setChatRooms}
+          />
         </div>
       </Flex>
     </div>

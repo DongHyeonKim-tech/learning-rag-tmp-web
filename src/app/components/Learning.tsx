@@ -16,15 +16,7 @@ import {
   ChatRoomData,
 } from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
-import {
-  notification,
-  Card,
-  Typography,
-  Spin,
-  Flex,
-  Button,
-  Space,
-} from "antd";
+import { notification, Card, Spin, Flex, Button, Space } from "antd";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,8 +33,6 @@ import {
   GlobalOutlined,
   LikeOutlined,
 } from "@ant-design/icons";
-
-const { Text } = Typography;
 
 const Learning = ({
   searchInput,
