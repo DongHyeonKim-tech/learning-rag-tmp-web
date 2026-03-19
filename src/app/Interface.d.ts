@@ -4,6 +4,7 @@ export interface SearchResult {
   snippet: string;
   video_url: string;
   video_label: string | null;
+  images: string[];
 }
 
 export interface SearchResponse {
@@ -18,6 +19,7 @@ export interface SearchSource {
   video_url: string;
   video_label: string;
   snippet: string;
+  images: string[];
 }
 
 export interface SearchResponseOpenAI {

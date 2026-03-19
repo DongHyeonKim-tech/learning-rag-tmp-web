@@ -188,6 +188,7 @@ const Search = ({
           snippet: source.snippet,
           video_url: source.video_url,
           video_label: source.video_label,
+          images: source.images,
         })
       );
 

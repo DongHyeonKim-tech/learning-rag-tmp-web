@@ -57,7 +57,6 @@ a {
 .markdown p {
   font-size: 18px;
   margin: 10px 0px 3px 0px;
-  font-weight: 600;
 }
 
 .markdown hr {
@@ -67,4 +66,9 @@ a {
 
 .markdown a {
   color: #667eea;
+}
+
+.markdown img {
+  max-width: 700px;
+  object-fit: contain;
 }
