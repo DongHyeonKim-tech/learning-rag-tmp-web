@@ -55,8 +55,9 @@ a {
 }
 
 .markdown p {
-  margin: 0px 0px 10px 5px;
   font-size: 18px;
+  margin: 10px 0px 3px 0px;
+  font-weight: 600;
 }
 
 .markdown hr {
