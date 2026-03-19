@@ -162,7 +162,12 @@ export type ChatRoomData = {
   updatedAt?: string;
 };
 
-export type Turn = { query: string; summary: string; results: SearchResult[] };
+export type Turn = {
+  query: string;
+  summary: string;
+  results: SearchResult[];
+  filters?: string;
+};
 
 export type ChatMessage = {
   chatId: number;

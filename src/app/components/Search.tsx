@@ -124,16 +124,30 @@ const Search = ({
 
       setCurrentTurn((prev) =>
         prev
-          ? { ...prev, summary: "", results: [] }
-          : { query: searchInput, summary: "", results: [] }
+          ? { ...prev, summary: "", results: [], filters: selectedCategory }
+          : {
+              query: searchInput,
+              summary: "",
+              results: [],
+              filters: selectedCategory,
+            }
       );
 
       const response = await searchLearningOpenAIStream(searchParams, {
         onDelta(content) {
           setCurrentTurn((prev) =>
             prev
-              ? { ...prev, summary: (prev.summary ?? "") + content }
-              : { query: searchInput, summary: content, results: [] }
+              ? {
+                  ...prev,
+                  summary: (prev.summary ?? "") + content,
+                  filters: selectedCategory,
+                }
+              : {
+                  query: searchInput,
+                  summary: content,
+                  results: [],
+                  filters: selectedCategory,
+                }
           );
         },
       });
@@ -151,11 +165,17 @@ const Search = ({
       if (response.noContent) {
         setCurrentTurn((prev) =>
           prev
-            ? { ...prev, summary: "관련 정보가 없습니다.", results: [] }
+            ? {
+                ...prev,
+                summary: "관련 정보가 없습니다.",
+                results: [],
+                filters: selectedCategory,
+              }
             : {
                 query: searchInput,
                 summary: "관련 정보가 없습니다.",
                 results: [],
+                filters: selectedCategory,
               }
         );
         return;
@@ -177,11 +197,13 @@ const Search = ({
               ...prev,
               summary: prev.summary || response.summary || "",
               results: convertedResults,
+              filters: selectedCategory,
             }
           : {
               query: searchInput,
               summary: response.summary || "",
               results: convertedResults,
+              filters: selectedCategory,
             }
       );
     } catch (err) {
@@ -208,7 +230,12 @@ const Search = ({
       if (currentTurn?.query && !searchLoading) {
         setMessageTurns((prev) => [...prev, currentTurn]);
       }
-      setCurrentTurn({ query: searchInput, summary: "", results: [] });
+      setCurrentTurn({
+        query: searchInput,
+        summary: "",
+        results: [],
+        filters: selectedCategory,
+      });
       setSearchLoading(true);
       onSearchOpenAI();
     },
@@ -261,6 +288,19 @@ const Search = ({
     currentTurn?.query ||
     (currentTurn && (currentTurn.summary || currentTurn.results.length > 0));
 
+  const renderFilterIcon = (filters: string) => {
+    switch (filters) {
+      case "Learning":
+        return <BookOutlined />;
+      case "MeetUp / Seminar":
+        return <CompassOutlined />;
+      case "framework":
+        return <FileTextOutlined />;
+      case "all":
+        return <GlobalOutlined />;
+    }
+  };
+
   return (
     <>
       <Card className={styles.contentCard}>
@@ -276,9 +316,16 @@ const Search = ({
                 className={styles.chatRow}
               >
                 <div
-                  className={`${styles.chatBubble} ${styles.chatBubbleUser}`}
+                  className={`${styles.chatBubble} ${styles.chatBubbleUser} ${turn.filters ? styles.chatBubbleUserWithFilter : ""}`}
                 >
-                  {turn.query}
+                  {turn.filters && (
+                    <span className={styles.chatBubbleUserIcon}>
+                      {renderFilterIcon(turn.filters)}
+                    </span>
+                  )}
+                  <span className={styles.chatBubbleUserText}>
+                    {turn.query}
+                  </span>
                 </div>
               </div>,
               <div
@@ -292,8 +339,13 @@ const Search = ({
               <>
                 <div className={styles.chatRow}>
                   <div
-                    className={`${styles.chatBubble} ${styles.chatBubbleUser}`}
+                    className={`${styles.chatBubble} ${styles.chatBubbleUser} ${currentTurn.filters ? styles.chatBubbleUserWithFilter : ""}`}
                   >
+                    {currentTurn.filters && (
+                      <span className={styles.chatBubbleUserIcon}>
+                        {renderFilterIcon(currentTurn.filters)}
+                      </span>
+                    )}
                     {currentTurn.query}
                   </div>
                 </div>
