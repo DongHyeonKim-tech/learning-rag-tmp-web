@@ -27,12 +27,10 @@ import {
   BookOutlined,
   CommentOutlined,
   CompassOutlined,
-  CopyOutlined,
-  DislikeOutlined,
   FileTextOutlined,
   GlobalOutlined,
-  LikeOutlined,
 } from "@ant-design/icons";
+import Image from "next/image";
 
 const Search = ({
   searchInput,
@@ -263,15 +261,33 @@ const Search = ({
             align="center"
             justify="flex-start"
           >
-            <LikeOutlined style={{ fontSize: 24 }} />
-            <DislikeOutlined style={{ fontSize: 24 }} />
-            <CommentOutlined style={{ fontSize: 24 }} />
-            <CopyOutlined
+            <Image
+              src="/search/images/thumbs_up.svg"
+              alt="thumbs_up"
+              width={24}
+              height={24}
+              className={styles.iconButton}
+            />
+            <Image
+              src="/search/images/thumbs_down.svg"
+              alt="thumbs_down"
+              width={24}
+              height={24}
+              className={styles.iconButton}
+            />
+            <CommentOutlined
               style={{ fontSize: 24 }}
+              className={styles.iconButton}
+            />
+            <Image
+              src="/search/images/copy.svg"
+              alt="copy"
+              width={24}
+              height={24}
+              className={styles.iconButton}
               onClick={() => {
-                console.log("turn.summary: ", turn.summary);
                 navigator.clipboard.writeText(turn.summary);
-                openNotification("success", "복사되었습니다.");
+                notification.success({ message: "복사되었습니다." });
               }}
             />
           </Flex>

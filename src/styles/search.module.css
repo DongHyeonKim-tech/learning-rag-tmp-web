@@ -387,3 +387,9 @@
   align-items: center;
   gap: 12px;
 }
+
+.iconButton {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
