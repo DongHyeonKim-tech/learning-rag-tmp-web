@@ -8,7 +8,10 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import { searchLearningOpenAIStream } from "@/utils/searchApi";
+import {
+  searchLearningOpenAIStream,
+  updateChatMessageRating,
+} from "@/utils/searchApi";
 import {
   SearchResult,
   SearchParamsOpenAI,
@@ -22,15 +25,16 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import SearchForm from "@/app/components/SearchForm";
-import { openNotification } from "@/utils/common";
 import {
   BookOutlined,
   CommentOutlined,
   CompassOutlined,
+  CopyOutlined,
   FileTextOutlined,
   GlobalOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
+import FeedbackModal from "@/app/components/modal/FeedbackModal";
 
 const Search = ({
   searchInput,
@@ -66,15 +70,42 @@ const Search = ({
   const [selectedCategory, setSelectedCategory] = useState<
     "all" | "Learning" | "MeetUp / Seminar" | "framework"
   >("all");
-
+  const [selectedFeedbackModalMessageId, setSelectedFeedbackModalMessageId] =
+    useState<number | null>(null);
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
     console.log("messageTurns: ", messageTurns);
   }, [messageTurns]);
 
   const SCROLL_BOTTOM_THRESHOLD = 24;
+
+  const onCancelFeedbackModal = useCallback(() => {
+    setSelectedFeedbackModalMessageId(null);
+    setFeedbackModalOpen(false);
+  }, []);
+
+  const openFeedbackModal = useCallback((messageId: number) => {
+    setSelectedFeedbackModalMessageId(messageId);
+    setFeedbackModalOpen(true);
+  }, []);
+
+  const updateMessageTurns = useCallback(
+    (messageId: number, feedbackId: number) => {
+      console.log("updateMessageTurns: ", messageId, feedbackId);
+      setMessageTurns((prev) =>
+        prev.map((turn) =>
+          turn.messageId === messageId
+            ? { ...turn, feedbackId: feedbackId }
+            : turn
+        )
+      );
+    },
+    []
+  );
 
   const checkAtBottom = useCallback((el: HTMLDivElement | null) => {
     if (!el) return false;
@@ -124,10 +155,12 @@ const Search = ({
         prev
           ? { ...prev, summary: "", results: [], filters: selectedCategory }
           : {
+              messageId: null,
               query: searchInput,
               summary: "",
               results: [],
               filters: selectedCategory,
+              rating: 0,
             }
       );
 
@@ -139,12 +172,15 @@ const Search = ({
                   ...prev,
                   summary: (prev.summary ?? "") + content,
                   filters: selectedCategory,
+                  rating: 0,
                 }
               : {
+                  messageId: null,
                   query: searchInput,
                   summary: content,
                   results: [],
                   filters: selectedCategory,
+                  rating: 0,
                 }
           );
         },
@@ -168,12 +204,15 @@ const Search = ({
                 summary: "관련 정보가 없습니다.",
                 results: [],
                 filters: selectedCategory,
+                rating: 0,
               }
             : {
+                messageId: null,
                 query: searchInput,
                 summary: "관련 정보가 없습니다.",
                 results: [],
                 filters: selectedCategory,
+                rating: 0,
               }
         );
         return;
@@ -197,12 +236,15 @@ const Search = ({
               summary: prev.summary || response.summary || "",
               results: convertedResults,
               filters: selectedCategory,
+              rating: 0,
             }
           : {
+              messageId: null,
               query: searchInput,
               summary: response.summary || "",
               results: convertedResults,
               filters: selectedCategory,
+              rating: 0,
             }
       );
     } catch (err) {
@@ -230,16 +272,39 @@ const Search = ({
         setMessageTurns((prev) => [...prev, currentTurn]);
       }
       setCurrentTurn({
+        messageId: null,
         query: searchInput,
         summary: "",
         results: [],
         filters: selectedCategory,
+        rating: 0,
       });
       setSearchLoading(true);
       onSearchOpenAI();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchInput, currentTurn, searchLoading, onSearchOpenAI]
+  );
+
+  const handleUpdateChatMessageRating = useCallback(
+    async (messageId: number, rating: number) => {
+      try {
+        const response = await updateChatMessageRating(messageId, rating);
+        if (response) {
+          notification.success({ message: "평점이 업데이트되었습니다." });
+          setMessageTurns((prev) =>
+            prev.map((turn) =>
+              turn.messageId === messageId ? { ...turn, rating: rating } : turn
+            )
+          );
+        }
+      } catch (err) {
+        notification.error({
+          message: "평점 업데이트 중 오류가 발생했습니다.",
+        });
+      }
+    },
+    [messageTurns]
   );
 
   const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;
@@ -262,24 +327,63 @@ const Search = ({
             justify="flex-start"
           >
             <Image
-              src="/search/images/thumbs_up.svg"
+              src={
+                turn.rating === 1
+                  ? "/search/images/thumbs_up_primary.svg"
+                  : "/search/images/thumbs_up.svg"
+              }
               alt="thumbs_up"
               width={24}
               height={24}
               className={styles.iconButton}
+              onClick={() => {
+                if (turn.messageId) {
+                  handleUpdateChatMessageRating(
+                    turn.messageId,
+                    turn.rating === 1 ? 0 : 1
+                  );
+                }
+              }}
             />
             <Image
-              src="/search/images/thumbs_down.svg"
+              src={
+                turn.rating === -1
+                  ? "/search/images/thumbs_down_primary.svg"
+                  : "/search/images/thumbs_down.svg"
+              }
               alt="thumbs_down"
               width={24}
               height={24}
               className={styles.iconButton}
+              onClick={() => {
+                if (turn.messageId) {
+                  handleUpdateChatMessageRating(
+                    turn.messageId,
+                    turn.rating === -1 ? 0 : -1
+                  );
+                }
+              }}
             />
-            <CommentOutlined
-              style={{ fontSize: 24 }}
-              className={styles.iconButton}
-            />
-            <Image
+            {turn.feedbackId ? (
+              <CommentOutlined
+                style={{ fontSize: 24 }}
+                className={styles.iconButton}
+                onClick={() => {
+                  console.log("turn: ", turn);
+                  openFeedbackModal(turn.messageId ?? 0);
+                }}
+              />
+            ) : (
+              <CopyOutlined
+                style={{ fontSize: 24 }}
+                className={styles.iconButton}
+                onClick={() => {
+                  console.log("turn: ", turn);
+                  openFeedbackModal(turn.messageId ?? 0);
+                }}
+              />
+            )}
+            {/* <Image
               src="/search/images/copy.svg"
               alt="copy"
               width={24}
@@ -289,7 +393,7 @@ const Search = ({
                 navigator.clipboard.writeText(turn.summary);
                 notification.success({ message: "복사되었습니다." });
               }}
-            />
+            /> */}
           </Flex>
         </div>
       ) : (
@@ -472,6 +576,12 @@ const Search = ({
           </div>
         </Flex>
       </Card>
+      <FeedbackModal
+        open={feedbackModalOpen}
+        onCancel={onCancelFeedbackModal}
+        messageId={selectedFeedbackModalMessageId}
+        updateMessageTurns={updateMessageTurns}
+      />
     </>
   );
 };

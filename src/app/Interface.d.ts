@@ -165,10 +165,13 @@ export type ChatRoomData = {
 };
 
 export type Turn = {
+  messageId: number | null;
   query: string;
   summary: string;
   results: SearchResult[];
   filters?: string;
+  rating: number;
+  feedbackId?: number | null;
 };
 
 export type ChatMessage = {
@@ -177,5 +180,17 @@ export type ChatMessage = {
   content: string;
   createdAt: string;
   responseTimeMs: number;
+  rating: number;
   role: string;
+};
+
+export type Code = {
+  codeId: number;
+  parentCodeId: number;
+  codeGroup: string;
+  codeValue: string;
+  codeName: string;
+  codeDesc: string;
+  sortOrder: number;
+  isActive: boolean;
 };

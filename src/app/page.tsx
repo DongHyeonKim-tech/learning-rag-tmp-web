@@ -4,7 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 import { Flex } from "antd";
 import styles from "@/styles/search.module.css";
 import Sidebar from "@/app/layout/Sidebar";
-import { getChatMessages, getChatRooms } from "@/utils/searchApi";
+import {
+  deleteChatRoom,
+  getChatMessages,
+  getChatRooms,
+} from "@/utils/searchApi";
 import { openNotification } from "@/utils/common";
 import { ChatRoomData, Turn } from "@/app/Interface";
 import Search from "@/app/components/Search";
@@ -99,6 +103,19 @@ export default function Home() {
     []
   );
 
+  const deleteChatRoomHandler = async (chatId: number) => {
+    if (!chatId) return;
+    try {
+      const success = await deleteChatRoom(chatId, "20230808");
+      if (success) {
+        fetchChatRooms();
+        openNotification("success", "채팅방 삭제를 완료했습니다.");
+      }
+    } catch {
+      openNotification("error", "채팅방 삭제 중 에러가 발생했습니다.");
+    }
+  };
+
   return (
     <div className={styles.pageRoot}>
       <Flex gap={24}>
@@ -108,6 +125,7 @@ export default function Home() {
           createTempChatRoomHandler={createTempChatRoomHandler}
           newChatLoading={newChatLoading}
           chatId={chatId}
+          deleteChatRoomHandler={deleteChatRoomHandler}
         />
         <div className={styles.pageContainer}>
           <Search

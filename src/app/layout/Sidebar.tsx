@@ -2,7 +2,8 @@
 
 import React from "react";
 import styles from "@/styles/sidebar.module.css";
-import { Button } from "antd";
+import { Button, Flex, Modal } from "antd";
+import Image from "next/image";
 
 const Sidebar = ({
   chatRooms,
@@ -10,13 +11,37 @@ const Sidebar = ({
   createTempChatRoomHandler,
   newChatLoading,
   chatId,
+  deleteChatRoomHandler,
 }: {
   chatRooms: any[];
   fetchChatMessages: (chatId: number) => void;
   createTempChatRoomHandler: () => void;
   newChatLoading: boolean;
   chatId: number | null;
+  deleteChatRoomHandler: (chatId: number) => void;
 }) => {
+  const confirmDeleteChatRoom = async (title: string, chatId: number) => {
+    Modal.confirm({
+      title: "채팅방 삭제",
+      content: `"${title}" 채팅방을 삭제하시겠습니까?`,
+      onOk: () => {
+        deleteChatRoomHandler(chatId);
+      },
+      onCancel: () => {
+        return;
+      },
+      okText: "삭제",
+      cancelText: "취소",
+      okButtonProps: {
+        type: "primary",
+        danger: true,
+      },
+      cancelButtonProps: {
+        type: "default",
+      },
+    });
+  };
+
   return (
     <div className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
@@ -75,17 +100,19 @@ const Sidebar = ({
         <div className={styles.chatRoomList}>
           {chatRooms.map((item) => {
             return (
-              <div
+              <Flex
                 className={styles.chatTitle}
                 style={{
-                  border: "1px solid #d9d9d9",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  padding: "6px 10px",
                   fontWeight: chatId === item.chatId ? "bold" : "normal",
                 }}
                 key={item.chatId}
-                onClick={() => {
+                onClick={(e) => {
+                  // If click is directly on the image, do not fetch messages.
+                  if (
+                    (e.target as HTMLElement).closest("img") // to support SSR with next/image and native img
+                  ) {
+                    return;
+                  }
                   fetchChatMessages(item.chatId);
                 }}
               >
@@ -94,7 +121,19 @@ const Sidebar = ({
                 ) : (
                   item.title
                 )}
-              </div>
+                {item.chatId && (
+                  <Image
+                    src="/search/images/close-icon.png"
+                    alt="delete"
+                    width={16}
+                    height={16}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      confirmDeleteChatRoom(item.title, item.chatId);
+                    }}
+                  />
+                )}
+              </Flex>
             );
           })}
         </div>

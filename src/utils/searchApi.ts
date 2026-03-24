@@ -13,6 +13,7 @@ import {
   StreamErrorData,
   ChatRoomData,
   Turn,
+  Code,
 } from "@/app/Interface";
 import camelcaseKeys from "camelcase-keys";
 import { client } from "@/utils/client";
@@ -420,4 +421,90 @@ export async function getChatMessages(
     throw new Error(`채팅방 목록 조회 실패: ${response.status}`);
   }
   return camelcaseKeys(response.data);
+}
+
+export async function deleteChatRoom(
+  chatId: number,
+  empNo: string
+): Promise<boolean> {
+  const response = await client.delete(`/chat/rooms/${chatId}`, {
+    headers: { "Content-Type": "application/json" },
+    params: {
+      emp_no: empNo,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`채팅방 삭제 실패: ${response.status}`);
+  }
+  return response.data.success;
+}
+
+export async function updateChatMessageRating(
+  messageId: number,
+  rating: number
+): Promise<boolean> {
+  const response = await client.patch(`/chat/messages/${messageId}/rating`, {
+    rating: rating,
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`채팅방 메시지 평점 업데이트 실패: ${response.status}`);
+  }
+  return response.data.success;
+}
+
+export async function getCodesByValue(
+  codeGroup: string,
+  parentCodeValue: string,
+  includeInactive: boolean = false
+): Promise<Code[]> {
+  const response = await client.get(`/feedback/common-codes`, {
+    headers: { "Content-Type": "application/json" },
+    params: {
+      code_group: codeGroup,
+      parent_code_value: parentCodeValue,
+      include_inactive: includeInactive,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`코드 조회 실패: ${response.status}`);
+  }
+  return camelcaseKeys(response.data);
+}
+
+export async function createFeedback(
+  empNo: string,
+  feedbackType: string,
+  feedbackText: string,
+  messageId?: number
+): Promise<number> {
+  const response = await client.post(`/feedback`, {
+    emp_no: empNo,
+    feedback_type: feedbackType,
+    feedback_text: feedbackText,
+    message_id: messageId,
+    chat_id: null,
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`피드백 생성 실패: ${response.status}`);
+  }
+  return response.data.feedback_id;
+}
+
+export async function createFeedbackReasonMaps(
+  feedbackId: number,
+  codeIds: number[]
+): Promise<void> {
+  const response = await client.post(`/feedback/reason-maps`, {
+    feedback_id: feedbackId,
+    code_ids: codeIds,
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`피드백 이유 매핑 생성 실패: ${response.status}`);
+  }
+  return response.data;
 }
