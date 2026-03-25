@@ -292,8 +292,13 @@
 .chatScroll {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
   padding: 12px 0;
+}
+
+.chatTurnBlockWrapper {
+  display: flex;
+  flex-direction: column;
 }
 
 .chatRow {
@@ -365,7 +370,8 @@
   /* border: 1px solid #d0daf0; */
   color: #333;
   border-radius: 10px;
-  padding: 15px 12px;
+  /* padding: 15px 12px; */
+  padding: 0px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
