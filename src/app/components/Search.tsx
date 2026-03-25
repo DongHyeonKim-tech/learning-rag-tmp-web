@@ -79,6 +79,10 @@ const Search = ({
 
   useEffect(() => {
     console.log("messageTurns: ", messageTurns);
+    scrollContainerRef.current?.scrollTo({
+      top: scrollContainerRef.current?.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messageTurns]);
 
   const SCROLL_BOTTOM_THRESHOLD = 24;
@@ -433,31 +437,36 @@ const Search = ({
           <div className={styles.chatScroll}>
             {messageTurns.flatMap((turn, i) => [
               <div
-                key={`u-${i}`}
-                className={styles.chatRow}
+                key={`turn-${i}`}
+                className={styles.chatTurnBlockWrapper}
               >
                 <div
-                  className={`${styles.chatBubble} ${styles.chatBubbleUser} ${turn.filters ? styles.chatBubbleUserWithFilter : ""}`}
+                  key={`u-${i}`}
+                  className={styles.chatRow}
                 >
-                  {turn.filters && (
-                    <span className={styles.chatBubbleUserIcon}>
-                      {renderFilterIcon(turn.filters)}
+                  <div
+                    className={`${styles.chatBubble} ${styles.chatBubbleUser} ${turn.filters ? styles.chatBubbleUserWithFilter : ""}`}
+                  >
+                    {turn.filters && (
+                      <span className={styles.chatBubbleUserIcon}>
+                        {renderFilterIcon(turn.filters)}
+                      </span>
+                    )}
+                    <span className={styles.chatBubbleUserText}>
+                      {turn.query}
                     </span>
-                  )}
-                  <span className={styles.chatBubbleUserText}>
-                    {turn.query}
-                  </span>
+                  </div>
                 </div>
-              </div>,
-              <div
-                key={`a-${i}`}
-                className={`${styles.chatRow} ${styles.chatRowAssistant}`}
-              >
-                {renderAssistantContent(turn)}
+                <div
+                  key={`a-${i}`}
+                  className={`${styles.chatRow} ${styles.chatRowAssistant}`}
+                >
+                  {renderAssistantContent(turn)}
+                </div>
               </div>,
             ])}
             {currentTurn?.query && (
-              <>
+              <div className={styles.chatTurnBlockWrapper}>
                 <div className={styles.chatRow}>
                   <div
                     className={`${styles.chatBubble} ${styles.chatBubbleUser} ${currentTurn.filters ? styles.chatBubbleUserWithFilter : ""}`}
@@ -492,7 +501,7 @@ const Search = ({
                     {renderAssistantContent(currentTurn)}
                   </div>
                 )}
-              </>
+              </div>
             )}
             {!hasContent && (
               <div className={styles.emptyState}>
