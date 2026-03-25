@@ -13,6 +13,7 @@ import {
   createFeedback,
   createFeedbackReasonMaps,
   getCodesByValue,
+  getFeedback,
 } from "@/utils/searchApi";
 
 const { TextArea } = Input;
@@ -21,15 +22,16 @@ export const FeedbackModal = ({
   open,
   onCancel,
   messageId,
+  feedbackId,
   updateMessageTurns,
 }: {
   open: boolean;
   onCancel: () => void;
   messageId?: number | null;
+  feedbackId?: number;
   updateMessageTurns: (messageId: number, feedbackId: number) => void;
 }) => {
   const [feedbackText, setFeedbackText] = useState<string>("");
-  const [rating, setRating] = useState<number>(0);
   const [feedbackCodes, setFeedbackCodes] = useState<Code[]>([]);
   const [selectedFeedbackCodes, setSelectedFeedbackCodes] = useState<number[]>(
     []
@@ -48,10 +50,22 @@ export const FeedbackModal = ({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (feedbackId) {
+      const fetchFeedback = async () => {
+        const feedback = await getFeedback(feedbackId);
+        if (feedback) {
+          setFeedbackText(feedback.feedbackText);
+          setSelectedFeedbackCodes(feedback.reasonCodes ?? []);
+        }
+      };
+      fetchFeedback();
+    }
+  }, [feedbackId]);
+
   const closeFeedbackModal = () => {
     onCancel();
     setFeedbackText("");
-    setRating(0);
     setSelectedFeedbackCodes([]);
     setFeedbackCodes([]);
     setLoading(false);
@@ -80,7 +94,7 @@ export const FeedbackModal = ({
     } finally {
       setLoading(false);
     }
-  }, [selectedFeedbackCodes, feedbackText, messageId, rating]);
+  }, [selectedFeedbackCodes, feedbackText, messageId]);
 
   return (
     <Modal

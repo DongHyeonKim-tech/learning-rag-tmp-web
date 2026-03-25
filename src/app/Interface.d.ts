@@ -194,3 +194,15 @@ export type Code = {
   sortOrder: number;
   isActive: boolean;
 };
+
+export type Feedback = {
+  feedbackId: number;
+  feedbackType: string;
+  feedbackText: string;
+  createdAt: string;
+  empNo: string;
+  chatId?: number | null;
+  messageId?: number | null;
+  reasonCodes?: number[] | null;
+  reasonNames?: string | null;
+};

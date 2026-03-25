@@ -72,6 +72,8 @@ const Search = ({
   >("all");
   const [selectedFeedbackModalMessageId, setSelectedFeedbackModalMessageId] =
     useState<number | null>(null);
+  const [selectedFeedbackModalFeedbackId, setSelectedFeedbackModalFeedbackId] =
+    useState<number | null>(null);
   const [stickToBottom, setStickToBottom] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +91,7 @@ const Search = ({
 
   const onCancelFeedbackModal = useCallback(() => {
     setSelectedFeedbackModalMessageId(null);
+    setSelectedFeedbackModalFeedbackId(null);
     setFeedbackModalOpen(false);
   }, []);
 
@@ -375,6 +378,7 @@ const Search = ({
                 onClick={() => {
                   console.log("turn: ", turn);
                   openFeedbackModal(turn.messageId ?? 0);
+                  setSelectedFeedbackModalFeedbackId(turn.feedbackId ?? 0);
                 }}
               />
             ) : (
@@ -589,6 +593,7 @@ const Search = ({
         open={feedbackModalOpen}
         onCancel={onCancelFeedbackModal}
         messageId={selectedFeedbackModalMessageId}
+        feedbackId={selectedFeedbackModalFeedbackId ?? undefined}
         updateMessageTurns={updateMessageTurns}
       />
     </>

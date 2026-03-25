@@ -14,6 +14,7 @@ import {
   ChatRoomData,
   Turn,
   Code,
+  Feedback,
 } from "@/app/Interface";
 import camelcaseKeys from "camelcase-keys";
 import { client } from "@/utils/client";
@@ -472,6 +473,22 @@ export async function getCodesByValue(
     throw new Error(`코드 조회 실패: ${response.status}`);
   }
   return camelcaseKeys(response.data);
+}
+
+export async function getFeedback(
+  feedbackId: number
+): Promise<Feedback | null> {
+  const response = await client.get(`/feedback/with-reasons`, {
+    headers: { "Content-Type": "application/json" },
+    params: {
+      feedback_id: feedbackId,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`피드백 조회 실패: ${response.status}`);
+  }
+  return response.data ? camelcaseKeys(response.data)[0] : null;
 }
 
 export async function createFeedback(
