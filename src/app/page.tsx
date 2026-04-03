@@ -118,15 +118,15 @@ export default function Home() {
 
   return (
     <div className={styles.pageRoot}>
-      <Flex gap={24}>
-        <Sidebar
-          chatRooms={chatRooms}
-          fetchChatMessages={fetchChatMessages}
-          createTempChatRoomHandler={createTempChatRoomHandler}
-          newChatLoading={newChatLoading}
-          chatId={chatId}
-          deleteChatRoomHandler={deleteChatRoomHandler}
-        />
+      <Sidebar
+        chatRooms={chatRooms}
+        fetchChatMessages={fetchChatMessages}
+        createTempChatRoomHandler={createTempChatRoomHandler}
+        newChatLoading={newChatLoading}
+        chatId={chatId}
+        deleteChatRoomHandler={deleteChatRoomHandler}
+      />
+      <div>
         <div className={styles.pageContainer}>
           <Search
             searchInput={searchInput}
@@ -142,7 +142,7 @@ export default function Home() {
             setChatRooms={setChatRooms}
           />
         </div>
-      </Flex>
+      </div>
     </div>
   );
 }

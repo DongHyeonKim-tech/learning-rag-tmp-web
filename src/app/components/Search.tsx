@@ -31,10 +31,43 @@ import {
   CompassOutlined,
   CopyOutlined,
   FileTextOutlined,
-  GlobalOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
 import FeedbackModal from "@/app/components/modal/FeedbackModal";
+
+const searchCategoryList: {
+  key: "all" | "Learning" | "MeetUp / Seminar" | "framework";
+  label: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    key: "all",
+    label: "통합",
+    icon: (
+      <Image
+        src="/search/images/globe.svg"
+        alt="filter_all"
+        width={12}
+        height={12}
+      />
+    ),
+  },
+  {
+    key: "Learning",
+    label: "학습",
+    icon: <BookOutlined key="icon-book" />,
+  },
+  {
+    key: "MeetUp / Seminar",
+    label: "사례",
+    icon: <CompassOutlined key="icon-compass" />,
+  },
+  {
+    key: "framework",
+    label: "문서",
+    icon: <FileTextOutlined key="icon-filetext" />,
+  },
+];
 
 const Search = ({
   searchInput,
@@ -426,169 +459,137 @@ const Search = ({
       case "framework":
         return <FileTextOutlined />;
       case "all":
-        return <GlobalOutlined />;
+        return (
+          <Image
+            src="/search/images/globe.svg"
+            alt="filter_all"
+            width={12}
+            height={12}
+          />
+        );
     }
   };
 
   return (
     <>
-      <Card className={styles.contentCard}>
-        <div
-          ref={scrollContainerRef}
-          className={tabPanelClass}
-          onScroll={onScrollPanel}
-        >
-          <div className={styles.chatScroll}>
-            {messageTurns.flatMap((turn, i) => [
+      <div
+        ref={scrollContainerRef}
+        className={tabPanelClass}
+        onScroll={onScrollPanel}
+      >
+        <div className={styles.chatScroll}>
+          {messageTurns.flatMap((turn, i) => [
+            <div
+              key={`turn-${i}`}
+              className={styles.chatTurnBlockWrapper}
+            >
               <div
-                key={`turn-${i}`}
-                className={styles.chatTurnBlockWrapper}
+                key={`u-${i}`}
+                className={styles.chatRowUser}
               >
                 <div
-                  key={`u-${i}`}
-                  className={styles.chatRow}
+                  className={`${styles.chatBubble} ${styles.chatBubbleUser} ${turn.filters ? styles.chatBubbleUserWithFilter : ""}`}
                 >
-                  <div
-                    className={`${styles.chatBubble} ${styles.chatBubbleUser} ${turn.filters ? styles.chatBubbleUserWithFilter : ""}`}
-                  >
-                    {turn.filters && (
-                      <span className={styles.chatBubbleUserIcon}>
-                        {renderFilterIcon(turn.filters)}
-                      </span>
-                    )}
-                    <span className={styles.chatBubbleUserText}>
-                      {turn.query}
+                  <span className={styles.chatBubbleUserText}>
+                    {turn.query}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                key={`a-${i}`}
+                className={`${styles.chatRow} ${styles.chatRowAssistant}`}
+              >
+                <div>
+                  {turn.filters && (
+                    <span className={styles.chatBubbleUserIcon}>
+                      {renderFilterIcon(turn.filters)}
                     </span>
-                  </div>
+                  )}
                 </div>
+                {renderAssistantContent(turn)}
+              </div>
+            </div>,
+          ])}
+          {currentTurn?.query && (
+            <div className={styles.chatTurnBlockWrapper}>
+              <div className={styles.chatRow}>
                 <div
-                  key={`a-${i}`}
-                  className={`${styles.chatRow} ${styles.chatRowAssistant}`}
+                  className={`${styles.chatBubble} ${styles.chatBubbleUser} ${currentTurn.filters ? styles.chatBubbleUserWithFilter : ""}`}
                 >
-                  {renderAssistantContent(turn)}
+                  {currentTurn.filters && (
+                    <span className={styles.chatBubbleUserIcon}>
+                      {renderFilterIcon(currentTurn.filters)}
+                    </span>
+                  )}
+                  {currentTurn.query}
                 </div>
-              </div>,
-            ])}
-            {currentTurn?.query && (
-              <div className={styles.chatTurnBlockWrapper}>
-                <div className={styles.chatRow}>
+              </div>
+              {searchLoading &&
+              !currentTurn.summary &&
+              !currentTurn.results.length ? (
+                <div
+                  className={`${styles.chatRow} ${styles.chatRowAssistantLoading}`}
+                >
                   <div
-                    className={`${styles.chatBubble} ${styles.chatBubbleUser} ${currentTurn.filters ? styles.chatBubbleUserWithFilter : ""}`}
+                    className={`${styles.chatBubble} ${styles.chatBubbleAssistant} ${styles.chatLoadingBubble}`}
                   >
-                    {currentTurn.filters && (
-                      <span className={styles.chatBubbleUserIcon}>
-                        {renderFilterIcon(currentTurn.filters)}
-                      </span>
-                    )}
-                    {currentTurn.query}
+                    <Spin size="small" />
+                    <span className={styles.loadingText}>검색 중입니다...</span>
                   </div>
                 </div>
-                {searchLoading &&
-                !currentTurn.summary &&
-                !currentTurn.results.length ? (
-                  <div
-                    className={`${styles.chatRow} ${styles.chatRowAssistantLoading}`}
-                  >
-                    <div
-                      className={`${styles.chatBubble} ${styles.chatBubbleAssistant} ${styles.chatLoadingBubble}`}
-                    >
-                      <Spin size="small" />
-                      <span className={styles.loadingText}>
-                        검색 중입니다...
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    className={`${styles.chatRow} ${styles.chatRowAssistant}`}
-                  >
-                    {renderAssistantContent(currentTurn)}
-                  </div>
-                )}
-              </div>
-            )}
-            {!hasContent && (
-              <div className={styles.emptyState}>
-                BIM에 관련된 질문을 입력하고 검색해보세요
-              </div>
-            )}
+              ) : (
+                <div className={`${styles.chatRow} ${styles.chatRowAssistant}`}>
+                  {renderAssistantContent(currentTurn)}
+                </div>
+              )}
+            </div>
+          )}
+          {!hasContent && (
+            <div className={styles.emptyState}>
+              BIM에 관련된 질문을 입력하고 검색해보세요
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className={styles.searchForm}>
+        <div className={styles.searchCategorySection}>
+          <div className={styles.searchCategoryWrapper}>
+            {searchCategoryList.map((item) => (
+              <Button
+                key={item.key}
+                type={selectedCategory === item.key ? "primary" : "default"}
+                size="middle"
+                onClick={() => {
+                  setSelectedCategory(item.key);
+                  setSearchInput(
+                    item.key === "all"
+                      ? ""
+                      : item.key === "Learning"
+                        ? "캐드 import 하는 방법 알려줘"
+                        : item.key === "MeetUp / Seminar"
+                          ? "HDA BIM 어워드에 대해 알려줘"
+                          : "프로젝트 파일 생성"
+                  );
+                }}
+                className={`${styles.modelButton} ${selectedCategory === item.key ? styles.modelButtonActive : ""}`}
+              >
+                {item.icon} {item.label}
+              </Button>
+            ))}
           </div>
         </div>
 
-        <Flex
-          gap={12}
-          align="center"
-          className={styles.modelSection}
-          justify="center"
-          vertical
-        >
-          <Flex
-            gap={6}
-            align="center"
-            justify="space-around"
-            className={styles.fullWidth}
-          >
-            <Flex
-              gap={12}
-              align="center"
-              justify="center"
-            >
-              <Space
-                size="small"
-                wrap
-                className={styles.modelButtonWrap}
-              >
-                {(
-                  [
-                    ["all", "통합", <GlobalOutlined key="icon-global" />],
-                    ["Learning", "학습", <BookOutlined key="icon-book" />],
-                    [
-                      "MeetUp / Seminar",
-                      "사례",
-                      <CompassOutlined key="icon-compass" />,
-                    ],
-                    [
-                      "framework",
-                      "문서",
-                      <FileTextOutlined key="icon-filetext" />,
-                    ],
-                  ] as const
-                ).map(([key, label, icon]) => (
-                  <Button
-                    key={key}
-                    type={selectedCategory === key ? "primary" : "default"}
-                    size="middle"
-                    onClick={() => {
-                      setSelectedCategory(key);
-                      setSearchInput(
-                        key === "all"
-                          ? ""
-                          : key === "Learning"
-                            ? "캐드 import 하는 방법 알려줘"
-                            : key === "MeetUp / Seminar"
-                              ? "HDA BIM 어워드에 대해 알려줘"
-                              : "프로젝트 파일 생성"
-                      );
-                    }}
-                    className={`${styles.modelButton} ${selectedCategory === key ? styles.modelButtonActive : ""}`}
-                  >
-                    {icon} {label}
-                  </Button>
-                ))}
-              </Space>
-            </Flex>
-          </Flex>
-
-          <div className={styles.fullWidth}>
-            <SearchForm
-              value={searchInput}
-              onChange={setSearchInput}
-              onSubmit={handleSearchSubmit}
-              loading={searchLoading}
-            />
-          </div>
-        </Flex>
-      </Card>
+        <div className={styles.fullWidth}>
+          <SearchForm
+            value={searchInput}
+            onChange={setSearchInput}
+            onSubmit={handleSearchSubmit}
+            loading={searchLoading}
+          />
+        </div>
+      </div>
       <FeedbackModal
         open={feedbackModalOpen}
         onCancel={onCancelFeedbackModal}
