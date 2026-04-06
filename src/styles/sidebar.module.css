@@ -2,7 +2,7 @@
   display: flex;
   width: 376px;
   height: 100vh;
-  padding: 24px 28px;
+  padding: 24px 12px 24px 28px;
   flex-direction: column;
   align-items: flex-start;
   gap: 32px;
@@ -87,24 +87,6 @@
   align-items: flex-start;
   gap: 16px;
   align-self: stretch;
-  max-height: 550px;
-  overflow-y: auto;
-}
-
-.sidebarContent::-webkit-scrollbar {
-  width: 8px;
-  background: var(--color-gray-300, #ced2d9);
-  border-radius: 106.667px;
-}
-
-.sidebarContent::-webkit-scrollbar-thumb {
-  background: var(--color-gray-300, #ced2d9);
-  border-radius: 106.667px;
-}
-
-.sidebarContent {
-  scrollbar-color: var(--color-gray-300, #ced2d9) transparent;
-  scrollbar-width: thin;
 }
 
 .sidebarContentHeader {
@@ -131,11 +113,51 @@
 }
 
 .chatRoomList {
+  display: grid;
+  grid-template-rows: 1fr;
+  align-self: stretch;
+  scrollbar-gutter: stable;
+  /* opacity 1s ease; */
+  max-height: 550px;
+  overflow-y: auto;
+}
+
+.chatRoomList::-webkit-scrollbar {
+  width: 8px;
+  background: var(--color-gray-300, #ced2d9);
+  border-radius: 106.667px;
+}
+
+.chatRoomList::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300, #ced2d9);
+  border-radius: 106.667px;
+}
+
+.chatRoomList {
+  scrollbar-color: var(--color-gray-300, #ced2d9) transparent;
+  scrollbar-width: thin;
+}
+
+.chatRoomListInner {
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
   align-self: stretch;
+  max-height: 550px;
+  overflow-y: auto;
+  opacity: 1;
+  transition: max-height 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-right: 12px;
+  /* opacity 0.2s ease; */
+}
+
+.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .chatRoomItem {
@@ -187,4 +209,25 @@
   font-style: normal;
   font-weight: 500;
   line-height: 152%; /* 21.28px */
+}
+
+.removeChatRoomButtonWrapper {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  justify-content: center;
+  align-items: center;
+}
+
+.removeChatRoomButton {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  padding: 2.813px 2.812px 2.812px 2.813px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+
+  border-radius: 14.4px;
+  background: var(--color-gray-300, #ced2d9);
 }

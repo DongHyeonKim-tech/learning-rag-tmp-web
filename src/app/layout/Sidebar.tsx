@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import styles from "@/styles/sidebar.module.css";
 import { Button, Flex, Modal, Spin } from "antd";
 import Image from "next/image";
 import PlusIcon from "@/public/images/plus.svg";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const Sidebar = ({
   chatRooms,
@@ -21,6 +22,7 @@ const Sidebar = ({
   chatId: number | null;
   deleteChatRoomHandler: (chatId: number) => void;
 }) => {
+  const [collapsed, setCollapsed] = useState(false);
   const confirmDeleteChatRoom = async (title: string, chatId: number) => {
     Modal.confirm({
       title: "채팅방 삭제",
@@ -71,55 +73,77 @@ const Sidebar = ({
             alt="collapsed"
             width={11}
             height={6}
+            onClick={() => {
+              if (chatRooms.length === 0) return;
+              setCollapsed(!collapsed);
+            }}
           />
         </div>
-        <div className={styles.chatRoomList}>
-          {chatRooms.length > 0 ? (
-            chatRooms.map((item) => {
-              return (
-                <div
-                  className={`${styles.chatRoomItem} ${chatId === item.chatId ? styles.chatRoomItemActive : ""}`}
-                  style={{
-                    fontWeight: chatId === item.chatId ? "bold" : "normal",
-                  }}
-                  key={item.chatId}
-                  onClick={(e) => {
-                    // If click is directly on the image, do not fetch messages.
-                    if (
-                      (e.target as HTMLElement).closest("img") // to support SSR with next/image and native img
-                    ) {
-                      return;
-                    }
-                    fetchChatMessages(item.chatId);
-                  }}
-                >
-                  {newChatLoading && !item.chatId ? (
-                    <Spin size="small" />
-                  ) : (
-                    <span className={styles.chatRoomItemTitle}>
-                      {item.title}
-                    </span>
-                  )}
-                  {item.chatId && (
-                    <Image
-                      src="/search/images/close-icon.png"
-                      alt="delete"
-                      width={16}
-                      height={16}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        confirmDeleteChatRoom(item.title, item.chatId);
-                      }}
-                    />
-                  )}
-                </div>
-              );
-            })
-          ) : (
-            <div className={styles.emptyChatRoomList}>
-              채팅 목록이 없습니다.
-            </div>
-          )}
+        <div className={`${styles.chatRoomList}`}>
+          <div
+            className={`${styles.chatRoomListInner} ${collapsed ? styles.collapsed : ""}`}
+          >
+            {chatRooms.length > 0 ? (
+              chatRooms.map((item) => {
+                return (
+                  <div
+                    className={`${styles.chatRoomItem} ${chatId === item.chatId ? styles.chatRoomItemActive : ""}`}
+                    style={{
+                      fontWeight: chatId === item.chatId ? "bold" : "normal",
+                    }}
+                    key={item.chatId}
+                    onClick={(e) => {
+                      // If click is directly on the image, do not fetch messages.
+                      if (
+                        (e.target as HTMLElement).closest("img") // to support SSR with next/image and native img
+                      ) {
+                        return;
+                      }
+                      fetchChatMessages(item.chatId);
+                    }}
+                  >
+                    {newChatLoading && !item.chatId ? (
+                      <Spin
+                        indicator={
+                          <LoadingOutlined
+                            spin
+                            style={{
+                              color: "#6F7581",
+                            }}
+                          />
+                        }
+                        size="small"
+                      />
+                    ) : (
+                      <span className={styles.chatRoomItemTitle}>
+                        {item.title}
+                      </span>
+                    )}
+                    {item.chatId && (
+                      <div className={styles.removeChatRoomButtonWrapper}>
+                        <div className={styles.removeChatRoomButton}>
+                          <Image
+                            src="/search/images/close.svg"
+                            alt="delete"
+                            width={16}
+                            height={16}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmDeleteChatRoom(item.title, item.chatId);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className={styles.emptyChatRoomList}>
+                채팅 목록이 없습니다.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

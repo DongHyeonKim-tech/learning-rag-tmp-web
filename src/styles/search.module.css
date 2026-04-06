@@ -1,16 +1,37 @@
 /* page.tsx - 레이아웃 */
 .pageRoot {
   min-height: 100vh;
+  width: 100vw;
   display: inline-flex;
-  padding-right: 16px;
   align-items: center;
   gap: 16px;
+  background: var(--color-gray-50, #fcfcfd);
+}
+
+.topNavSection {
+  display: flex;
+  width: 1472px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.topNavWrapper {
+  display: flex;
+  padding: 6px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 20px;
+}
+
+.topNavDots {
+  cursor: pointer;
 }
 
 .pageContainer {
   display: flex;
   width: 1512px;
-  padding: 48px 60px 22px 60px;
+  padding: 18px 60px;
   flex-direction: column;
   align-items: center;
   gap: 20px;
@@ -80,14 +101,28 @@
 }
 
 .modelButton {
-  border-radius: 8px;
-  min-width: 90px;
-  font-family: "Pretendard";
+  display: flex;
+  width: 84px;
+  height: 40px;
+  padding: 8px 0;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  border-radius: 20px;
+  border: 1px solid var(--color-gray-200, #e7e9ed);
+  background: var(--color-gray-00, #fff);
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%; /* 19.6px */
+  color: var(--color-gray-700, #3d424d);
 }
 
 .modelButtonActive {
-  background: linear-gradient(45deg, #667eea, #764ba2) !important;
-  border: none !important;
+  border-radius: 20px;
+  background: var(--color-blue-50, #edf5ff);
+  color: var(--color-blue-600, #0769eb);
 }
 
 /* 공통 - 카드, 폼, 탭 */
@@ -133,8 +168,24 @@
 }
 
 .tabPanel500 {
-  height: 78vh;
+  height: 72vh;
   padding: 10px;
+}
+
+.tabPanel500::-webkit-scrollbar {
+  width: 8px;
+  background: var(--color-gray-300, #ced2d9);
+  border-radius: 106.667px;
+}
+
+.tabPanel500::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300, #ced2d9);
+  border-radius: 106.667px;
+}
+
+.tabPanel500 {
+  scrollbar-color: var(--color-gray-300, #ced2d9) transparent;
+  scrollbar-width: thin;
 }
 
 .tabPanel544 {
@@ -158,6 +209,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 }
 
 /* 공통 - 결과 카드/텍스트 */
@@ -307,6 +359,8 @@
 .chatTurnBlockWrapper {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
 }
 
 .chatRowUser {
@@ -345,8 +399,8 @@
   align-items: flex-start;
   gap: 4px;
   border-radius: 14px 14px 0 14px;
-  background: var(--color-gray-100, #f6f6f8);
-  color: var(--color-gray-800, #252a32);
+  background: var(--color-gray-700, #3d424d);
+  color: var(--color-gray-00, #fff);
 
   /* Web/body3/400 */
   font-family: Pretendard;
@@ -359,6 +413,14 @@
 .chatBubbleUserWithFilter {
   position: relative;
   overflow: visible;
+}
+
+.chatBubbleUserIconWrapper {
+  display: flex;
+  padding-top: 12px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .chatBubbleUserIcon {
@@ -534,4 +596,5 @@
   border-radius: 20px;
   background: var(--color-blue-600, #0769eb);
   cursor: pointer;
+  border: none;
 }

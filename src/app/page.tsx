@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Flex } from "antd";
 import styles from "@/styles/search.module.css";
 import Sidebar from "@/app/layout/Sidebar";
 import {
@@ -12,6 +11,7 @@ import {
 import { openNotification } from "@/utils/common";
 import { ChatRoomData, Turn } from "@/app/Interface";
 import Search from "@/app/components/Search";
+import Image from "next/image";
 
 export default function Home() {
   const [searchInput, setSearchInput] = useState(
@@ -126,8 +126,19 @@ export default function Home() {
         chatId={chatId}
         deleteChatRoomHandler={deleteChatRoomHandler}
       />
-      <div>
+      <div className={styles.contentContainer}>
         <div className={styles.pageContainer}>
+          <div className={styles.topNavSection}>
+            <div className={styles.topNavWrapper}>
+              <Image
+                src="/search/images/dots.svg"
+                alt="dots"
+                width={20}
+                height={20}
+                className={styles.topNavDots}
+              />
+            </div>
+          </div>
           <Search
             searchInput={searchInput}
             setSearchInput={setSearchInput}

@@ -25,13 +25,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import SearchForm from "@/app/components/SearchForm";
-import {
-  BookOutlined,
-  CommentOutlined,
-  CompassOutlined,
-  CopyOutlined,
-  FileTextOutlined,
-} from "@ant-design/icons";
+import { CommentOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import FeedbackModal from "@/app/components/modal/FeedbackModal";
 
@@ -39,33 +33,87 @@ const searchCategoryList: {
   key: "all" | "Learning" | "MeetUp / Seminar" | "framework";
   label: string;
   icon: React.ReactNode;
+  iconActive: React.ReactNode;
 }[] = [
   {
     key: "all",
     label: "통합",
     icon: (
       <Image
-        src="/search/images/globe.svg"
-        alt="filter_all"
-        width={12}
-        height={12}
+        src="/search/images/globe-filled.svg"
+        alt="globe-filled"
+        width={16}
+        height={16}
+      />
+    ),
+    iconActive: (
+      <Image
+        src="/search/images/globe-active.svg"
+        alt="globe-active"
+        width={16}
+        height={16}
       />
     ),
   },
   {
     key: "Learning",
     label: "학습",
-    icon: <BookOutlined key="icon-book" />,
+    icon: (
+      <Image
+        src="/search/images/learning-filled.svg"
+        alt="learning-filled"
+        width={18}
+        height={18}
+      />
+    ),
+    iconActive: (
+      <Image
+        src="/search/images/learning-active.svg"
+        alt="learning-active"
+        width={17}
+        height={17}
+      />
+    ),
   },
   {
     key: "MeetUp / Seminar",
     label: "사례",
-    icon: <CompassOutlined key="icon-compass" />,
+    icon: (
+      <Image
+        src="/search/images/meetup-filled.svg"
+        alt="meetup-filled"
+        width={18}
+        height={18}
+      />
+    ),
+    iconActive: (
+      <Image
+        src="/search/images/meetup-active.svg"
+        alt="meetup-active"
+        width={18}
+        height={18}
+      />
+    ),
   },
   {
     key: "framework",
     label: "문서",
-    icon: <FileTextOutlined key="icon-filetext" />,
+    icon: (
+      <Image
+        src="/search/images/framework-filled.svg"
+        alt="framework-filled"
+        width={18}
+        height={18}
+      />
+    ),
+    iconActive: (
+      <Image
+        src="/search/images/framework-active.svg"
+        alt="framework-active"
+        width={18}
+        height={18}
+      />
+    ),
   },
 ];
 
@@ -369,10 +417,10 @@ const Search = ({
             <Image
               src={
                 turn.rating === 1
-                  ? "/search/images/thumbs_up_primary.svg"
-                  : "/search/images/thumbs_up.svg"
+                  ? "/search/images/thumbs-up-active.svg"
+                  : "/search/images/thumbs-up.svg"
               }
-              alt="thumbs_up"
+              alt="thumbs-up"
               width={24}
               height={24}
               className={styles.iconButton}
@@ -388,10 +436,10 @@ const Search = ({
             <Image
               src={
                 turn.rating === -1
-                  ? "/search/images/thumbs_down_primary.svg"
-                  : "/search/images/thumbs_down.svg"
+                  ? "/search/images/thumbs-down-active.svg"
+                  : "/search/images/thumbs-down.svg"
               }
-              alt="thumbs_down"
+              alt="thumbs-down"
               width={24}
               height={24}
               className={styles.iconButton}
@@ -415,7 +463,7 @@ const Search = ({
                 }}
               />
             ) : (
-              <CopyOutlined
+              <CommentOutlined
                 style={{ fontSize: 24 }}
                 className={styles.iconButton}
                 onClick={() => {
@@ -453,18 +501,39 @@ const Search = ({
   const renderFilterIcon = (filters: string) => {
     switch (filters) {
       case "Learning":
-        return <BookOutlined />;
+        return (
+          <Image
+            src="/search/images/learning.svg"
+            alt="learning"
+            width={14}
+            height={14}
+          />
+        );
       case "MeetUp / Seminar":
-        return <CompassOutlined />;
+        return (
+          <Image
+            src="/search/images/meetup.svg"
+            alt="meetup"
+            width={14}
+            height={14}
+          />
+        );
       case "framework":
-        return <FileTextOutlined />;
+        return (
+          <Image
+            src="/search/images/framework.svg"
+            alt="framework"
+            width={14}
+            height={14}
+          />
+        );
       case "all":
         return (
           <Image
             src="/search/images/globe.svg"
             alt="filter_all"
-            width={12}
-            height={12}
+            width={14}
+            height={14}
           />
         );
     }
@@ -476,6 +545,21 @@ const Search = ({
         ref={scrollContainerRef}
         className={tabPanelClass}
         onScroll={onScrollPanel}
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+
+          // a 태그 찾기 (안쪽 클릭까지 대비)
+          const anchor = target.closest("a");
+
+          if (anchor) {
+            e.preventDefault();
+
+            const href = anchor.getAttribute("href");
+            if (href) {
+              window.open(href, "_blank");
+            }
+          }
+        }}
       >
         <div className={styles.chatScroll}>
           {messageTurns.flatMap((turn, i) => [
@@ -500,7 +584,7 @@ const Search = ({
                 key={`a-${i}`}
                 className={`${styles.chatRow} ${styles.chatRowAssistant}`}
               >
-                <div>
+                <div className={styles.chatBubbleUserIconWrapper}>
                   {turn.filters && (
                     <span className={styles.chatBubbleUserIcon}>
                       {renderFilterIcon(turn.filters)}
@@ -575,7 +659,8 @@ const Search = ({
                 }}
                 className={`${styles.modelButton} ${selectedCategory === item.key ? styles.modelButtonActive : ""}`}
               >
-                {item.icon} {item.label}
+                {selectedCategory === item.key ? item.iconActive : item.icon}{" "}
+                {item.label}
               </Button>
             ))}
           </div>
