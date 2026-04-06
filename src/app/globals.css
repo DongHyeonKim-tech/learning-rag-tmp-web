@@ -69,7 +69,8 @@ a {
 }
 
 .markdown a {
-  display: flex;
+  display: inline-flex;
+  width: fit-content;
   padding: 7.5px 12px;
   align-items: center;
   gap: 8px;

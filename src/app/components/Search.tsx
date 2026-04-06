@@ -597,36 +597,39 @@ const Search = ({
           ])}
           {currentTurn?.query && (
             <div className={styles.chatTurnBlockWrapper}>
-              <div className={styles.chatRow}>
+              <div className={styles.chatRowUser}>
                 <div
                   className={`${styles.chatBubble} ${styles.chatBubbleUser} ${currentTurn.filters ? styles.chatBubbleUserWithFilter : ""}`}
                 >
+                  <span className={styles.chatBubbleUserText}>
+                    {currentTurn.query}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={`${styles.chatRow} ${styles.chatRowAssistant}`}
+              >
+                <div className={styles.chatBubbleUserIconWrapper}>
                   {currentTurn.filters && (
                     <span className={styles.chatBubbleUserIcon}>
                       {renderFilterIcon(currentTurn.filters)}
                     </span>
                   )}
-                  {currentTurn.query}
                 </div>
-              </div>
-              {searchLoading &&
-              !currentTurn.summary &&
-              !currentTurn.results.length ? (
-                <div
-                  className={`${styles.chatRow} ${styles.chatRowAssistantLoading}`}
-                >
+                {searchLoading &&
+                !currentTurn.summary &&
+                !currentTurn.results.length ? (
                   <div
                     className={`${styles.chatBubble} ${styles.chatBubbleAssistant} ${styles.chatLoadingBubble}`}
                   >
                     <Spin size="small" />
                     <span className={styles.loadingText}>검색 중입니다...</span>
                   </div>
-                </div>
-              ) : (
-                <div className={`${styles.chatRow} ${styles.chatRowAssistant}`}>
-                  {renderAssistantContent(currentTurn)}
-                </div>
-              )}
+                ) : (
+                  renderAssistantContent(currentTurn)
+                )}
+              </div>
             </div>
           )}
           {!hasContent && (

@@ -69,7 +69,11 @@ const Sidebar = ({
           <div className={styles.sidebarContentHeaderTitle}>채팅 목록</div>
           <Image
             className={styles.collapsedIcon}
-            src={"/search/images/collapsed.svg"}
+            src={
+              collapsed
+                ? "/search/images/collapsed.svg"
+                : "/search/images/uncollapsed.svg"
+            }
             alt="collapsed"
             width={11}
             height={6}
@@ -115,7 +119,9 @@ const Sidebar = ({
                         size="small"
                       />
                     ) : (
-                      <span className={styles.chatRoomItemTitle}>
+                      <span
+                        className={`${styles.chatRoomItemTitle} ${chatId === item.chatId ? styles.chatRoomItemTitleActive : ""}`}
+                      >
                         {item.title}
                       </span>
                     )}

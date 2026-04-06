@@ -185,6 +185,10 @@
   line-height: 152%; /* 21.28px */
 }
 
+.chatRoomItemTitleActive {
+  color: var(--color-gray-800, #252a32);
+}
+
 .chatRoomItemActive {
   border-radius: 8px;
   border: 1px solid var(--color-blue-200, #99c7ff);
