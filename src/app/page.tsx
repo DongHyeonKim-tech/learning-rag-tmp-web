@@ -12,9 +12,18 @@ import { openNotification } from "@/utils/common";
 import { ChatRoomData, Turn } from "@/app/Interface";
 import Search from "@/app/components/Search";
 import Image from "next/image";
-import { FeedbackModal } from "./components/modal/FeedbackModal";
+import { FeedbackModal } from "@/app/components/modal/FeedbackModal";
+import { validateHubToken, getHubMyInfo } from "@/utils/searchApi";
+import { useUserStore } from "@/utils/store";
+import { useCookies } from "react-cookie";
+import { router } from "next/client";
 
 export default function Home() {
+  const { updateUser } = useUserStore();
+  const [cookies, setCookies, removeCookies] = useCookies(["refreshToken"]);
+  const [imageUrl, setImageUrl] = useState<string>("");
+
+  const [loading, setLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState(
     "캐드 import 하는 방법 알려줘"
   );
@@ -29,6 +38,39 @@ export default function Home() {
   useEffect(() => {
     console.log("messageTurns: ", messageTurns);
   }, [messageTurns]);
+
+  const checkHubToken = async () => {
+    setLoading(true);
+    try {
+      const checkHubTokenResponse = await validateHubToken();
+
+      if (checkHubTokenResponse.status === 200) {
+        const getHubMyInfoResponse = await getHubMyInfo();
+
+        if (getHubMyInfoResponse?.EMP_NO) {
+          const userData = {
+            code: "0",
+            empNo: getHubMyInfoResponse?.EMP_NO,
+            userNm: getHubMyInfoResponse?.USER_NM,
+            deptNm: getHubMyInfoResponse?.DEPT_NM,
+            deptCd: getHubMyInfoResponse?.DEPT_CD,
+            titleNm: getHubMyInfoResponse?.TITLE_NM,
+            titleCd: getHubMyInfoResponse?.TITLE_CD,
+            email: `${getHubMyInfoResponse?.USER_ID}@haeahn.com`,
+            isCookieLogin: true,
+          };
+          updateUser(userData);
+          setImageUrl(
+            `https://hub.haeahn.com/Storage/GW/ImageStorage/Employee/${userData.email.split("@")[0]}`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error checking hub token:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchChatRooms = async () => {
     try {
@@ -118,6 +160,18 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    if (cookies?.refreshToken) {
+      checkHubToken();
+    } else {
+      if (process.env.NEXT_PUBLIC_ENV !== "development") {
+        window.location.href =
+          "https://hubnx.haeahn.com/login/#/login?redirect=bim";
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cookies]);
+
   return (
     <div className={styles.pageRoot}>
       <Sidebar
@@ -157,6 +211,13 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            <Image
+              src={imageUrl}
+              width={40}
+              height={40}
+              alt="profile"
+              className={styles.headerProfileAvatar}
+            ></Image>
           </div>
           <Search
             searchInput={searchInput}

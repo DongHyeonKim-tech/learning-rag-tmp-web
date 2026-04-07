@@ -18,6 +18,53 @@ import {
 } from "@/app/Interface";
 import camelcaseKeys from "camelcase-keys";
 import { client } from "@/utils/client";
+import axios from "axios";
+
+/**
+ * HUB 토큰 확인
+ * @returns {
+ *  "message": "SUCCESS",
+ *  "status": 200,
+ *  "timestamp": "2025-06-25T23:44:48.975+00:00"
+ * }
+ */
+export const checkHubToken = () => {
+  const config = {
+    method: "get",
+    url: "https://hubnx.haeahn.com/auth-be/v1/api/auth/check ",
+  };
+  return axios.request(config);
+};
+
+/**
+ * HUB 토큰 확인
+ * @returns 사용자 정보
+ */
+export const validateHubToken = async () => {
+  const config = {
+    method: "get",
+    url: "https://hubnx.haeahn.com/auth-be/v1/api/auth/check ",
+    credentials: "include",
+    withCredentials: true,
+  };
+  const response = await axios.request(config);
+  return response;
+};
+
+/**
+ * HUB 토큰 확인
+ * @returns 사용자 정보
+ */
+export const getHubMyInfo = async () => {
+  const config = {
+    method: "get",
+    url: "https://hubnx.haeahn.com/api-be/v2/api/user/myInfo",
+    credentials: "include",
+    withCredentials: true,
+  };
+  const response = await axios.request(config);
+  return response.data.data.result[0];
+};
 
 export async function searchDocumentsKure(
   params: SearchParams

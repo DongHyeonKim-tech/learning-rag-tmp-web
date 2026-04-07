@@ -1,3 +1,24 @@
+export interface UserType {
+  code?: string | number;
+  comCd?: string;
+  empNo?: string;
+  userNm?: string;
+  deptCd?: string;
+  deptNm?: string;
+  titleCd?: string;
+  titleNm?: string;
+  email?: string;
+  auth?: number;
+  isCookieLogin?: boolean;
+}
+
+export interface UserStateType {
+  user: UserType;
+  isLoading: boolean;
+  error: any;
+  updateUser: (data: UserType) => void;
+}
+
 export interface SearchResult {
   doc_id: string;
   title: string;

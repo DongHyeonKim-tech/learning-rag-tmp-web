@@ -17,10 +17,12 @@
     "openai": "^5.20.2",
     "prettier": "^3.8.1",
     "react": "19.1.0",
+    "react-cookie": "^8.1.0",
     "react-dom": "19.1.0",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
