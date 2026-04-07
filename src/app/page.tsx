@@ -18,16 +18,19 @@ import { useUserStore } from "@/utils/store";
 import { useCookies } from "react-cookie";
 import { router } from "next/client";
 import { SmileOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 
 export default function Home() {
-  const { updateUser } = useUserStore();
+  const { user, updateUser } = useUserStore();
   const [cookies, setCookies, removeCookies] = useCookies(["refreshToken"]);
   const [imageUrl, setImageUrl] = useState<string>("");
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loginLoading, setLoginLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState(
     "캐드 import 하는 방법 알려줘"
   );
+  const [fetchChatRoomsLoading, setFetchChatRoomsLoading] =
+    useState<boolean>(false);
   const [chatRooms, setChatRooms] = useState<ChatRoomData[]>([]);
   const [chatId, setChatId] = useState<number | null>(null);
   const [messageId, setMessageId] = useState<number | null>(null);
@@ -41,7 +44,7 @@ export default function Home() {
   }, [messageTurns]);
 
   const checkHubToken = async () => {
-    setLoading(true);
+    setLoginLoading(true);
     try {
       const checkHubTokenResponse = await validateHubToken();
 
@@ -71,17 +74,21 @@ export default function Home() {
     } catch (error) {
       console.error("Error checking hub token:", error);
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
 
   const fetchChatRooms = async () => {
+    if (!user.empNo) return;
+    setFetchChatRoomsLoading(true);
     try {
-      const data = await getChatRooms("20230808");
+      const data = await getChatRooms(user.empNo);
       setChatRooms(data);
     } catch {
       setChatRooms([]);
       openNotification("error", "채팅 기록 조회 중 오류가 발생했습니다.");
+    } finally {
+      setFetchChatRoomsLoading(false);
     }
   };
 
@@ -120,8 +127,10 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchChatRooms();
-  }, []);
+    if (user.empNo) {
+      fetchChatRooms();
+    }
+  }, [user]);
 
   useEffect(() => {
     console.log("currentTurn: ", currentTurn);
@@ -151,9 +160,9 @@ export default function Home() {
   );
 
   const deleteChatRoomHandler = async (chatId: number) => {
-    if (!chatId) return;
+    if (!chatId || !user.empNo) return;
     try {
-      const success = await deleteChatRoom(chatId, "20230808");
+      const success = await deleteChatRoom(chatId, user.empNo);
       if (success) {
         fetchChatRooms();
         openNotification("success", "채팅방 삭제를 완료했습니다.");
@@ -167,7 +176,9 @@ export default function Home() {
     if (cookies?.refreshToken) {
       checkHubToken();
     } else {
-      if (process.env.NEXT_PUBLIC_ENV !== "development") {
+      if (process.env.NEXT_PUBLIC_ENV === "development") {
+        updateUser({ empNo: "20230808" });
+      } else {
         window.location.href =
           "https://hubnx.haeahn.com/login/#/login?redirect=bim";
       }
@@ -185,6 +196,7 @@ export default function Home() {
         chatId={chatId}
         deleteChatRoomHandler={deleteChatRoomHandler}
         chatLoading={chatLoading}
+        fetchChatRoomsLoading={fetchChatRoomsLoading}
       />
       <div className={styles.contentContainer}>
         <div className={styles.pageContainer}>
@@ -233,7 +245,7 @@ export default function Home() {
             onStreamMetaUpdate={handleLearningStreamMeta}
             messageTurns={messageTurns}
             setMessageTurns={setMessageTurns}
-            empNo={"20230808"}
+            empNo={user.empNo}
             currentTurn={currentTurn}
             setCurrentTurn={setCurrentTurn}
             setNewChatLoading={setNewChatLoading}

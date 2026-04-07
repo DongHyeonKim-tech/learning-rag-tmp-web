@@ -14,6 +14,7 @@ const Sidebar = ({
   chatId,
   deleteChatRoomHandler,
   chatLoading,
+  fetchChatRoomsLoading,
 }: {
   chatRooms: any[];
   fetchChatMessages: (chatId: number) => void;
@@ -22,6 +23,7 @@ const Sidebar = ({
   chatId: number | null;
   deleteChatRoomHandler: (chatId: number) => void;
   chatLoading: boolean;
+  fetchChatRoomsLoading: boolean;
 }) => {
   const [collapsed, setCollapsed] = useState(false);
   const confirmDeleteChatRoom = async (title: string, chatId: number) => {
@@ -65,106 +67,121 @@ const Sidebar = ({
           <span className={styles.newChatButtonText}>새 채팅</span>
         </div>
       </div>
-      <div className={styles.sidebarContent}>
-        <div className={styles.sidebarContentHeader}>
-          <div className={styles.sidebarContentHeaderTitle}>채팅 목록</div>
-          <Image
-            className={styles.collapsedIcon}
-            src={
-              collapsed
-                ? "/search/images/collapsed.svg"
-                : "/search/images/uncollapsed.svg"
+      {fetchChatRoomsLoading ? (
+        <div className={styles.sidebarLoading}>
+          <Spin
+            size="large"
+            indicator={
+              <LoadingOutlined
+                spin
+                style={{ fontSize: 40 }}
+              />
             }
-            alt="collapsed"
-            width={11}
-            height={6}
-            onClick={() => {
-              if (chatRooms.length === 0) return;
-              setCollapsed(!collapsed);
-            }}
           />
         </div>
-        <div className={`${styles.chatRoomList}`}>
-          <div
-            className={`${styles.chatRoomListInner} ${collapsed ? styles.collapsed : ""}`}
-          >
-            {chatRooms.length > 0 ? (
-              chatRooms.map((item) => {
-                return (
-                  <div
-                    className={`${styles.chatRoomItem} ${chatId === item.chatId ? styles.chatRoomItemActive : ""}`}
-                    style={{
-                      fontWeight: chatId === item.chatId ? "bold" : "normal",
-                    }}
-                    key={item.chatId}
-                    onClick={(e) => {
-                      // If click is directly on the image, do not fetch messages.
-                      if (
-                        (e.target as HTMLElement).closest("img") // to support SSR with next/image and native img
-                      ) {
-                        return;
-                      }
-                      fetchChatMessages(item.chatId);
-                    }}
-                  >
-                    {newChatLoading && !item.chatId ? (
-                      <Spin
-                        indicator={
-                          <LoadingOutlined
-                            spin
-                            style={{
-                              color: "#6F7581",
-                            }}
-                          />
+      ) : (
+        <div className={styles.sidebarContent}>
+          <div className={styles.sidebarContentHeader}>
+            <div className={styles.sidebarContentHeaderTitle}>채팅 목록</div>
+            <Image
+              className={styles.collapsedIcon}
+              src={
+                collapsed
+                  ? "/search/images/collapsed.svg"
+                  : "/search/images/uncollapsed.svg"
+              }
+              alt="collapsed"
+              width={11}
+              height={6}
+              onClick={() => {
+                if (chatRooms.length === 0) return;
+                setCollapsed(!collapsed);
+              }}
+            />
+          </div>
+          <div className={`${styles.chatRoomList}`}>
+            <div
+              className={`${styles.chatRoomListInner} ${collapsed ? styles.collapsed : ""}`}
+            >
+              {chatRooms.length > 0 ? (
+                chatRooms.map((item) => {
+                  return (
+                    <div
+                      className={`${styles.chatRoomItem} ${chatId === item.chatId ? styles.chatRoomItemActive : ""}`}
+                      style={{
+                        fontWeight: chatId === item.chatId ? "bold" : "normal",
+                      }}
+                      key={item.chatId}
+                      onClick={(e) => {
+                        // If click is directly on the image, do not fetch messages.
+                        if (
+                          (e.target as HTMLElement).closest("img") // to support SSR with next/image and native img
+                        ) {
+                          return;
                         }
-                        size="small"
-                      />
-                    ) : (
-                      <span
-                        className={`${styles.chatRoomItemTitle} ${chatId === item.chatId ? styles.chatRoomItemTitleActive : ""}`}
-                      >
-                        {item.title}
-                      </span>
-                    )}
-                    {item.chatId && chatId === item.chatId && chatLoading ? (
-                      <Spin
-                        indicator={
-                          <LoadingOutlined
-                            spin
-                            style={{
-                              color: "#6F7581",
-                            }}
-                          />
-                        }
-                        size="small"
-                      />
-                    ) : (
-                      <div className={styles.removeChatRoomButtonWrapper}>
-                        <div className={styles.removeChatRoomButton}>
-                          <Image
-                            src="/search/images/close.svg"
-                            alt="delete"
-                            width={16}
-                            height={16}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              confirmDeleteChatRoom(item.title, item.chatId);
-                            }}
-                          />
+                        fetchChatMessages(item.chatId);
+                      }}
+                    >
+                      {newChatLoading && !item.chatId ? (
+                        <Spin
+                          indicator={
+                            <LoadingOutlined
+                              spin
+                              style={{
+                                color: "#6F7581",
+                              }}
+                            />
+                          }
+                          size="small"
+                        />
+                      ) : (
+                        <span
+                          className={`${styles.chatRoomItemTitle} ${chatId === item.chatId ? styles.chatRoomItemTitleActive : ""}`}
+                        >
+                          {item.title}
+                        </span>
+                      )}
+                      {item.chatId && chatId === item.chatId && chatLoading && (
+                        <Spin
+                          indicator={
+                            <LoadingOutlined
+                              spin
+                              style={{
+                                color: "#6F7581",
+                              }}
+                            />
+                          }
+                          size="small"
+                        />
+                      )}
+                      {item.chatId && (
+                        <div className={styles.removeChatRoomButtonWrapper}>
+                          <div className={styles.removeChatRoomButton}>
+                            <Image
+                              src="/search/images/close.svg"
+                              alt="delete"
+                              width={16}
+                              height={16}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                confirmDeleteChatRoom(item.title, item.chatId);
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            ) : (
-              <div className={styles.emptyChatRoomList}>
-                채팅 목록이 없습니다.
-              </div>
-            )}
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className={styles.emptyChatRoomList}>
+                  채팅 목록이 없습니다.
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

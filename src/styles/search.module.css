@@ -163,27 +163,6 @@
   justify-content: center;
 }
 
-.tabButton {
-  min-width: 120px;
-  height: 40px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-family: Pretendard;
-  transition: all 0.3s ease;
-}
-
-.tabButtonActive {
-  background: linear-gradient(45deg, #667eea, #764ba2) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 500;
-  font-family: "Pretendard";
-}
-
-.tabButtonDefault {
-  border-color: #ddd;
-}
-
 .modelButton {
   display: flex;
   width: 84px;

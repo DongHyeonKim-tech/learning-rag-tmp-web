@@ -60,27 +60,6 @@
   line-height: 162.5%; /* 26px */
 }
 
-.tabButton {
-  min-width: 120px;
-  height: 40px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-family: Pretendard;
-  transition: all 0.3s ease;
-}
-
-.tabButtonActive {
-  background: linear-gradient(45deg, #667eea, #764ba2) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 500;
-  font-family: "Pretendard";
-}
-
-.tabButtonDefault {
-  border-color: #ddd;
-}
-
 .sidebarContent {
   display: flex;
   flex-direction: column;
@@ -110,6 +89,14 @@
 
 .collapsedIcon {
   cursor: pointer;
+}
+
+.sidebarLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
 
 .chatRoomList {

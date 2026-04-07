@@ -15,6 +15,7 @@ import {
   getCodesByValue,
   getFeedback,
 } from "@/utils/searchApi";
+import { useUserStore } from "@/utils/store";
 
 const { TextArea } = Input;
 
@@ -31,6 +32,7 @@ export const FeedbackModal = ({
   feedbackId?: number;
   updateMessageTurns?: (messageId: number, feedbackId: number) => void;
 }) => {
+  const { user } = useUserStore();
   const [feedbackText, setFeedbackText] = useState<string>("");
   const [feedbackCodes, setFeedbackCodes] = useState<Code[]>([]);
   const [selectedFeedbackCodes, setSelectedFeedbackCodes] = useState<number[]>(
@@ -80,7 +82,7 @@ export const FeedbackModal = ({
     setLoading(true);
     try {
       const feedbackId = await createFeedback(
-        "20230808",
+        user.empNo,
         messageId ? "message" : "system",
         feedbackText,
         messageId ?? undefined
