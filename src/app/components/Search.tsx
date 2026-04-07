@@ -665,6 +665,7 @@ const Search = ({
               <Tooltip
                 title={item.tooltipMessage}
                 key={item.key}
+                overlayStyle={{ maxWidth: 250 }}
               >
                 <Button
                   type={selectedCategory === item.key ? "primary" : "default"}
