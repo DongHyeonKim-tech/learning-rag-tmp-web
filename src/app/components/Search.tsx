@@ -19,7 +19,7 @@ import {
   ChatRoomData,
 } from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
-import { notification, Card, Spin, Flex, Button, Space } from "antd";
+import { notification, Card, Spin, Flex, Button, Space, Tooltip } from "antd";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -32,12 +32,14 @@ import FeedbackModal from "@/app/components/modal/FeedbackModal";
 const searchCategoryList: {
   key: "all" | "Learning" | "MeetUp / Seminar" | "framework";
   label: string;
+  tooltipMessage: string;
   icon: React.ReactNode;
   iconActive: React.ReactNode;
 }[] = [
   {
     key: "all",
     label: "통합",
+    tooltipMessage: "통합 검색",
     icon: (
       <Image
         src="/search/images/globe-filled.svg"
@@ -58,6 +60,8 @@ const searchCategoryList: {
   {
     key: "framework",
     label: "표준",
+    tooltipMessage:
+      "BIM 지침, 기준과 절차, 방법으로 구성된 회사 자체 BIM 표준 기반 검색",
     icon: (
       <Image
         src="/search/images/framework-filled.svg"
@@ -78,6 +82,7 @@ const searchCategoryList: {
   {
     key: "Learning",
     label: "학습",
+    tooltipMessage: " BIM 역량 증진을 위한 BIM 학습 컨텐츠 기반 검색",
     icon: (
       <Image
         src="/search/images/learning-filled.svg"
@@ -98,6 +103,7 @@ const searchCategoryList: {
   {
     key: "MeetUp / Seminar",
     label: "사례",
+    tooltipMessage: "BIM 프로젝트 사례와 글로벌 기술동향 등의 컨텐츠 기반 검색",
     icon: (
       <Image
         src="/search/images/meetup-filled.svg"
@@ -656,27 +662,29 @@ const Search = ({
         <div className={styles.searchCategorySection}>
           <div className={styles.searchCategoryWrapper}>
             {searchCategoryList.map((item) => (
-              <Button
-                key={item.key}
-                type={selectedCategory === item.key ? "primary" : "default"}
-                size="middle"
-                onClick={() => {
-                  setSelectedCategory(item.key);
-                  setSearchInput(
-                    item.key === "all"
-                      ? ""
-                      : item.key === "Learning"
-                        ? "캐드 import 하는 방법 알려줘"
-                        : item.key === "MeetUp / Seminar"
-                          ? "HDA BIM 어워드에 대해 알려줘"
-                          : "프로젝트 파일 생성"
-                  );
-                }}
-                className={`${styles.modelButton} ${selectedCategory === item.key ? styles.modelButtonActive : ""}`}
-              >
-                {selectedCategory === item.key ? item.iconActive : item.icon}{" "}
-                {item.label}
-              </Button>
+              <Tooltip title={item.tooltipMessage}>
+                <Button
+                  key={item.key}
+                  type={selectedCategory === item.key ? "primary" : "default"}
+                  size="middle"
+                  onClick={() => {
+                    setSelectedCategory(item.key);
+                    setSearchInput(
+                      item.key === "all"
+                        ? ""
+                        : item.key === "Learning"
+                          ? "캐드 import 하는 방법 알려줘"
+                          : item.key === "MeetUp / Seminar"
+                            ? "HDA BIM 어워드에 대해 알려줘"
+                            : "프로젝트 파일 생성"
+                    );
+                  }}
+                  className={`${styles.modelButton} ${selectedCategory === item.key ? styles.modelButtonActive : ""}`}
+                >
+                  {selectedCategory === item.key ? item.iconActive : item.icon}{" "}
+                  {item.label}
+                </Button>
+              </Tooltip>
             ))}
           </div>
         </div>
