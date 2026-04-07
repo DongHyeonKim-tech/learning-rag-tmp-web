@@ -28,6 +28,7 @@ import SearchForm from "@/app/components/SearchForm";
 import { CommentOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import FeedbackModal from "@/app/components/modal/FeedbackModal";
+import { useUserStore } from "@/utils/store";
 
 const searchCategoryList: {
   key: "all" | "Learning" | "MeetUp / Seminar" | "framework";
@@ -130,7 +131,6 @@ const Search = ({
   onStreamMetaUpdate,
   messageTurns,
   setMessageTurns,
-  empNo,
   currentTurn,
   setCurrentTurn,
   setNewChatLoading,
@@ -147,13 +147,13 @@ const Search = ({
   ) => void;
   messageTurns: Turn[];
   setMessageTurns: Dispatch<SetStateAction<Turn[]>>;
-  empNo: string;
   currentTurn: Turn | null;
   setCurrentTurn: Dispatch<SetStateAction<Turn | null>>;
   setNewChatLoading: Dispatch<SetStateAction<boolean>>;
   setChatRooms: Dispatch<SetStateAction<ChatRoomData[]>>;
   setChatLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const { user } = useUserStore();
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel] = useState<"kure" | "baai" | "full" | "json">("kure");
   const [selectedCategory, setSelectedCategory] = useState<
@@ -223,7 +223,7 @@ const Search = ({
   }, [currentTurn?.summary, searchLoading, stickToBottom]);
 
   const onSearchOpenAI = useCallback(async () => {
-    if (!searchInput.trim()) return;
+    if (!searchInput.trim() || !user.empNo) return;
     setStickToBottom(true);
     setChatLoading(true);
     chatId ? setChatLoading(true) : setNewChatLoading(true);
@@ -243,7 +243,7 @@ const Search = ({
             },
       chat_id: chatId,
       embedding_model: "nlpai-lab/KURE-v1",
-      emp_no: empNo,
+      emp_no: user.empNo,
     };
     try {
       setSearchLoading(true);

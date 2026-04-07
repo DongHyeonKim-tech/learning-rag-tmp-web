@@ -245,7 +245,6 @@ export default function Home() {
             onStreamMetaUpdate={handleLearningStreamMeta}
             messageTurns={messageTurns}
             setMessageTurns={setMessageTurns}
-            empNo={user.empNo}
             currentTurn={currentTurn}
             setCurrentTurn={setCurrentTurn}
             setNewChatLoading={setNewChatLoading}

@@ -75,6 +75,7 @@ export const FeedbackModal = ({
 
   const onSubmit = useCallback(async () => {
     console.log("submit");
+    if (!user.empNo) return;
     if (selectedFeedbackCodes.length === 0 && !feedbackText.trim()) {
       notification.error({ message: "의견을 선택 또는 입력해주세요." });
       return;
