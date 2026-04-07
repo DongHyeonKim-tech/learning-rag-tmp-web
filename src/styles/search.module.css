@@ -16,6 +16,16 @@
   gap: 12px;
 }
 
+.headerProfileAvatar {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+  gap: 12.5px;
+  border-radius: 50%;
+}
+
 .topNavDotsAnchor {
   position: relative;
   display: inline-flex;

@@ -14,7 +14,6 @@ const Sidebar = ({
   chatId,
   deleteChatRoomHandler,
   chatLoading,
-  imageUrl,
 }: {
   chatRooms: any[];
   fetchChatMessages: (chatId: number) => void;
@@ -23,7 +22,6 @@ const Sidebar = ({
   chatId: number | null;
   deleteChatRoomHandler: (chatId: number) => void;
   chatLoading: boolean;
-  imageUrl: string;
 }) => {
   const [collapsed, setCollapsed] = useState(false);
   const confirmDeleteChatRoom = async (title: string, chatId: number) => {
@@ -167,13 +165,6 @@ const Sidebar = ({
           </div>
         </div>
       </div>
-      <Image
-        src={imageUrl}
-        width={40}
-        height={40}
-        alt="profile"
-        className={styles.headerProfileAvatar}
-      />
     </div>
   );
 };
