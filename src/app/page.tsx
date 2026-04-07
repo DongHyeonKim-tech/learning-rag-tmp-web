@@ -184,6 +184,7 @@ export default function Home() {
         chatId={chatId}
         deleteChatRoomHandler={deleteChatRoomHandler}
         chatLoading={chatLoading}
+        imageUrl={imageUrl}
       />
       <div className={styles.contentContainer}>
         <div className={styles.pageContainer}>
@@ -213,13 +214,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <Image
-              src={imageUrl}
-              width={40}
-              height={40}
-              alt="profile"
-              className={styles.headerProfileAvatar}
-            ></Image>
           </div>
           <Search
             searchInput={searchInput}
