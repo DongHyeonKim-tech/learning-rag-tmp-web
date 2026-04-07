@@ -17,6 +17,7 @@ import { validateHubToken, getHubMyInfo } from "@/utils/searchApi";
 import { useUserStore } from "@/utils/store";
 import { useCookies } from "react-cookie";
 import { router } from "next/client";
+import { SmileOutlined } from "@ant-design/icons";
 
 export default function Home() {
   const { updateUser } = useUserStore();
@@ -213,13 +214,17 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <Image
-              src={imageUrl}
-              width={40}
-              height={40}
-              alt="profile"
-              className={styles.headerProfileAvatar}
-            />
+            {process.env.NEXT_PUBLIC_ENV === "development" ? (
+              <SmileOutlined />
+            ) : (
+              <Image
+                src={imageUrl}
+                width={40}
+                height={40}
+                alt="profile"
+                className={styles.headerProfileAvatar}
+              />
+            )}
           </div>
           <Search
             searchInput={searchInput}
