@@ -610,6 +610,7 @@
 
 .searchInput {
   width: 100%;
+  background: #fff;
   display: flex;
   padding: 25px 24px;
   flex-direction: column;
