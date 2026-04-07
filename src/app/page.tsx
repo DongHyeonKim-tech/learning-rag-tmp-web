@@ -12,6 +12,7 @@ import { openNotification } from "@/utils/common";
 import { ChatRoomData, Turn } from "@/app/Interface";
 import Search from "@/app/components/Search";
 import Image from "next/image";
+import { FeedbackModal } from "./components/modal/FeedbackModal";
 
 export default function Home() {
   const [searchInput, setSearchInput] = useState(
@@ -24,7 +25,7 @@ export default function Home() {
   const [chatLoading, setChatLoading] = useState<boolean>(false);
   const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
   const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
-
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState<boolean>(false);
   useEffect(() => {
     console.log("messageTurns: ", messageTurns);
   }, [messageTurns]);
@@ -131,14 +132,30 @@ export default function Home() {
       <div className={styles.contentContainer}>
         <div className={styles.pageContainer}>
           <div className={styles.topNavSection}>
-            <div className={styles.topNavWrapper}>
-              <Image
-                src="/search/images/dots.svg"
-                alt="dots"
-                width={20}
-                height={20}
-                className={styles.topNavDots}
-              />
+            <div className={styles.topNavDotsAnchor}>
+              <div className={styles.topNavWrapper}>
+                <Image
+                  src="/search/images/dots.svg"
+                  alt="dots"
+                  width={20}
+                  height={20}
+                  className={styles.topNavDots}
+                />
+              </div>
+              <div
+                className={styles.dotsPopover}
+                role="region"
+                aria-label="추가 메뉴"
+              >
+                <div
+                  className={styles.dotsPopoverContentItem}
+                  onClick={() => {
+                    setFeedbackModalOpen(true);
+                  }}
+                >
+                  의견 보내기
+                </div>
+              </div>
             </div>
           </div>
           <Search
@@ -157,6 +174,10 @@ export default function Home() {
           />
         </div>
       </div>
+      <FeedbackModal
+        open={feedbackModalOpen}
+        onCancel={() => setFeedbackModalOpen(false)}
+      />
     </div>
   );
 }

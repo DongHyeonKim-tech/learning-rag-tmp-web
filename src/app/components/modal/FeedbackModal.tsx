@@ -29,7 +29,7 @@ export const FeedbackModal = ({
   onCancel: () => void;
   messageId?: number | null;
   feedbackId?: number;
-  updateMessageTurns: (messageId: number, feedbackId: number) => void;
+  updateMessageTurns?: (messageId: number, feedbackId: number) => void;
 }) => {
   const [feedbackText, setFeedbackText] = useState<string>("");
   const [feedbackCodes, setFeedbackCodes] = useState<Code[]>([]);
@@ -85,7 +85,7 @@ export const FeedbackModal = ({
         feedbackText,
         messageId ?? undefined
       );
-      updateMessageTurns(messageId ?? 0, feedbackId);
+      updateMessageTurns && updateMessageTurns(messageId ?? 0, feedbackId);
       await createFeedbackReasonMaps(feedbackId, selectedFeedbackCodes);
       notification.success({ message: "피드백 제출 완료" });
       closeFeedbackModal();
