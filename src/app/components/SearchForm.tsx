@@ -1,7 +1,7 @@
 "use client";
 
-import { Button, Input, Space, Spin } from "antd";
-import { SearchOutlined, StopOutlined } from "@ant-design/icons";
+import { Button, Spin } from "antd";
+import { StopOutlined } from "@ant-design/icons";
 import styles from "@/styles/search.module.css";
 import Image from "next/image";
 export type SearchFormProps = {

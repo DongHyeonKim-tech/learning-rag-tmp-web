@@ -2,9 +2,8 @@
 
 import React, { useState } from "react";
 import styles from "@/styles/sidebar.module.css";
-import { Button, Flex, Modal, Spin } from "antd";
+import { Modal, Spin } from "antd";
 import Image from "next/image";
-import PlusIcon from "@/public/images/plus.svg";
 import { LoadingOutlined } from "@ant-design/icons";
 
 const Sidebar = ({

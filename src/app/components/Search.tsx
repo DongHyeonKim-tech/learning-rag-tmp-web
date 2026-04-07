@@ -19,7 +19,7 @@ import {
   ChatRoomData,
 } from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
-import { notification, Card, Spin, Flex, Button, Space, Tooltip } from "antd";
+import { notification, Spin, Flex, Button, Tooltip } from "antd";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -662,9 +662,11 @@ const Search = ({
         <div className={styles.searchCategorySection}>
           <div className={styles.searchCategoryWrapper}>
             {searchCategoryList.map((item) => (
-              <Tooltip title={item.tooltipMessage}>
+              <Tooltip
+                title={item.tooltipMessage}
+                key={item.key}
+              >
                 <Button
-                  key={item.key}
                   type={selectedCategory === item.key ? "primary" : "default"}
                   size="middle"
                   onClick={() => {
