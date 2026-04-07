@@ -14,6 +14,7 @@ const Sidebar = ({
   newChatLoading,
   chatId,
   deleteChatRoomHandler,
+  chatLoading,
 }: {
   chatRooms: any[];
   fetchChatMessages: (chatId: number) => void;
@@ -21,6 +22,7 @@ const Sidebar = ({
   newChatLoading: boolean;
   chatId: number | null;
   deleteChatRoomHandler: (chatId: number) => void;
+  chatLoading: boolean;
 }) => {
   const [collapsed, setCollapsed] = useState(false);
   const confirmDeleteChatRoom = async (title: string, chatId: number) => {
@@ -125,7 +127,19 @@ const Sidebar = ({
                         {item.title}
                       </span>
                     )}
-                    {item.chatId && (
+                    {item.chatId && chatId === item.chatId && chatLoading ? (
+                      <Spin
+                        indicator={
+                          <LoadingOutlined
+                            spin
+                            style={{
+                              color: "#6F7581",
+                            }}
+                          />
+                        }
+                        size="small"
+                      />
+                    ) : (
                       <div className={styles.removeChatRoomButtonWrapper}>
                         <div className={styles.removeChatRoomButton}>
                           <Image

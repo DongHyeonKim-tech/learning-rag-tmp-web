@@ -56,6 +56,26 @@ const searchCategoryList: {
     ),
   },
   {
+    key: "framework",
+    label: "표준",
+    icon: (
+      <Image
+        src="/search/images/framework-filled.svg"
+        alt="framework-filled"
+        width={18}
+        height={18}
+      />
+    ),
+    iconActive: (
+      <Image
+        src="/search/images/framework-active.svg"
+        alt="framework-active"
+        width={18}
+        height={18}
+      />
+    ),
+  },
+  {
     key: "Learning",
     label: "학습",
     icon: (
@@ -95,26 +115,6 @@ const searchCategoryList: {
       />
     ),
   },
-  {
-    key: "framework",
-    label: "문서",
-    icon: (
-      <Image
-        src="/search/images/framework-filled.svg"
-        alt="framework-filled"
-        width={18}
-        height={18}
-      />
-    ),
-    iconActive: (
-      <Image
-        src="/search/images/framework-active.svg"
-        alt="framework-active"
-        width={18}
-        height={18}
-      />
-    ),
-  },
 ];
 
 const Search = ({
@@ -129,6 +129,7 @@ const Search = ({
   setCurrentTurn,
   setNewChatLoading,
   setChatRooms,
+  setChatLoading,
 }: {
   searchInput: string;
   setSearchInput: (input: string) => void;
@@ -145,6 +146,7 @@ const Search = ({
   setCurrentTurn: Dispatch<SetStateAction<Turn | null>>;
   setNewChatLoading: Dispatch<SetStateAction<boolean>>;
   setChatRooms: Dispatch<SetStateAction<ChatRoomData[]>>;
+  setChatLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedModel] = useState<"kure" | "baai" | "full" | "json">("kure");
@@ -217,7 +219,8 @@ const Search = ({
   const onSearchOpenAI = useCallback(async () => {
     if (!searchInput.trim()) return;
     setStickToBottom(true);
-    if (!chatId) setNewChatLoading(true);
+    setChatLoading(true);
+    chatId ? setChatLoading(true) : setNewChatLoading(true);
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
       top_k: 20,
@@ -345,6 +348,7 @@ const Search = ({
     } finally {
       setSearchLoading(false);
       setNewChatLoading(false);
+      setChatLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, selectedModel, setSearchInput]);
@@ -355,6 +359,16 @@ const Search = ({
       if (!searchInput.trim()) return;
       if (!chatId) {
         setChatRooms((prev) => [{ chatId: null, title: "새 채팅방" }, ...prev]);
+      } else {
+        // chatId가 chatRooms에서 가장 앞으로 순서 나오도록 setChatRooms로 수정
+        setChatRooms((prev) => {
+          // 현재 chatId와 일치하는 채팅방을 앞으로 이동
+          const currentIndex = prev.findIndex((room) => room.chatId === chatId);
+          if (currentIndex === -1) return prev;
+          const updatedRooms = [...prev];
+          const [room] = updatedRooms.splice(currentIndex, 1);
+          return [room, ...updatedRooms];
+        });
       }
       if (currentTurn?.query && !searchLoading) {
         setMessageTurns((prev) => [...prev, currentTurn]);
@@ -607,9 +621,7 @@ const Search = ({
                 </div>
               </div>
 
-              <div
-                className={`${styles.chatRow} ${styles.chatRowAssistant}`}
-              >
+              <div className={`${styles.chatRow} ${styles.chatRowAssistant}`}>
                 <div className={styles.chatBubbleUserIconWrapper}>
                   {currentTurn.filters && (
                     <span className={styles.chatBubbleUserIcon}>

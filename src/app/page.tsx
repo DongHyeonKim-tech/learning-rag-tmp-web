@@ -21,6 +21,7 @@ export default function Home() {
   const [chatId, setChatId] = useState<number | null>(null);
   const [messageId, setMessageId] = useState<number | null>(null);
   const [newChatLoading, setNewChatLoading] = useState<boolean>(false);
+  const [chatLoading, setChatLoading] = useState<boolean>(false);
   const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
   const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
 
@@ -125,6 +126,7 @@ export default function Home() {
         newChatLoading={newChatLoading}
         chatId={chatId}
         deleteChatRoomHandler={deleteChatRoomHandler}
+        chatLoading={chatLoading}
       />
       <div className={styles.contentContainer}>
         <div className={styles.pageContainer}>
@@ -151,6 +153,7 @@ export default function Home() {
             setCurrentTurn={setCurrentTurn}
             setNewChatLoading={setNewChatLoading}
             setChatRooms={setChatRooms}
+            setChatLoading={setChatLoading}
           />
         </div>
       </div>
