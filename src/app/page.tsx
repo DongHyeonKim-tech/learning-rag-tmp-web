@@ -61,7 +61,7 @@ export default function Home() {
           };
           updateUser(userData);
           setImageUrl(
-            `https://hub.haeahn.com/Storage/GW/ImageStorage/Employee/${userData.email.split("@")[0]}`
+            `https://hub.haeahn.com/Storage/GW/ImageStorage/Employee/${userData.email.split("@")[0]}.jpg`
           );
         }
       }
