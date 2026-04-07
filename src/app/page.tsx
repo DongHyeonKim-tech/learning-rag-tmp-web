@@ -159,12 +159,17 @@ export default function Home() {
     []
   );
 
-  const deleteChatRoomHandler = async (chatId: number) => {
-    if (!chatId || !user.empNo) return;
+  const deleteChatRoomHandler = async (selectedChatId: number) => {
+    if (!selectedChatId || !user.empNo) return;
     try {
-      const success = await deleteChatRoom(chatId, user.empNo);
+      const success = await deleteChatRoom(selectedChatId, user.empNo);
       if (success) {
         fetchChatRooms();
+        if (selectedChatId === chatId) {
+          setChatId(null);
+          setMessageTurns([]);
+          setCurrentTurn(null);
+        }
         openNotification("success", "채팅방 삭제를 완료했습니다.");
       }
     } catch {
