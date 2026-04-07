@@ -118,8 +118,6 @@
   align-self: stretch;
   scrollbar-gutter: stable;
   /* opacity 1s ease; */
-  max-height: 550px;
-  overflow-y: auto;
 }
 
 .chatRoomList::-webkit-scrollbar {
@@ -146,7 +144,7 @@
   align-items: flex-start;
   gap: 8px;
   align-self: stretch;
-  max-height: 550px;
+  max-height: 700px;
   overflow-y: auto;
   opacity: 1;
   transition: max-height 1.8s cubic-bezier(0.4, 0, 0.2, 1);
