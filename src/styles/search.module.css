@@ -185,6 +185,13 @@
   border-radius: 20px;
   background: var(--color-blue-50, #edf5ff);
   color: var(--color-blue-600, #0769eb);
+  border: none;
+}
+
+.modelButtonActive:hover {
+  background: var(--color-blue-50, #edf5ff);
+  color: var(--color-blue-600, #0769eb);
+  border: 1px solid var(--color-blue-600, #0769eb);
 }
 
 /* 공통 - 카드, 폼, 탭 */

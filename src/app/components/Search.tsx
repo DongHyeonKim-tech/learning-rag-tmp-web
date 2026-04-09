@@ -682,7 +682,7 @@ const Search = ({
                 overlayStyle={{ maxWidth: 250 }}
               >
                 <Button
-                  type={selectedCategory === item.key ? "primary" : "default"}
+                  type={"default"}
                   size="middle"
                   onClick={() => {
                     setSelectedCategory(item.key);
