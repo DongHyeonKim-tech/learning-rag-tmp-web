@@ -525,8 +525,8 @@ const Search = ({
           <Image
             src="/search/images/learning.svg"
             alt="learning"
-            width={14}
-            height={14}
+            width={18}
+            height={18}
           />
         );
       case "MeetUp / Seminar":
@@ -534,8 +534,8 @@ const Search = ({
           <Image
             src="/search/images/meetup.svg"
             alt="meetup"
-            width={14}
-            height={14}
+            width={18}
+            height={18}
           />
         );
       case "framework":
@@ -543,8 +543,8 @@ const Search = ({
           <Image
             src="/search/images/framework.svg"
             alt="framework"
-            width={14}
-            height={14}
+            width={18}
+            height={18}
           />
         );
       case "all":
@@ -552,8 +552,8 @@ const Search = ({
           <Image
             src="/search/images/globe.svg"
             alt="filter_all"
-            width={14}
-            height={14}
+            width={18}
+            height={18}
           />
         );
     }

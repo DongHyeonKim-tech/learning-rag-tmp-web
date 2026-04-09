@@ -482,8 +482,8 @@
 .chatBubbleUserIcon {
   font-size: 14px;
   line-height: 1;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   border-radius: 6px;
   background: var(--color-blue-400, #4d96f9);
   color: #fff;
