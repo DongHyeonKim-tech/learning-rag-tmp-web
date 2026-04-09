@@ -55,7 +55,11 @@ const Sidebar = ({
         <div
           className={styles.newChatButton}
           onClick={() => {
+            if (newChatLoading || chatLoading) return;
             createTempChatRoomHandler();
+          }}
+          style={{
+            cursor: newChatLoading || chatLoading ? "not-allowed" : "pointer",
           }}
         >
           <Image
