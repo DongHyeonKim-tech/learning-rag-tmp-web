@@ -434,63 +434,77 @@ const Search = ({
             align="center"
             justify="flex-start"
           >
-            <Image
-              src={
-                turn.rating === 1
-                  ? "/search/images/thumbs-up-active.svg"
-                  : "/search/images/thumbs-up.svg"
-              }
-              alt="thumbs-up"
-              width={24}
-              height={24}
-              className={styles.iconButton}
-              onClick={() => {
-                if (turn.messageId) {
-                  handleUpdateChatMessageRating(
-                    turn.messageId,
-                    turn.rating === 1 ? 0 : 1
-                  );
+            <Tooltip title="좋아요">
+              <Image
+                src={
+                  turn.rating === 1
+                    ? "/search/images/thumbs-up-active.svg"
+                    : "/search/images/thumbs-up.svg"
                 }
-              }}
-            />
-            <Image
-              src={
-                turn.rating === -1
-                  ? "/search/images/thumbs-down-active.svg"
-                  : "/search/images/thumbs-down.svg"
-              }
-              alt="thumbs-down"
-              width={24}
-              height={24}
-              className={styles.iconButton}
-              onClick={() => {
-                if (turn.messageId) {
-                  handleUpdateChatMessageRating(
-                    turn.messageId,
-                    turn.rating === -1 ? 0 : -1
-                  );
+                alt="thumbs-up"
+                width={24}
+                height={24}
+                className={styles.iconButton}
+                onClick={() => {
+                  if (turn.messageId) {
+                    handleUpdateChatMessageRating(
+                      turn.messageId,
+                      turn.rating === 1 ? 0 : 1
+                    );
+                  }
+                }}
+              />
+            </Tooltip>
+
+            <Tooltip title="싫어요">
+              <Image
+                src={
+                  turn.rating === -1
+                    ? "/search/images/thumbs-down-active.svg"
+                    : "/search/images/thumbs-down.svg"
                 }
-              }}
-            />
+                alt="thumbs-down"
+                width={24}
+                height={24}
+                className={styles.iconButton}
+                onClick={() => {
+                  if (turn.messageId) {
+                    handleUpdateChatMessageRating(
+                      turn.messageId,
+                      turn.rating === -1 ? 0 : -1
+                    );
+                  }
+                }}
+              />
+            </Tooltip>
+
             {turn.feedbackId ? (
-              <CommentOutlined
-                style={{ fontSize: 24 }}
-                className={styles.iconButton}
-                onClick={() => {
-                  console.log("turn: ", turn);
-                  openFeedbackModal(turn.messageId ?? 0);
-                  setSelectedFeedbackModalFeedbackId(turn.feedbackId ?? 0);
-                }}
-              />
+              <Tooltip title="피드백">
+                <Image
+                  src="/search/images/comment-active.svg"
+                  alt="comment"
+                  width={30}
+                  height={30}
+                  onClick={() => {
+                    openFeedbackModal(turn.messageId ?? 0);
+                    setSelectedFeedbackModalFeedbackId(turn.feedbackId ?? 0);
+                  }}
+                  className={styles.iconButton}
+                />
+              </Tooltip>
             ) : (
-              <CommentOutlined
-                style={{ fontSize: 24 }}
-                className={styles.iconButton}
-                onClick={() => {
-                  console.log("turn: ", turn);
-                  openFeedbackModal(turn.messageId ?? 0);
-                }}
-              />
+              <Tooltip title="피드백">
+                <Image
+                  src="/search/images/comment.svg"
+                  alt="comment"
+                  width={30}
+                  height={30}
+                  onClick={() => {
+                    openFeedbackModal(turn.messageId ?? 0);
+                  }}
+                  className={styles.iconButton}
+                />
+              </Tooltip>
             )}
             {/* <Image
               src="/search/images/copy.svg"
