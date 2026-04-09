@@ -89,7 +89,9 @@ export const FeedbackModal = ({
         messageId ?? undefined
       );
       updateMessageTurns && updateMessageTurns(messageId ?? 0, feedbackId);
-      await createFeedbackReasonMaps(feedbackId, selectedFeedbackCodes);
+      if (selectedFeedbackCodes.length > 0) {
+        await createFeedbackReasonMaps(feedbackId, selectedFeedbackCodes);
+      }
       notification.success({ message: "피드백 제출 완료" });
       closeFeedbackModal();
     } catch {
