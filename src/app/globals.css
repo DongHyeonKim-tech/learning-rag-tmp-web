@@ -109,3 +109,10 @@ a {
   flex-direction: column;
   gap: 8px;
 }
+
+.markdown ol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 20px;
+}
