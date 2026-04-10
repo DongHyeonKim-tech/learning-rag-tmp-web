@@ -63,9 +63,9 @@ a {
 }
 
 .markdown p {
-  font-size: 18px;
-  margin: 3px 0px;
-  line-height: 150%;
+  margin: 3px 0;
+  font-size: 17px;
+  line-height: 28px;
 }
 
 .markdown hr {
