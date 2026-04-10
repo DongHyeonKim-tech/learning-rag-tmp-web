@@ -158,22 +158,27 @@ const Sidebar = ({
                           size="small"
                         />
                       )}
-                      {item.chatId && (
-                        <div className={styles.removeChatRoomButtonWrapper}>
-                          <div className={styles.removeChatRoomButton}>
-                            <Image
-                              src="/search/images/close.svg"
-                              alt="delete"
-                              width={16}
-                              height={16}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                confirmDeleteChatRoom(item.title, item.chatId);
-                              }}
-                            />
+                      {item.chatId &&
+                        ((item.chatId === chatId && !chatLoading) ||
+                          item.chatId !== chatId) && (
+                          <div className={styles.removeChatRoomButtonWrapper}>
+                            <div className={styles.removeChatRoomButton}>
+                              <Image
+                                src="/search/images/close.svg"
+                                alt="delete"
+                                width={16}
+                                height={16}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  confirmDeleteChatRoom(
+                                    item.title,
+                                    item.chatId
+                                  );
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </div>
                   );
                 })
