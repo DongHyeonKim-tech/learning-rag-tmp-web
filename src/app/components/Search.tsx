@@ -168,7 +168,6 @@ const Search = ({
   useEffect(() => {
     scrollContainerRef.current?.scrollTo({
       top: scrollContainerRef.current?.scrollHeight,
-      behavior: "smooth",
     });
   }, [messageTurns.length]);
 
