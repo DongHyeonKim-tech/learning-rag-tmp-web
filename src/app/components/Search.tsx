@@ -438,8 +438,8 @@ const Search = ({
                     : "/search/images/thumbs-up.svg"
                 }
                 alt="thumbs-up"
-                width={24}
-                height={24}
+                width={20}
+                height={20}
                 className={styles.iconButton}
                 onClick={() => {
                   if (turn.messageId) {
@@ -460,8 +460,8 @@ const Search = ({
                     : "/search/images/thumbs-down.svg"
                 }
                 alt="thumbs-down"
-                width={24}
-                height={24}
+                width={20}
+                height={20}
                 className={styles.iconButton}
                 onClick={() => {
                   if (turn.messageId) {
@@ -479,8 +479,8 @@ const Search = ({
                 <Image
                   src="/search/images/comment-active.svg"
                   alt="comment"
-                  width={30}
-                  height={30}
+                  width={20}
+                  height={20}
                   onClick={() => {
                     openFeedbackModal(turn.messageId ?? 0);
                     setSelectedFeedbackModalFeedbackId(turn.feedbackId ?? 0);
@@ -493,8 +493,8 @@ const Search = ({
                 <Image
                   src="/search/images/comment.svg"
                   alt="comment"
-                  width={30}
-                  height={30}
+                  width={20}
+                  height={20}
                   onClick={() => {
                     openFeedbackModal(turn.messageId ?? 0);
                   }}
@@ -505,8 +505,8 @@ const Search = ({
             {/* <Image
               src="/search/images/copy.svg"
               alt="copy"
-              width={24}
-              height={24}
+              width={20}
+              height={20}
               className={styles.iconButton}
               onClick={() => {
                 navigator.clipboard.writeText(turn.summary);
