@@ -6,13 +6,16 @@
     "dev": "next dev --turbopack -p 3007",
     "build": "next build --turbopack",
     "start": "next start -p 3007",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:dev": "env-cmd -f .env.development next build",
+    "build:prod": "env-cmd -f .env.production next build"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "axios": "^1.13.6",
     "camelcase-keys": "^10.0.2",
+    "env-cmd": "^11.0.0",
     "next": "15.5.3",
     "openai": "^5.20.2",
     "prettier": "^3.8.1",
