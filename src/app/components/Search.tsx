@@ -8,10 +8,7 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import {
-  searchLearningOpenAIStream,
-  updateChatMessageRating,
-} from "@/utils/searchApi";
+import { searchOpenAIStream, updateChatMessageRating } from "@/utils/searchApi";
 import {
   SearchResult,
   SearchParamsOpenAI,
@@ -169,12 +166,11 @@ const Search = ({
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
-    console.log("messageTurns: ", messageTurns);
     scrollContainerRef.current?.scrollTo({
       top: scrollContainerRef.current?.scrollHeight,
       behavior: "smooth",
     });
-  }, [messageTurns]);
+  }, [messageTurns.length]);
 
   const SCROLL_BOTTOM_THRESHOLD = 24;
 
@@ -261,7 +257,7 @@ const Search = ({
             }
       );
 
-      const response = await searchLearningOpenAIStream(searchParams, {
+      const response = await searchOpenAIStream(searchParams, {
         onDelta(content) {
           setCurrentTurn((prev) =>
             prev
