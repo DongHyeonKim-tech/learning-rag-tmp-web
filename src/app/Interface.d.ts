@@ -113,7 +113,7 @@ export interface SearchResponseFramework {
   total_sources?: number;
 }
 
-type SearchLearningStreamCallbacks = {
+type SearchStreamCallbacks = {
   onDelta: (text: string) => void;
   onMeta?: (meta: StreamMetaData) => void;
   onError?: (err: StreamErrorData) => void;
