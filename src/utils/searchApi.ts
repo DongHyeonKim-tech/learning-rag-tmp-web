@@ -1,11 +1,7 @@
 import {
-  SearchParams,
-  SearchResponse,
   SearchParamsOpenAI,
   SearchResponseOpenAI,
-  SearchParamsFramework,
-  SearchResponseFramework,
-  SearchLearningStreamCallbacks,
+  SearchStreamCallbacks,
   GetMessagesParams,
   StreamEvent,
   StreamMetaData,
@@ -66,60 +62,11 @@ export const getHubMyInfo = async () => {
   return response.data.data.result[0];
 };
 
-export async function searchDocumentsKure(
-  params: SearchParams
-): Promise<SearchResponse> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/search-kure`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Search failed: ${response.status}`);
-  }
-
-  return response.json();
-}
-
-export async function searchDocumentsOpenAI(
-  params: SearchParamsOpenAI
-): Promise<SearchResponseOpenAI> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/summarize`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    }
-  );
-
-  if (!response.ok) {
-    let errorMessage = `Search failed: ${response.status}`;
-    try {
-      const errorData = await response.json();
-      errorMessage += ` - ${JSON.stringify(errorData)}`;
-    } catch {
-      // JSON 파싱 실패 시 기본 메시지 사용
-    }
-    throw new Error(errorMessage);
-  }
-
-  return response.json();
-}
-
-export async function searchLearningOpenAIStream(
+export async function searchOpenAIStream(
   params: SearchParamsOpenAI,
-  callbacks: SearchLearningStreamCallbacks
+  callbacks: SearchStreamCallbacks
 ): Promise<SearchResponseOpenAI> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chat`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_CHAT_API_BASE}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -250,59 +197,6 @@ export async function searchLearningOpenAIStream(
         safeReject(e);
       });
   });
-}
-
-export async function searchDocuments(
-  params: SearchParams
-): Promise<SearchResponse> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/search`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(params),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Search failed: ${response.status}`);
-  }
-
-  return response.json();
-}
-
-export async function searchFrameworkDocuments(
-  params: SearchParamsFramework
-): Promise<SearchResponseFramework> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_FRAMEWORK_API_BASE}/framework`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Search failed: ${response.status}`);
-  }
-
-  return response.json();
-}
-
-export async function syncFrameworkDocuments() {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_FRAMEWORK_API_BASE}/sync/run`,
-    {
-      method: "POST",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Search failed: ${response.status}`);
-  }
-  return response.status;
 }
 
 /**
