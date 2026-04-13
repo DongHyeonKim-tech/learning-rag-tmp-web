@@ -123,6 +123,7 @@ const Sidebar = ({
                         ) {
                           return;
                         }
+                        if (chatLoading || newChatLoading) return;
                         fetchChatMessages(item.chatId);
                       }}
                     >
