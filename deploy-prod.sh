@@ -4,7 +4,7 @@ PARENT_DIR=$(dirname "$CURRENT_DIR")
 
 echo "BIM Search Web 배포 시작"
 
-cd "$PARENT_DIR/bim-project-old"
+cd "$PARENT_DIR/bim-search-old"
 
 git pull
 
