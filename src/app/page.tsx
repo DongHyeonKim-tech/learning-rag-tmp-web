@@ -38,9 +38,6 @@ export default function Home() {
   const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
   const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState<boolean>(false);
-  useEffect(() => {
-    console.log("messageTurns: ", messageTurns);
-  }, [messageTurns]);
 
   const checkHubToken = async () => {
     setLoginLoading(true);
@@ -100,21 +97,15 @@ export default function Home() {
         });
       }
       const res = await getChatMessages(selectedChatId);
-      console.log("fetchChatMessages res: ", res);
       setMessageTurns(res);
       setCurrentTurn(null);
       setChatId(selectedChatId);
       setSearchInput("");
-      console.log("messages: ", res);
       // setMessageTurns(data.messages.map((item: any) => ({ query: item.content, summary: item.summary, results: item.results })));
     } catch {
       openNotification("error", "채팅 메시지 조회 중 오류가 발생했습니다.");
     }
   };
-
-  useEffect(() => {
-    console.log("chatId: ", chatId);
-  }, [chatId]);
 
   const createTempChatRoomHandler = async () => {
     setNewChatLoading(false);
@@ -131,10 +122,6 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
-  useEffect(() => {
-    console.log("currentTurn: ", currentTurn);
-  }, [currentTurn]);
 
   const handleLearningStreamMeta = useCallback(
     (

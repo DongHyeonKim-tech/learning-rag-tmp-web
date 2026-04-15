@@ -216,8 +216,6 @@ const Search = ({
   }, [currentTurn?.summary, searchLoading, stickToBottom]);
 
   const onSearchOpenAI = useCallback(async () => {
-    console.log("user: ", user);
-    console.log("onSearchOpenAI: ", searchInput, user.empNo);
     if (!searchInput.trim() || !user.empNo) return;
     setStickToBottom(true);
     setChatLoading(true);
@@ -244,7 +242,6 @@ const Search = ({
       embedding_model: "nlpai-lab/KURE-v1",
       emp_no: user.empNo,
     };
-    console.log("searchParams: ", searchParams);
     try {
       setSearchLoading(true);
       setCurrentTurn((prev) =>
@@ -281,8 +278,6 @@ const Search = ({
           );
         },
       });
-
-      console.log("response: ", response);
 
       onStreamMetaUpdate(
         response.chat_id ?? null,
