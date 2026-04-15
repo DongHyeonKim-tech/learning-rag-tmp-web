@@ -88,7 +88,7 @@ export const FeedbackModal = ({
         feedbackText,
         messageId ?? undefined
       );
-      updateMessageTurns && updateMessageTurns(messageId ?? 0, feedbackId);
+      updateMessageTurns?.(messageId ?? 0, feedbackId);
       if (selectedFeedbackCodes.length > 0) {
         await createFeedbackReasonMaps(feedbackId, selectedFeedbackCodes);
       }
@@ -99,7 +99,14 @@ export const FeedbackModal = ({
     } finally {
       setLoading(false);
     }
-  }, [selectedFeedbackCodes, feedbackText, messageId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedFeedbackCodes,
+    feedbackText,
+    messageId,
+    updateMessageTurns,
+    user.empNo,
+  ]);
 
   return (
     <Modal

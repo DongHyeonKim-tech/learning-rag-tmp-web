@@ -22,7 +22,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import SearchForm from "@/app/components/SearchForm";
-import { CommentOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import FeedbackModal from "@/app/components/modal/FeedbackModal";
 import { useUserStore } from "@/utils/store";
@@ -186,7 +185,6 @@ const Search = ({
 
   const updateMessageTurns = useCallback(
     (messageId: number, feedbackId: number) => {
-      console.log("updateMessageTurns: ", messageId, feedbackId);
       setMessageTurns((prev) =>
         prev.map((turn) =>
           turn.messageId === messageId
@@ -195,7 +193,7 @@ const Search = ({
         )
       );
     },
-    []
+    [setMessageTurns]
   );
 
   const checkAtBottom = useCallback((el: HTMLDivElement | null) => {
@@ -218,10 +216,16 @@ const Search = ({
   }, [currentTurn?.summary, searchLoading, stickToBottom]);
 
   const onSearchOpenAI = useCallback(async () => {
+    console.log("user: ", user);
+    console.log("onSearchOpenAI: ", searchInput, user.empNo);
     if (!searchInput.trim() || !user.empNo) return;
     setStickToBottom(true);
     setChatLoading(true);
-    chatId ? setChatLoading(true) : setNewChatLoading(true);
+    if (chatId) {
+      setChatLoading(true);
+    } else {
+      setNewChatLoading(true);
+    }
     const searchParams: SearchParamsOpenAI = {
       query: searchInput,
       top_k: 20,
@@ -240,9 +244,9 @@ const Search = ({
       embedding_model: "nlpai-lab/KURE-v1",
       emp_no: user.empNo,
     };
+    console.log("searchParams: ", searchParams);
     try {
       setSearchLoading(true);
-
       setCurrentTurn((prev) =>
         prev
           ? { ...prev, summary: "", results: [], filters: selectedCategory }
@@ -352,7 +356,7 @@ const Search = ({
       setChatLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchInput, selectedModel, setSearchInput]);
+  }, [searchInput, selectedModel, setSearchInput, user]);
 
   const handleSearchSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -403,11 +407,11 @@ const Search = ({
         }
       } catch (err) {
         notification.error({
-          message: "평점 업데이트 중 오류가 발생했습니다.",
+          message: `평점 업데이트 중 오류가 발생했습니다. ${(err as Error).message}`,
         });
       }
     },
-    [messageTurns]
+    [setMessageTurns]
   );
 
   const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;

@@ -16,13 +16,12 @@ import { FeedbackModal } from "@/app/components/modal/FeedbackModal";
 import { validateHubToken, getHubMyInfo } from "@/utils/searchApi";
 import { useUserStore } from "@/utils/store";
 import { useCookies } from "react-cookie";
-import { router } from "next/client";
 import { SmileOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 
 export default function Home() {
   const { user, updateUser } = useUserStore();
-  const [cookies, setCookies, removeCookies] = useCookies(["refreshToken"]);
+  const [cookies] = useCookies(["refreshToken"]);
   const [imageUrl, setImageUrl] = useState<string>("");
 
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
@@ -130,6 +129,7 @@ export default function Home() {
     if (user.empNo) {
       fetchChatRooms();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
@@ -193,75 +193,84 @@ export default function Home() {
 
   return (
     <div className={styles.pageRoot}>
-      <Sidebar
-        chatRooms={chatRooms}
-        fetchChatMessages={fetchChatMessages}
-        createTempChatRoomHandler={createTempChatRoomHandler}
-        newChatLoading={newChatLoading}
-        chatId={chatId}
-        deleteChatRoomHandler={deleteChatRoomHandler}
-        chatLoading={chatLoading}
-        fetchChatRoomsLoading={fetchChatRoomsLoading}
-      />
-      <div className={styles.contentContainer}>
-        <div className={styles.pageContainer}>
-          <div className={styles.topNavSection}>
-            <div className={styles.topNavDotsAnchor}>
-              <div className={styles.topNavWrapper}>
-                <Image
-                  src="/search/images/dots.svg"
-                  alt="dots"
-                  width={20}
-                  height={20}
-                  className={styles.topNavDots}
-                />
-              </div>
-              <div
-                className={styles.dotsPopover}
-                role="region"
-                aria-label="추가 메뉴"
-              >
-                <div
-                  className={styles.dotsPopoverContentItem}
-                  onClick={() => {
-                    setFeedbackModalOpen(true);
-                  }}
-                >
-                  의견 보내기
-                </div>
-              </div>
-            </div>
-            {process.env.NEXT_PUBLIC_ENV === "development" ? (
-              <SmileOutlined />
-            ) : (
-              <Image
-                src={imageUrl}
-                width={40}
-                height={40}
-                alt="profile"
-                className={styles.headerProfileAvatar}
-              />
-            )}
-          </div>
-          <Search
-            searchInput={searchInput}
-            setSearchInput={setSearchInput}
+      {loginLoading ? (
+        <Spin
+          fullscreen
+          size="large"
+        />
+      ) : (
+        <>
+          <Sidebar
+            chatRooms={chatRooms}
+            fetchChatMessages={fetchChatMessages}
+            createTempChatRoomHandler={createTempChatRoomHandler}
+            newChatLoading={newChatLoading}
             chatId={chatId}
-            onStreamMetaUpdate={handleLearningStreamMeta}
-            messageTurns={messageTurns}
-            setMessageTurns={setMessageTurns}
-            currentTurn={currentTurn}
-            setCurrentTurn={setCurrentTurn}
-            setNewChatLoading={setNewChatLoading}
-            setChatRooms={setChatRooms}
-            setChatLoading={setChatLoading}
+            deleteChatRoomHandler={deleteChatRoomHandler}
+            chatLoading={chatLoading}
+            fetchChatRoomsLoading={fetchChatRoomsLoading}
           />
-        </div>
-      </div>
-      <FeedbackModal
-        open={feedbackModalOpen}
-        onCancel={() => setFeedbackModalOpen(false)}
-      />
+          <div className={styles.contentContainer}>
+            <div className={styles.pageContainer}>
+              <div className={styles.topNavSection}>
+                <div className={styles.topNavDotsAnchor}>
+                  <div className={styles.topNavWrapper}>
+                    <Image
+                      src="/search/images/dots.svg"
+                      alt="dots"
+                      width={20}
+                      height={20}
+                      className={styles.topNavDots}
+                    />
+                  </div>
+                  <div
+                    className={styles.dotsPopover}
+                    role="region"
+                    aria-label="추가 메뉴"
+                  >
+                    <div
+                      className={styles.dotsPopoverContentItem}
+                      onClick={() => {
+                        setFeedbackModalOpen(true);
+                      }}
+                    >
+                      의견 보내기
+                    </div>
+                  </div>
+                </div>
+                {process.env.NEXT_PUBLIC_ENV === "development" ? (
+                  <SmileOutlined />
+                ) : (
+                  <Image
+                    src={imageUrl}
+                    width={40}
+                    height={40}
+                    alt="profile"
+                    className={styles.headerProfileAvatar}
+                  />
+                )}
+              </div>
+              <Search
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                chatId={chatId}
+                onStreamMetaUpdate={handleLearningStreamMeta}
+                messageTurns={messageTurns}
+                setMessageTurns={setMessageTurns}
+                currentTurn={currentTurn}
+                setCurrentTurn={setCurrentTurn}
+                setNewChatLoading={setNewChatLoading}
+                setChatRooms={setChatRooms}
+                setChatLoading={setChatLoading}
+              />
+            </div>
+          </div>
+          <FeedbackModal
+            open={feedbackModalOpen}
+            onCancel={() => setFeedbackModalOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 }
