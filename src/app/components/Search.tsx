@@ -683,12 +683,12 @@ const Search = ({
                     setSelectedCategory(item.key);
                     setSearchInput(
                       item.key === "all"
-                        ? ""
+                        ? "신규 BIM 프로젝트 시작 시에 도움이 될 만한 모든 사항 정리해줘"
                         : item.key === "Learning"
-                          ? "캐드 import 하는 방법 알려줘"
+                          ? "Curtain Wall 작성법 알려줘"
                           : item.key === "MeetUp / Seminar"
-                            ? "HDA BIM 어워드에 대해 알려줘"
-                            : "프로젝트 파일 생성"
+                            ? "공동주택 BIM 사례 소개해줘"
+                            : "프로젝트 초기 세팅하는 방법 알려줘"
                     );
                   }}
                   className={`${styles.modelButton} ${selectedCategory === item.key ? styles.modelButtonActive : ""}`}
