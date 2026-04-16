@@ -144,7 +144,16 @@ a {
 .markdown hr {
   margin: 1.5em 0;
   border: none;
-  border-top: 1px solid #374151;
+  border-top: 1px solid #ced2d9;
+}
+
+.markdown code {
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  background: #e7e9ed;
+  font-size: 0.9em;
+  font-family: monospace;
+  color: #3d424d;
 }
 
 .markdown table {
@@ -165,15 +174,6 @@ a {
 .markdown th {
   background: #1f2937;
   font-weight: 600;
-}
-
-.markdown code {
-  padding: 0.15em 0.4em;
-  border-radius: 6px;
-  background: #1f2937;
-  font-size: 0.9em;
-  font-family: monospace;
-  color: #fff;
 }
 
 .markdown pre {
