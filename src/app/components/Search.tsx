@@ -165,10 +165,11 @@ const Search = ({
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
+    console.log("messageTurns.length", messageTurns.length);
     scrollContainerRef.current?.scrollTo({
       top: scrollContainerRef.current?.scrollHeight,
     });
-  }, [messageTurns.length]);
+  }, [messageTurns]);
 
   const SCROLL_BOTTOM_THRESHOLD = 24;
 
