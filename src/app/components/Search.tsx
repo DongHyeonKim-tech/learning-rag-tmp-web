@@ -16,7 +16,14 @@ import {
   ChatRoomData,
 } from "@/app/Interface";
 import "@ant-design/v5-patch-for-react-19";
-import { notification, Spin, Flex, Button, Tooltip } from "antd";
+import {
+  notification,
+  Spin,
+  Flex,
+  Button,
+  Tooltip,
+  Image as AntdImage,
+} from "antd";
 import styles from "@/styles/search.module.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -165,7 +172,6 @@ const Search = ({
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
-    console.log("messageTurns.length", messageTurns.length);
     scrollContainerRef.current?.scrollTo({
       top: scrollContainerRef.current?.scrollHeight,
     });
@@ -420,6 +426,21 @@ const Search = ({
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}
+              components={{
+                img: ({ src, alt }) => (
+                  <AntdImage
+                    src={src as string}
+                    alt={alt || "image"}
+                    preview
+                    style={{
+                      maxWidth: "500px",
+                      maxHeight: "250px",
+                      borderRadius: 10,
+                      objectFit: "contain",
+                    }}
+                  />
+                ),
+              }}
             >
               {turn.summary}
             </ReactMarkdown>
