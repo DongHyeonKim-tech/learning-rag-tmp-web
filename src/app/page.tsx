@@ -148,7 +148,7 @@ export default function Home() {
         });
       }
     },
-    []
+    [chatId]
   );
 
   const deleteChatRoomHandler = async (selectedChatId: number) => {

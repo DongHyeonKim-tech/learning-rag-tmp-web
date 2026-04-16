@@ -177,6 +177,10 @@ const Search = ({
     });
   }, [messageTurns]);
 
+  useEffect(() => {
+    console.log("chatId: ", chatId);
+  }, [chatId]);
+
   const SCROLL_BOTTOM_THRESHOLD = 24;
 
   const onCancelFeedbackModal = useCallback(() => {
@@ -357,8 +361,14 @@ const Search = ({
       setNewChatLoading(false);
       setChatLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchInput, selectedModel, setSearchInput, user]);
+  }, [
+    searchInput,
+    selectedModel,
+    setSearchInput,
+    user,
+    chatId,
+    selectedCategory,
+  ]);
 
   const handleSearchSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -443,6 +453,7 @@ const Search = ({
                       maxHeight: "250px",
                       borderRadius: 10,
                       objectFit: "contain",
+                      border: "1px solid #e7e9ed",
                     }}
                   />
                 ),
