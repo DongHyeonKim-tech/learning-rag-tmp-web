@@ -419,7 +419,13 @@ const Search = ({
   const tabPanelClass = `${styles.tabPanel} ${styles.tabPanel500}`;
 
   const renderAssistantContent = (turn: Turn) => (
-    <div className={styles.chatTurnBlock}>
+    <div
+      className={styles.chatTurnBlock}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        return false;
+      }}
+    >
       {turn.summary ? (
         <div className={styles.chatBubbleAssistant}>
           <div className="markdown">
