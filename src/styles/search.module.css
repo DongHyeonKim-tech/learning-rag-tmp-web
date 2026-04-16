@@ -498,7 +498,6 @@
   border-radius: 6px;
   background: var(--color-blue-400, #4d96f9);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 1;
 
   display: flex;

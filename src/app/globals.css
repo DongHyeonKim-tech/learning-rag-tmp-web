@@ -105,7 +105,7 @@ a {
   width: fit-content;
   padding: 7.5px 12px;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   border-radius: 8px;
   border: 1px solid var(--color-gray-200, #e7e9ed);
   background: var(--color-gray-100, #f6f6f8);
