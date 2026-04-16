@@ -393,7 +393,7 @@ const Search = ({
       try {
         const response = await updateChatMessageRating(messageId, rating);
         if (response) {
-          notification.success({ message: "평점이 업데이트되었습니다." });
+          notification.success({ message: "의견이 반영되었습니다." });
           setMessageTurns((prev) =>
             prev.map((turn) =>
               turn.messageId === messageId ? { ...turn, rating: rating } : turn
@@ -402,7 +402,7 @@ const Search = ({
         }
       } catch (err) {
         notification.error({
-          message: `평점 업데이트 중 오류가 발생했습니다. ${(err as Error).message}`,
+          message: `의견 반영 중 오류가 발생했습니다. ${(err as Error).message}`,
         });
       }
     },

@@ -91,10 +91,11 @@ export const FeedbackModal = ({
       if (selectedFeedbackCodes.length > 0) {
         await createFeedbackReasonMaps(feedbackId, selectedFeedbackCodes);
       }
-      notification.success({ message: "피드백 제출 완료" });
+      notification.success({ message: "의견이 반영되었습니다." });
+
       closeFeedbackModal();
     } catch {
-      notification.error({ message: "피드백 제출 실패" });
+      notification.error({ message: "의견 반영 중 오류가 발생했습니다." });
     } finally {
       setLoading(false);
     }
