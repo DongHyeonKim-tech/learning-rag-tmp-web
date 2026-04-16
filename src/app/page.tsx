@@ -29,7 +29,7 @@ export default function Home() {
 
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState(
-    "신규 BIM 프로젝트 시작 시에 도움이 될 만한 모든 사항 정리해줘"
+    "신규 BIM 프로젝트 시작 시에 도움이 될 만한 사항 정리해줘"
   );
   const [fetchChatRoomsLoading, setFetchChatRoomsLoading] =
     useState<boolean>(false);
