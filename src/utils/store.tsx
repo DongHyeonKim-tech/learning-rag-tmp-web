@@ -1,4 +1,4 @@
-import { UserStateType, UserType } from "@/app/Interface";
+import { AuthStateType, UserStateType, UserType } from "@/app/Interface";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -12,6 +12,19 @@ export const useUserStore = create(
     }),
     {
       name: "user",
+    }
+  )
+);
+
+export const useAuthStore = create(
+  persist<AuthStateType>(
+    (set) => ({
+      isAuthenticated: false,
+      setIsAuthenticated: (isAuthenticated: boolean) =>
+        set((prev) => ({ ...prev, isAuthenticated })),
+    }),
+    {
+      name: "auth",
     }
   )
 );

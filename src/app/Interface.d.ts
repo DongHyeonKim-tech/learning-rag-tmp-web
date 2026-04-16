@@ -19,6 +19,11 @@ export interface UserStateType {
   updateUser: (data: UserType) => void;
 }
 
+export interface AuthStateType {
+  isAuthenticated: boolean;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
+}
+
 export interface SearchResult {
   doc_id: string;
   title: string;

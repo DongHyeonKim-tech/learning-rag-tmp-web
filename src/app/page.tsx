@@ -14,13 +14,16 @@ import Search from "@/app/components/Search";
 import Image from "next/image";
 import { FeedbackModal } from "@/app/components/modal/FeedbackModal";
 import { validateHubToken, getHubMyInfo } from "@/utils/searchApi";
-import { useUserStore } from "@/utils/store";
+import { useAuthStore, useUserStore } from "@/utils/store";
 import { useCookies } from "react-cookie";
 import { SmileOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
+import CheckAuthModal from "@/app/components/modal/CheckAuthModal";
+import AdminModal from "@/app/components/modal/AdminModal";
 
 export default function Home() {
   const { user, updateUser } = useUserStore();
+  const { isAuthenticated, setIsAuthenticated } = useAuthStore();
   const [cookies] = useCookies(["refreshToken"]);
   const [imageUrl, setImageUrl] = useState<string>("");
 
@@ -38,6 +41,8 @@ export default function Home() {
   const [messageTurns, setMessageTurns] = useState<Turn[]>([]);
   const [currentTurn, setCurrentTurn] = useState<Turn | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState<boolean>(false);
+  const [checkAuthModalOpen, setCheckAuthModalOpen] = useState<boolean>(false);
+  const [adminModalOpen, setAdminModalOpen] = useState<boolean>(false);
 
   const checkHubToken = async () => {
     setLoginLoading(true);
@@ -164,6 +169,39 @@ export default function Home() {
     }
   };
 
+  const handleAuthenticate = async (
+    password: string,
+    setPassword: (password: string) => void
+  ) => {
+    try {
+      if (password === process.env.NEXT_PUBLIC_ADMIN_AUTH) {
+        setIsAuthenticated(true);
+        setCheckAuthModalOpen(false);
+        setAdminModalOpen(true);
+        setPassword("");
+      }
+    } catch (error) {
+      console.error("Error authenticating:", error);
+    }
+  };
+
+  const handleChangeAdmin = async (
+    empNo: string,
+    setEmpNo: (empNo: string) => void
+  ) => {
+    try {
+      updateUser({ ...user, empNo });
+      setAdminModalOpen(false);
+      setEmpNo("");
+      setCurrentTurn(null);
+      setMessageTurns([]);
+      setChatId(null);
+      setMessageId(null);
+    } catch (error) {
+      console.error("Error changing admin:", error);
+    }
+  };
+
   useEffect(() => {
     if (cookies?.refreshToken) {
       checkHubToken();
@@ -223,6 +261,43 @@ export default function Home() {
                     >
                       의견 보내기
                     </div>
+                    {user.empNo === "20230808" &&
+                      !isAuthenticated &&
+                      process.env.NEXT_PUBLIC_ENV === "production" && (
+                        <div
+                          className={styles.dotsPopoverContentItem}
+                          onClick={() => {
+                            setCheckAuthModalOpen(true);
+                          }}
+                        >
+                          관리자
+                        </div>
+                      )}
+                    {isAuthenticated && (
+                      <>
+                        <div
+                          className={styles.dotsPopoverContentItem}
+                          onClick={() => {
+                            setAdminModalOpen(true);
+                          }}
+                        >
+                          계정 전환
+                        </div>
+                        <div
+                          className={styles.dotsPopoverContentItem}
+                          onClick={() => {
+                            setIsAuthenticated(false);
+                            setCurrentTurn(null);
+                            setMessageTurns([]);
+                            setChatId(null);
+                            setMessageId(null);
+                            updateUser({ ...user, empNo: "20230808" });
+                          }}
+                        >
+                          계정 원복
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 {process.env.NEXT_PUBLIC_ENV === "development" ? (
@@ -255,6 +330,16 @@ export default function Home() {
           <FeedbackModal
             open={feedbackModalOpen}
             onCancel={() => setFeedbackModalOpen(false)}
+          />
+          <CheckAuthModal
+            open={checkAuthModalOpen}
+            onCancel={() => setCheckAuthModalOpen(false)}
+            onAuthenticate={handleAuthenticate}
+          />
+          <AdminModal
+            open={adminModalOpen}
+            onCancel={() => setAdminModalOpen(false)}
+            onChangeAdmin={handleChangeAdmin}
           />
         </>
       )}
