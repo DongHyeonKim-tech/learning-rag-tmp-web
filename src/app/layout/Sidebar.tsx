@@ -170,6 +170,7 @@ const Sidebar = ({
                                 width={16}
                                 height={16}
                                 onClick={(e) => {
+                                  if (chatLoading || newChatLoading) return;
                                   e.stopPropagation();
                                   confirmDeleteChatRoom(
                                     item.title,
