@@ -532,7 +532,7 @@
   padding: 0px 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   color: var(--color-gray-600, #4e535f);
 
   /* Web/body3/400 */

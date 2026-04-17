@@ -456,7 +456,7 @@ const Search = ({
             </ReactMarkdown>
           </div>
           <Flex
-            gap={12}
+            gap={14}
             align="center"
             justify="flex-start"
           >
