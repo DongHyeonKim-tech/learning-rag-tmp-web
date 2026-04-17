@@ -1,5 +1,4 @@
 "use client";
-
 import {
   useState,
   useCallback,
@@ -448,13 +447,7 @@ const Search = ({
                     src={src as string}
                     alt={alt || "image"}
                     preview
-                    style={{
-                      maxWidth: "500px",
-                      maxHeight: "250px",
-                      borderRadius: 10,
-                      objectFit: "contain",
-                      border: "1px solid #e7e9ed",
-                    }}
+                    className={styles.chatBubbleAssistantImage}
                   />
                 ),
               }}

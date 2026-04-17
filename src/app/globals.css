@@ -188,13 +188,6 @@ a {
   background: transparent;
 }
 
-.markdown img {
-  height: auto;
-  border-radius: 10px;
-  max-width: 700px;
-  object-fit: contain;
-}
-
 .markdown strong {
   font-weight: 700;
 }
