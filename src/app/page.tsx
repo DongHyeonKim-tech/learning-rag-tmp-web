@@ -174,6 +174,7 @@ export default function Home() {
     setPassword: (password: string) => void
   ) => {
     try {
+      console.log(password, process.env.NEXT_PUBLIC_ADMIN_AUTH);
       if (password === process.env.NEXT_PUBLIC_ADMIN_AUTH) {
         setIsAuthenticated(true);
         setCheckAuthModalOpen(false);
