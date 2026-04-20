@@ -16,6 +16,7 @@ import {
   getFeedback,
 } from "@/utils/searchApi";
 import { useUserStore } from "@/utils/store";
+import styles from "@/styles/feedback.module.css";
 
 const { TextArea } = Input;
 
@@ -43,8 +44,8 @@ export const FeedbackModal = ({
     if (open) {
       const fetchFeedbackCodes = async () => {
         const codes = await getCodesByValue(
-          "FEEDBACK_REASON",
-          "FEEDBACK_REASON"
+          messageId ? "MESSAGE_FEEDBACK" : "SYSTEM_FEEDBACK",
+          messageId ? "MESSAGE_FEEDBACK" : "SYSTEM_FEEDBACK"
         );
         setFeedbackCodes(codes);
       };
@@ -112,7 +113,7 @@ export const FeedbackModal = ({
     <Modal
       open={open}
       onCancel={closeFeedbackModal}
-      width={360}
+      width={500}
       title={null}
       footer={
         <Flex
@@ -144,45 +145,49 @@ export const FeedbackModal = ({
       >
         <Flex
           vertical
-          gap={5}
+          gap={20}
         >
-          <Typography.Title level={5}>
-            답변에 개선이 필요한 부분을 선택해주세요.
-          </Typography.Title>
-          {feedbackCodes.map((code) => (
-            <Checkbox
-              key={code.codeId}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedFeedbackCodes([
-                    ...selectedFeedbackCodes,
-                    code.codeId,
-                  ]);
-                } else {
-                  setSelectedFeedbackCodes(
-                    selectedFeedbackCodes.filter((id) => id !== code.codeId)
-                  );
-                }
-              }}
-              disabled={loading}
-              checked={selectedFeedbackCodes.includes(code.codeId)}
-            >
-              {code.codeName}
-            </Checkbox>
-          ))}
+          <div className={styles.title}>
+            {`${messageId ? "답변" : "시스템"}에 개선이 필요한 부분을 선택해주세요.`}
+          </div>
+          <Flex
+            vertical
+            gap={10}
+          >
+            {feedbackCodes.map((code) => (
+              <Checkbox
+                key={code.codeId}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedFeedbackCodes([
+                      ...selectedFeedbackCodes,
+                      code.codeId,
+                    ]);
+                  } else {
+                    setSelectedFeedbackCodes(
+                      selectedFeedbackCodes.filter((id) => id !== code.codeId)
+                    );
+                  }
+                }}
+                disabled={loading}
+                checked={selectedFeedbackCodes.includes(code.codeId)}
+              >
+                <div className={styles.checkboxText}>{code.codeName}</div>
+              </Checkbox>
+            ))}
+          </Flex>
         </Flex>
         <Flex
           vertical
           gap={5}
         >
-          <Typography.Title level={5}>
-            기타 의견을 입력해주세요.
-          </Typography.Title>
           <TextArea
             placeholder="피드백을 입력해주세요."
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
             disabled={loading}
+            className={styles.feedbackText}
+            style={{ minHeight: 80 }}
           />
         </Flex>
       </Flex>
