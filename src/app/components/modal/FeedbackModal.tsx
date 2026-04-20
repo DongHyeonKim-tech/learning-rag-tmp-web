@@ -125,7 +125,7 @@ export const FeedbackModal = ({
           gap={10}
         >
           <Button
-            onClick={onCancel}
+            onClick={closeFeedbackModal}
             disabled={loading}
           >
             취소
