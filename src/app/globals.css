@@ -88,7 +88,7 @@ a {
 
 .markdown ul,
 .markdown ol {
-  margin: 0 0 1em;
+  margin: 0 0 1.5em;
   padding-left: 1.5em;
 }
 
@@ -103,7 +103,8 @@ a {
 .markdown a {
   display: inline-flex;
   width: fit-content;
-  padding: 7.5px 12px;
+  padding: 7px 12px;
+  margin: 2px;
   align-items: center;
   gap: 4px;
   border-radius: 8px;
