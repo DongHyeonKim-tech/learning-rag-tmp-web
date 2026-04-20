@@ -5,7 +5,7 @@
   display: inline-flex;
   align-items: center;
   gap: 16px;
-  background: var(--color-gray-50, #fcfcfd);
+  background: var(--color-gray-50, #f6f6f8);
 }
 
 .topNavSection {
@@ -238,7 +238,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  height: 72vh;
+  height: 71vh;
   padding: 10px;
 }
 
