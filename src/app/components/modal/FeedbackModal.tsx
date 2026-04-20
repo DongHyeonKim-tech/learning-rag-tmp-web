@@ -76,8 +76,12 @@ export const FeedbackModal = ({
 
   const onSubmit = useCallback(async () => {
     if (!user.empNo) return;
-    if (selectedFeedbackCodes.length === 0 && !feedbackText.trim()) {
-      notification.error({ message: "의견을 선택 또는 입력해주세요." });
+    if (selectedFeedbackCodes.length === 0) {
+      notification.error({ message: "개선 필요 사항을 선택해주세요." });
+      return;
+    }
+    if (!feedbackText.trim()) {
+      notification.error({ message: "피드백을 입력해주세요." });
       return;
     }
     setLoading(true);
@@ -130,7 +134,7 @@ export const FeedbackModal = ({
             type={"primary"}
             onClick={onSubmit}
             disabled={
-              selectedFeedbackCodes.length === 0 && !feedbackText.trim()
+              selectedFeedbackCodes.length === 0 || !feedbackText.trim()
             }
             loading={loading}
           >
