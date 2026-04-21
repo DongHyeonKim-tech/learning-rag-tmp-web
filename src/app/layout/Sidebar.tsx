@@ -51,7 +51,15 @@ const Sidebar = ({
   return (
     <div className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
-        <div className={styles.sidebarHeaderTitle}>BIM Search</div>
+        <div className={styles.sidebarHeaderTitle}>
+          <Image
+            src="/search/images/bim-ai.svg"
+            alt="bim-ai"
+            width={24}
+            height={24}
+          />
+          BIM Search
+        </div>
         <div
           className={styles.newChatButton}
           onClick={() => {
