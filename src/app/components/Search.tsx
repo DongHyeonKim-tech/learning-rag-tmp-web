@@ -98,8 +98,8 @@ const searchCategoryList: {
       <Image
         src="/search/images/learning-active.svg"
         alt="learning-active"
-        width={17}
-        height={17}
+        width={18}
+        height={18}
       />
     ),
   },
@@ -161,6 +161,7 @@ const Search = ({
   const [selectedCategory, setSelectedCategory] = useState<
     "all" | "Learning" | "MeetUp / Seminar" | "framework"
   >("all");
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [selectedFeedbackModalMessageId, setSelectedFeedbackModalMessageId] =
     useState<number | null>(null);
   const [selectedFeedbackModalFeedbackId, setSelectedFeedbackModalFeedbackId] =
@@ -722,9 +723,13 @@ const Search = ({
                             : "프로젝트 파일 생성하는 방법 알려줘"
                     );
                   }}
+                  onMouseEnter={() => setHoveredCategory(item.key)}
+                  onMouseLeave={() => setHoveredCategory(null)}
                   className={`${styles.modelButton} ${selectedCategory === item.key ? styles.modelButtonActive : ""}`}
                 >
-                  {selectedCategory === item.key ? item.iconActive : item.icon}{" "}
+                  {selectedCategory === item.key || hoveredCategory === item.key
+                    ? item.iconActive
+                    : item.icon}{" "}
                   {item.label}
                 </Button>
               </Tooltip>
