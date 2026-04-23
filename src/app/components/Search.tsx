@@ -706,11 +706,13 @@ const Search = ({
               <Tooltip
                 title={item.tooltipMessage}
                 key={item.key}
-                overlayStyle={{ maxWidth: 250 }}
+                styles={{
+                  body: {
+                    maxWidth: 250,
+                  },
+                }}
               >
-                <Button
-                  type={"default"}
-                  size="middle"
+                <div
                   onClick={() => {
                     setSelectedCategory(item.key);
                     setSearchInput(
@@ -731,7 +733,7 @@ const Search = ({
                     ? item.iconActive
                     : item.icon}{" "}
                   {item.label}
-                </Button>
+                </div>
               </Tooltip>
             ))}
           </div>

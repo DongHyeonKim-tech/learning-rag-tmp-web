@@ -177,6 +177,7 @@
   align-items: center;
   gap: 6px;
   border-radius: 20px;
+  border: 1px solid var(--color-gray-200, #d9d9d9);
   background: var(--color-gray-00, #fff);
   font-family: Pretendard;
   font-size: 14px;
@@ -184,6 +185,12 @@
   font-weight: 500;
   line-height: 140%; /* 19.6px */
   color: var(--color-gray-700, #3d424d);
+  cursor: pointer;
+}
+
+.modelButton:hover {
+  color: var(--color-blue-600, #0769eb);
+  border: 1px solid var(--color-blue-600, #0769eb);
 }
 
 .modelButtonActive {
