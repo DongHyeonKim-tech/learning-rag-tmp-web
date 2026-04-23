@@ -706,11 +706,7 @@ const Search = ({
               <Tooltip
                 title={item.tooltipMessage}
                 key={item.key}
-                styles={{
-                  body: {
-                    maxWidth: 250,
-                  },
-                }}
+                overlayStyle={{ maxWidth: 250 }}
               >
                 <div
                   onClick={() => {
