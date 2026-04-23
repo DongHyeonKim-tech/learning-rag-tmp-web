@@ -78,7 +78,7 @@
   background: var(--color-gray-00, #fff);
   border: 1px solid var(--color-gray-100, #e8eaed);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  font-family: Pretendard, sans-serif;
+  font-family: Pretendard;
   font-size: 14px;
   color: var(--color-gray-700, #3d424d);
   line-height: 1.5;
