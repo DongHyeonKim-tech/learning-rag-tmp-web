@@ -19,6 +19,13 @@ export interface UserStateType {
   updateUser: (data: UserType) => void;
 }
 
+export interface AdminStateType {
+  admin: AdminType;
+  isLoading: boolean;
+  error: any;
+  updateAdmin: (data: AdminType) => void;
+}
+
 export interface AuthStateType {
   isAuthenticated: boolean;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
@@ -232,3 +239,8 @@ export type Feedback = {
   reasonCodes?: number[] | null;
   reasonNames?: string | null;
 };
+
+export interface AdminUserList {
+  empNo: string;
+  userNm: string;
+}

@@ -1,4 +1,9 @@
-import { AuthStateType, UserStateType, UserType } from "@/app/Interface";
+import {
+  AdminStateType,
+  AuthStateType,
+  UserStateType,
+  UserType,
+} from "@/app/Interface";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -9,6 +14,20 @@ export const useUserStore = create(
       isLoading: false,
       error: null,
       updateUser: (user: UserType) => set((prev) => ({ ...prev, user })),
+    }),
+    {
+      name: "user",
+    }
+  )
+);
+
+export const useAdminStore = create(
+  persist<AdminStateType>(
+    (set) => ({
+      admin: {},
+      isLoading: false,
+      error: null,
+      updateAdmin: (admin: UserType) => set((prev) => ({ ...prev, admin })),
     }),
     {
       name: "user",

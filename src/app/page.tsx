@@ -14,7 +14,7 @@ import Search from "@/app/components/Search";
 import Image from "next/image";
 import { FeedbackModal } from "@/app/components/modal/FeedbackModal";
 import { validateHubToken, getHubMyInfo } from "@/utils/searchApi";
-import { useAuthStore, useUserStore } from "@/utils/store";
+import { useAdminStore, useAuthStore, useUserStore } from "@/utils/store";
 import { useCookies } from "react-cookie";
 import { SmileOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
@@ -23,6 +23,7 @@ import AdminModal from "@/app/components/modal/AdminModal";
 
 export default function Home() {
   const { user, updateUser } = useUserStore();
+  const { admin, updateAdmin } = useAdminStore();
   const { isAuthenticated, setIsAuthenticated } = useAuthStore();
   const [cookies] = useCookies(["refreshToken"]);
   const [imageUrl, setImageUrl] = useState<string>("");
@@ -121,6 +122,16 @@ export default function Home() {
     }
   };
 
+  const resetAdminHandler = () => {
+    setIsAuthenticated(false);
+    setCurrentTurn(null);
+    setMessageTurns([]);
+    setChatId(null);
+    setMessageId(null);
+    updateUser({ ...user, empNo: admin.empNo });
+    updateAdmin(null);
+  };
+
   useEffect(() => {
     if (user.empNo) {
       fetchChatRooms();
@@ -174,8 +185,8 @@ export default function Home() {
     setPassword: (password: string) => void
   ) => {
     try {
-      console.log(password, process.env.NEXT_PUBLIC_ADMIN_AUTH);
       if (password === process.env.NEXT_PUBLIC_ADMIN_AUTH) {
+        updateAdmin(user);
         setIsAuthenticated(true);
         setCheckAuthModalOpen(false);
         setAdminModalOpen(true);
@@ -186,14 +197,10 @@ export default function Home() {
     }
   };
 
-  const handleChangeAdmin = async (
-    empNo: string,
-    setEmpNo: (empNo: string) => void
-  ) => {
+  const handleChangeAdmin = async (empNo: string) => {
     try {
       updateUser({ ...user, empNo });
       setAdminModalOpen(false);
-      setEmpNo("");
       setCurrentTurn(null);
       setMessageTurns([]);
       setChatId(null);
@@ -287,12 +294,7 @@ export default function Home() {
                         <div
                           className={styles.dotsPopoverContentItem}
                           onClick={() => {
-                            setIsAuthenticated(false);
-                            setCurrentTurn(null);
-                            setMessageTurns([]);
-                            setChatId(null);
-                            setMessageId(null);
-                            updateUser({ ...user, empNo: "20230808" });
+                            resetAdminHandler();
                           }}
                         >
                           계정 원복

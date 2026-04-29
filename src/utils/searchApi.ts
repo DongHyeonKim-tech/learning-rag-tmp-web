@@ -11,6 +11,7 @@ import {
   Turn,
   Code,
   Feedback,
+  AdminUserList,
 } from "@/app/Interface";
 import camelcaseKeys from "camelcase-keys";
 import { client } from "@/utils/client";
@@ -465,4 +466,16 @@ export async function createFeedbackReasonMaps(
     throw new Error(`피드백 이유 매핑 생성 실패: ${response.status}`);
   }
   return response.data;
+}
+
+export async function getAdminUserList(
+  empNo: string
+): Promise<AdminUserList[] | null> {
+  const response = await client.get(`/admin/user-list`, {
+    headers: { "Content-Type": "application/json" },
+    params: {
+      emp_no: empNo,
+    },
+  });
+  return camelcaseKeys(response.data);
 }

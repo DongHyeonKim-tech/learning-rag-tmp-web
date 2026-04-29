@@ -1,29 +1,33 @@
-import { useState } from "react";
-import { Button, Flex, Input, Modal } from "antd";
+import { useEffect, useState } from "react";
+import { Flex, Modal, Input } from "antd";
+import { getAdminUserList } from "@/utils/searchApi";
+import { AdminUserList } from "@/app/Interface";
+import { useAdminStore } from "@/utils/store";
+import styles from "@/styles/admin.module.css";
 
 type AdminModalProps = {
   open: boolean;
   onCancel: () => void;
-  onChangeAdmin: (empNo: string, setEmpNo: (empNo: string) => void) => void;
-  loading?: boolean;
+  onChangeAdmin: (empNo: string) => void;
 };
 
-const AdminModal = ({
-  open,
-  onCancel,
-  onChangeAdmin,
-  loading = false,
-}: AdminModalProps) => {
-  const [empNo, setEmpNo] = useState("");
-
+const AdminModal = ({ open, onCancel, onChangeAdmin }: AdminModalProps) => {
+  const { admin } = useAdminStore();
+  const [adminUserList, setAdminUserList] = useState<AdminUserList[]>([]);
+  const [searchUserNm, setSearchUserNm] = useState<string>("");
   const handleCancel = () => {
-    setEmpNo("");
     onCancel();
   };
 
-  const handleChangeAdmin = () => {
-    onChangeAdmin(empNo, setEmpNo);
-  };
+  useEffect(() => {
+    if (open) {
+      const fetchAdminUserList = async () => {
+        const adminUserList = await getAdminUserList(admin.empNo ?? "");
+        setAdminUserList(adminUserList ?? []);
+      };
+      fetchAdminUserList();
+    }
+  }, [admin.empNo, open]);
 
   return (
     <Modal
@@ -31,35 +35,41 @@ const AdminModal = ({
       onCancel={handleCancel}
       title="관리자 변경"
       width={250}
-      footer={
-        <Flex
-          justify="end"
-          gap={10}
-        >
-          <Button
-            onClick={handleCancel}
-            disabled={loading}
-          >
-            취소
-          </Button>
-          <Button
-            type="primary"
-            onClick={handleChangeAdmin}
-            loading={loading}
-            disabled={!empNo.trim()}
-          >
-            변경
-          </Button>
-        </Flex>
-      }
+      footer={null}
     >
-      <Input
-        placeholder="사번을 입력해주세요."
-        value={empNo}
-        onChange={(e) => setEmpNo(e.target.value)}
-        onPressEnter={handleChangeAdmin}
-        disabled={loading}
-      />
+      <Flex
+        vertical
+        gap={10}
+      >
+        <Flex>
+          <Input
+            value={searchUserNm}
+            onChange={(e) => setSearchUserNm(e.target.value)}
+            placeholder="사번을 입력해주세요."
+          />
+        </Flex>
+        <Flex
+          vertical
+          gap={2}
+          className={styles.adminListContainer}
+        >
+          {adminUserList
+            .filter(
+              (adminUser) =>
+                adminUser.userNm.includes(searchUserNm) ||
+                adminUser.empNo.includes(searchUserNm)
+            )
+            .map((adminUser) => (
+              <div
+                key={adminUser.empNo}
+                className={styles.adminItem}
+                onClick={() => {
+                  onChangeAdmin(adminUser.empNo);
+                }}
+              >{`${adminUser.userNm} (${adminUser.empNo})`}</div>
+            ))}
+        </Flex>
+      </Flex>
     </Modal>
   );
 };
