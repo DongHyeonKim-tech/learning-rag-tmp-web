@@ -22,12 +22,12 @@ const AdminModal = ({ open, onCancel, onChangeAdmin }: AdminModalProps) => {
   useEffect(() => {
     if (open) {
       const fetchAdminUserList = async () => {
-        const adminUserList = await getAdminUserList(admin.empNo ?? "");
+        const adminUserList = await getAdminUserList(admin?.empNo ?? "");
         setAdminUserList(adminUserList ?? []);
       };
       fetchAdminUserList();
     }
-  }, [admin.empNo, open]);
+  }, [admin?.empNo, open]);
 
   return (
     <Modal
