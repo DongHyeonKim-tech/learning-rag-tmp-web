@@ -177,10 +177,6 @@ const Search = ({
     });
   }, [messageTurns]);
 
-  useEffect(() => {
-    console.log("chatId: ", chatId);
-  }, [chatId]);
-
   const SCROLL_BOTTOM_THRESHOLD = 24;
 
   const onCancelFeedbackModal = useCallback(() => {
